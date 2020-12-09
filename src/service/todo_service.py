@@ -1,15 +1,14 @@
 import datetime
 import typing
 
+import src.domain.todo_unit_of_work
 from src import domain
-
-from src.service import unit_of_work
 
 __all__ = ("TodoService",)
 
 
 class TodoService:
-    def __init__(self, /, uow: unit_of_work.TodoUnitOfWork):
+    def __init__(self, /, uow: src.domain.todo_unit_of_work.TodoUnitOfWork):
         self._uow = uow
 
     def add_todo(self, /, todo: domain.Todo) -> None:
@@ -52,7 +51,7 @@ class TodoService:
 
 def get_todos(
     *,
-    uow: unit_of_work.TodoUnitOfWork,
+    uow: src.domain.todo_unit_of_work.TodoUnitOfWork,
     category: str,
     today: datetime.date = datetime.date.today(),
 ) -> typing.List[domain.Todo]:

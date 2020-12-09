@@ -50,17 +50,13 @@ def main() -> None:
     logger.info("Starting Todo app.")
 
     db_path = pathlib.Path(config.db_path())
-    # if not db_path.exists():
-    #     raise domain.exceptions.FileNotFound(db_path)
-
     with src.adapter.sqlite_db.SqliteDb(db_path) as db:
-        uow = service.DefaultTodoUnitOfWork(db)
+        uow = adapter.DefaultTodoUnitOfWork(db)
         todo_service = service.TodoService(uow)
 
         # workaround for PyQt exceptions somehow bypassing outer context manager's __exit__ methods
         original_except_hook = sys.excepthook
         sys.excepthook = functools.partial(exception_hook, original_except_hook, db)
-        # sys.excepthook = logger.catch(functools.partial(exception_hook, db))
 
         app = qtw.QApplication(sys.argv)
         window = presentation.MainView(todo_service)

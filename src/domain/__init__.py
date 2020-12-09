@@ -11,6 +11,7 @@ from src.domain.rows import *
 from src.domain.todo import *
 from src.domain.todo_category import *
 from src.domain.todo_repository import *
+from src.domain.todo_unit_of_work import *
 from src.domain.validation_result import *
 from src.domain.validators import *
 from src.domain.weekday import *
