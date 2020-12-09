@@ -9,7 +9,7 @@ from src.presentation.todo import todo_list_view
 __all__ = ("MainView",)
 
 
-class MainView(qtw.QMainWindow):
+class MainView(qtw.QDialog):
     def __init__(
         self,
         /,
@@ -19,8 +19,8 @@ class MainView(qtw.QMainWindow):
 
         self.setWindowTitle("Todos")
         # self.setWindowIcon(qtg.QIcon("home.png"))
-        # self.setGeometry(500, 200, 300, 250)
-        self.resize(800, 400)
+        self.setGeometry(100, 100, 1200, 500)
+        # self.resize(800, 400)
         self.setStyleSheet(qdarkgraystyle.load_stylesheet())
 
         self._todo_view = todo_list_view.TodoListView(
@@ -34,16 +34,16 @@ class MainView(qtw.QMainWindow):
         self._tabs.addTab(self._todo_view, "Todos")
         self._tabs.addTab(self._reminder_view, "Reminders")
 
-        # layout = qtw.QHBoxLayout()
-        # stack = qtw.QStackedWidget()
-        # stack.addWidget(self._todo_view)
-        # stack.addWidget(self._reminder_view)
+        layout = qtw.QHBoxLayout()
+        layout.addWidget(self._todo_view)
+        layout.addWidget(self._reminder_view)
 
-        # layout = qtw.QHBoxLayout()
-        # layout.addWidget(self.table_view)
-        # self.setLayout(layout)
+        self._todo_view.show()
+        self._reminder_view.show()
 
-        self.setCentralWidget(self._tabs)
+        self.setLayout(layout)
+
+        # self.setCentralWidget(self._tabs)
 
         # menu = self.menuBar()
         # file_menu = menu.addMenu("File")
@@ -53,7 +53,3 @@ class MainView(qtw.QMainWindow):
         # edit_menu.addAction("Insert Above", self.insert_above)
         # edit_menu.addAction("Insert Below", self.insert_below)
         # edit_menu.addAction("Remove Row(s)", self.remove_rows)
-
-    # def save(self) -> None:
-    #     if self.model:
-    #         self.model.save_data()
