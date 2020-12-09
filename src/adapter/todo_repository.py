@@ -8,9 +8,9 @@ __all__ = ("SqliteTodoRepository",)
 
 
 class SqliteTodoRepository(domain.TodoRepository):
-    def __init__(self, sqlite_db: sqlite_db.SqliteDb):
+    def __init__(self, db: sqlite_db.SqliteDb):
         super().__init__()
-        self._db = sqlite_db
+        self._db = db
 
     def add(self, /, item: domain.Todo) -> None:
         dto = item.to_dto()
@@ -75,6 +75,40 @@ class SqliteTodoRepository(domain.TodoRepository):
             (row.to_domain() for row in dtos),
             key=lambda todo: todo.date_completed or datetime.date(1970, 1, 1),
         )
+
+    def create_if_not_exists(self) -> None:
+        # fmt: off
+        result = self._db.execute(
+            "SELECT COUNT(*) AS ct FROM sqlite_master WHERE type = 'table' AND name = :table_name",
+            params=[{"table_name": "todo"}],
+        )
+        if result.first_value and result.first_value == 0:
+            self._db.execute(sql="""
+                CREATE TABLE todo (
+                    id INTEGER PRIMARY KEY,
+                    description VARCHAR(100) NOT NULL,
+                    frequency VARCHAR(20) NOT NULL,
+                    month INT NULL,
+                    week_day INT NULL,
+                    month_day INT NULL,
+                    year INT NULL,
+                    week_number INT NULL,
+                    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                    date_completed TIMESTAMP NULL,
+                    advance_days INT NULL,
+                    start_date DATE NULL,
+                    days INT NULL,
+                    note TEXT NULL,
+                    category TEXT NULL
+                );
+            """, params=None)
+            self._db.execute(
+                sql="CREATE INDEX ix_todo_category ON todo (category, description);",
+                params=None,
+            )
+            for holiday in domain.HOLIDAYS:
+                self.add(holiday)
+        # fmt: on
 
     def get_id(self, /, todo_id: int) -> domain.Todo:
         result = self._db.execute(

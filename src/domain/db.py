@@ -15,10 +15,6 @@ class Db(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create_if_not_exists(self) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def execute(
         self,
         sql: str,

@@ -18,6 +18,10 @@ class TodoRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def create_if_not_exists(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_id(self, /, todo_id: int) -> todo.Todo:
         raise NotImplementedError
 

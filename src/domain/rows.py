@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-
+import dataclasses
 import typing
 
 import pydantic
 
-if typing.TYPE_CHECKING:
-    import dataclasses
-else:
-    from pydantic import dataclasses
+from src.domain import exceptions
 
 __all__ = (
     "Row",
     "Rows",
 )
-
-from src.domain import exceptions
 
 Row = typing.Tuple[typing.Any, ...]
 
@@ -33,6 +28,12 @@ class Rows:
     @property
     def column_names(self) -> typing.List[str]:
         return self._column_names
+
+    @property
+    def first_value(self) -> typing.Optional[typing.Any]:
+        if self._rows and self._rows[0]:
+            return self._rows[0][0]
+        return None
 
     @classmethod
     def from_dicts(

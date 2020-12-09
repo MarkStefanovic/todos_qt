@@ -20,34 +20,6 @@ class SqliteDb(domain.Db):
         self._con: typing.Optional[sqlite3.Connection] = None
         self._cur: typing.Optional[sqlite3.Cursor] = None
 
-    def create_if_not_exists(self) -> None:
-        if self._con is None:
-            raise domain.exceptions.ConnectionClosed()
-        else:
-            # fmt: off
-            self._con.executescript(
-                """CREATE TABLE IF NOT EXISTS todo (
-                        id INTEGER PRIMARY KEY,
-                        description VARCHAR(100) NOT NULL,
-                        frequency VARCHAR(20) NOT NULL,
-                        month INT NULL,
-                        week_day INT NULL,
-                        month_day INT NULL,
-                        year INT NULL,
-                        week_number INT NULL,
-                        date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                        date_completed TIMESTAMP NULL,
-                        advance_days INT NULL,
-                        start_date DATE NULL,
-                        days INT NULL,
-                        note TEXT NULL,
-                        category TEXT NULL
-                    );
-                    CREATE INDEX IF NOT EXISTS ix_todo_category ON todo (category, description);
-                """
-            )
-            # fmt: on
-
     def execute(
         self,
         sql: str,

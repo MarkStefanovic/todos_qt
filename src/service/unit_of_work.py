@@ -40,7 +40,9 @@ class TodoUnitOfWork(abc.ABC):
 class DefaultTodoUnitOfWork(TodoUnitOfWork):
     def __init__(self, sqlite_db: src.adapter.sqlite_db.SqliteDb):
         self._db = sqlite_db
-        self._todo_repository: typing.Optional[adapter.SqliteTodoRepository] = None
+        self._todo_repository = adapter.SqliteTodoRepository(self._db)
+
+        self._todo_repository.create_if_not_exists()
 
     def __enter__(self) -> DefaultTodoUnitOfWork:
         self._todo_repository = adapter.SqliteTodoRepository(self._db)
