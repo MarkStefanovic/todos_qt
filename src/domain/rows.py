@@ -50,9 +50,7 @@ class Rows:
         return self._rows
 
     def as_dtos(
-        self,
-        /,
-        domain_type: typing.Type[typing.Any],
+        self, /, domain_type: typing.Type[typing.Any]
     ) -> typing.List[typing.Any]:
         if hasattr(domain_type, "__dataclass_fields__"):
             fields: typing.Dict[str, dataclasses.Field] = domain_type.__dataclass_fields__  # type: ignore

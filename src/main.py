@@ -11,6 +11,8 @@ from loguru import logger
 import src.adapter.sqlite_db
 from src import adapter, service, presentation
 
+all = ("main",)
+
 
 def exception_hook(
     original_exception_hook: typing.Callable[

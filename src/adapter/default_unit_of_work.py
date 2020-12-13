@@ -10,7 +10,7 @@ __all__ = ("DefaultTodoUnitOfWork",)
 
 
 class DefaultTodoUnitOfWork(domain.TodoUnitOfWork):
-    def __init__(self, sqlite_db: sqlite_db.SqliteDb):
+    def __init__(self, /, sqlite_db: sqlite_db.SqliteDb):
         self._db = sqlite_db
         self._todo_repository = sqlite_todo_repository.SqliteTodoRepository(self._db)
 

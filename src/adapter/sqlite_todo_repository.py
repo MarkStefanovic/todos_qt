@@ -8,7 +8,7 @@ __all__ = ("SqliteTodoRepository",)
 
 
 class SqliteTodoRepository(domain.TodoRepository):
-    def __init__(self, db: sqlite_db.SqliteDb):
+    def __init__(self, /, db: sqlite_db.SqliteDb):
         super().__init__()
         self._db = db
 
@@ -69,7 +69,7 @@ class SqliteTodoRepository(domain.TodoRepository):
         )
 
     def all(self) -> typing.List[domain.Todo]:
-        rows = self._db.execute("SELECT * FROM todo")
+        rows = self._db.execute(sql="SELECT * FROM todo")
         dtos = rows.as_dtos(domain.TodoDTO)
         return sorted(
             (row.to_domain() for row in dtos),
@@ -79,7 +79,7 @@ class SqliteTodoRepository(domain.TodoRepository):
     def create_if_not_exists(self) -> None:
         # fmt: off
         result = self._db.execute(
-            "SELECT COUNT(*) AS ct FROM sqlite_master WHERE type = 'table' AND name = :table_name",
+            sql="SELECT COUNT(*) AS ct FROM sqlite_master WHERE type = 'table' AND name = :table_name",
             params=[{"table_name": "todo"}],
         )
         if result.first_value and result.first_value == 0:

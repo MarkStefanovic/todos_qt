@@ -2,6 +2,11 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
+__all__ = (
+    "ValidatedLineEdit",
+    "ValidatedTextWidget",
+)
+
 
 class ValidatedLineEdit(qtw.QLineEdit):
     validation_error_occurred = qtc.pyqtSignal(list)

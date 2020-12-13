@@ -5,7 +5,7 @@ import pydantic
 from PyQt5 import QtCore as qtc
 
 from src import service, domain
-from src.domain import exceptions, dataclasses
+from src.domain import exceptions
 
 __all__ = ("TodoEditFormModel",)
 

@@ -22,6 +22,7 @@ class SqliteDb(domain.Db):
 
     def execute(
         self,
+        *,
         sql: str,
         params: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None,
     ) -> domain.Rows:

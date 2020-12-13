@@ -2,74 +2,68 @@ from __future__ import annotations
 
 import typing
 
-from PyQt5 import QtWidgets as qtw, QtCore as qtc
+from PyQt5 import QtWidgets as qtw
 from loguru import logger
 
-from src import domain, service
+from src import domain
+from src.presentation import widgets
 from src.presentation.todo import (
     todo_list_view_model,
 )
-from src.presentation.todo.todo_edit_form import edit_form_model, edit_form_base
+from src.presentation.todo.todo_edit_form import edit_form_base
 
 __all__ = ("TodoListView",)
 
 
-class TodoListView(qtw.QWidget):
-    def __init__(
-        self, *, todo_service: service.TodoService, category: domain.TodoCategory
-    ):
-        super().__init__()
+class TodoListView(widgets.ListView):
+    def __init__(self, /, view_model: todo_list_view_model.TodoListViewModel):
+        super().__init__(view_model)
 
-        self._todo_service = todo_service
+        self._mark_complete_button = qtw.QPushButton("Mark Complete")
+        self._mark_complete_button.clicked.connect(self.mark_complete)
+        self._mark_complete_button.setMinimumWidth(100)
+        self._mark_complete_button.setDisabled(True)
 
-        self._model = todo_list_view_model.TableListViewModel(
-            todo_service=todo_service, category=category
-        )
+        self._refresh_button = qtw.QPushButton("Refresh")
+        self._refresh_button.clicked.connect(self.refresh)
+        self._refresh_button.setMinimumWidth(100)
 
-        self._table = qtw.QTableView()
-        self._table.setSortingEnabled(True)
-        self._table.setSizeAdjustPolicy(qtw.QAbstractScrollArea.AdjustToContents)
-        self._table.setModel(self._model)
-        self._table.resizeColumnsToContents()
+        self._add_button = qtw.QPushButton("Add")
+        self._add_button.clicked.connect(self.open_add_form)
+        self._add_button.setMinimumWidth(100)
 
-        button_layout = qtw.QHBoxLayout()
-        # button_group = qtw.QGroupBox(alignment=qtc.Qt.AlignRight)
-        # button_group.setAlignment(qtc.Qt.AlignHCenter)
+        self._edit_button = qtw.QPushButton("Edit")
+        self._edit_button.clicked.connect(self.open_edit_form)
+        self._edit_button.setMinimumWidth(100)
+        self._edit_button.setDisabled(True)
 
-        mark_complete_button = qtw.QPushButton("Mark Complete", clicked=self.mark_complete)  # type: ignore
-        mark_complete_button.setMinimumWidth(100)
-        refresh_button = qtw.QPushButton("Refresh", clicked=self.refresh)  # type: ignore
-        refresh_button.setMinimumWidth(100)
-        add_button = qtw.QPushButton("Add", clicked=self.open_add_form)  # type: ignore
-        add_button.setMinimumWidth(100)
-        edit_button = qtw.QPushButton("Edit", clicked=self.open_edit_form)  # type: ignore
-        edit_button.setMinimumWidth(100)
-        delete_button = qtw.QPushButton("Delete", clicked=self.delete)  # type: ignore
-        delete_button.setMinimumWidth(100)
+        self._delete_button = qtw.QPushButton("Delete")
+        self._delete_button.clicked.connect(self.delete)
+        self._delete_button.setMinimumWidth(100)
 
         spacer = qtw.QSpacerItem(20, 40, qtw.QSizePolicy.Expanding)
+
+        button_layout = qtw.QHBoxLayout()
         button_layout.addItem(spacer)
-        button_layout.addWidget(mark_complete_button)
-        button_layout.addWidget(refresh_button)
-        button_layout.addWidget(add_button)
-        button_layout.addWidget(edit_button)
-        button_layout.addWidget(delete_button)
-        # button_group.setLayout(button_layout)
+        button_layout.addWidget(self._mark_complete_button)
+        button_layout.addWidget(self._refresh_button)
+        button_layout.addWidget(self._add_button)
+        button_layout.addWidget(self._edit_button)
+        button_layout.addWidget(self._delete_button)
 
         layout = qtw.QVBoxLayout()
         layout.addWidget(self._table)
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
-        self._popup: typing.Optional[qtw.QDialog] = None
+        self._table.selectionModel().selectionChanged.connect(self.on_selection_changed)  # type: ignore
 
-        self._selection_model = self._table.selectionModel()
-        # self._selection_model.selectionChanged.connect(self.show_selected_id)
+        self._popup: typing.Optional[qtw.QDialog] = None
 
     def delete(self) -> None:
         logger.debug("delete_button clicked.")
         if todo_id := self.selected_id:
-            description = self._model.get_row_by_id(todo_id)[1]
+            description = self.view_model.get_row_by_id(todo_id)[1]
             confirmation = qtw.QMessageBox.question(
                 self,
                 "Confirm Delete",
@@ -78,7 +72,7 @@ class TodoListView(qtw.QWidget):
                 qtw.QMessageBox.No,
             )
             if confirmation == qtw.QMessageBox.Yes:
-                self._model.delete(todo_id)
+                self.view_model.delete(todo_id)
             else:
                 logger.debug(
                     f"User did not confirm they wanted to delete {description}."
@@ -88,52 +82,39 @@ class TodoListView(qtw.QWidget):
 
     def mark_complete(self) -> None:
         logger.debug("mark_complete_button clicked.")
-        if self.selected_id:
-            self._model.mark_complete(self.selected_id)
+        if todo_id := self.selected_row_id():
+            self.view_model.mark_complete(todo_id)
         else:
             logger.debug("Nothing is selected.")
 
+    def on_selection_changed(self) -> None:
+        if todo := self.selected_todo():
+            if todo.display():
+                self._mark_complete_button.setText("Mark Complete")
+            else:
+                self._mark_complete_button.setText("Mark Incomplete")
+            self._mark_complete_button.setDisabled(False)
+            self._edit_button.setDisabled(False)
+        else:
+            self._mark_complete_button.setDisabled(True)
+            self._edit_button.setDisabled(True)
+
     def open_add_form(self) -> None:
-        print(f"opening add form")
-        item_model = edit_form_model.TodoEditFormModel(
-            edit_mode=domain.EditMode.ADD, todo_service=self._todo_service
-        )
-        self._popup = edit_form_base.EditFormBase(item_model)
+        logger.debug(f"opening add form")
+        model = self.view_model.create_add_todo_form_model()
+        self._popup = edit_form_base.EditFormBase(model)
         self._popup.exec()
 
     def open_edit_form(self) -> None:
-        if self.selected_id:
+        if todo_id := self.selected_id:
             logger.debug(f"opening edit form: {self.selected_id=}")
-            item_model = edit_form_model.TodoEditFormModel(
-                edit_mode=domain.EditMode.EDIT,
-                todo_service=self._todo_service,
-                todo_id=self.selected_id,
-            )
-            self._popup = edit_form_base.EditFormBase(item_model)
+            model = self.view_model.create_edit_todo_form_model(todo_id)
+            self._popup = edit_form_base.EditFormBase(model)
             self._popup.exec()
         else:
             logger.debug("Nothing is selected.")
 
-    def refresh(self) -> None:
-        logger.debug("Refresh clicked")
-        self._model.refresh()
-        self._table.setModel(self._model)
-
-    @property
-    def selected_id(self) -> typing.Optional[int]:
-        if selected_index := self._table.selectedIndexes():
-            first_row_selected = selected_index[0].row()
-            first_col_index = self._table.model().index(first_row_selected, 0)
-            todo_id = self._table.model().data(first_col_index, qtc.Qt.DisplayRole)
-            logger.debug(f"Selection: {first_row_selected=}, {todo_id=}")
-            return todo_id
-        else:
-            logger.debug("Nothing is selected.")
-            return None
-
-    # def show_selected_id(self) -> None:
-    #     selected_index = self._table.selectedIndexes()
-    #     first_row_selected = selected_index[0].row()
-    #     first_col_index = self._table.model().index(first_row_selected, 0)
-    #     todo_id = self._table.model().data(first_col_index, qtc.Qt.DisplayRole)
-    #     logger.debug(f"{first_row_selected=}, {todo_id=}")
+    def selected_todo(self) -> typing.Optional[domain.Todo]:
+        if todo_id := self.selected_row_id():
+            return self.view_model.get_todo(todo_id)
+        return None

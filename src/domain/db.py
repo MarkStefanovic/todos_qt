@@ -17,6 +17,7 @@ class Db(abc.ABC):
     @abc.abstractmethod
     def execute(
         self,
+        *,
         sql: str,
         params: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None,
     ) -> typing.Optional[rows.Rows]:

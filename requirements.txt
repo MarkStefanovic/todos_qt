@@ -1,0 +1,10 @@
+loguru
+pydantic
+pyqt5
+python-dotenv
+qdarkgraystyle
+
+# dev
+mypy
+pylint
+pytest

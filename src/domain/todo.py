@@ -63,7 +63,7 @@ class TodoDTO(pydantic.BaseModel):
             month=None,
             month_day=None,
             note="",
-            start_date=datetime.date(1970, 1, 1),
+            start_date=datetime.date.today(),
             week_day=None,
             week_number=None,
             year=None,

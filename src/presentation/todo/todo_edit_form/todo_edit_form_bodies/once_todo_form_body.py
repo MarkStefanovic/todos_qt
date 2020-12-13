@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.todo.todo_edit_form import edit_form_model
@@ -11,8 +13,9 @@ class OnceTodoForm(qtw.QGroupBox):
 
         self._model = model
 
-        self.once_date_widget = qtw.QDateEdit(calendarPopup=True)  # type: ignore
-        self.once_date_widget.setDate(self._model.start_date)
+        self.once_date_widget = qtw.QDateEdit()
+        self.once_date_widget.setCalendarPopup(True)
+        self.once_date_widget.setDate(self._model.start_date or datetime.date.today())
         self.once_date_widget.dateChanged.connect(self._model.set_start_date)
 
         layout = qtw.QFormLayout()

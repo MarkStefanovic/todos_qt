@@ -1,5 +1,5 @@
 import qdarkgraystyle
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw, sip
+from PyQt5 import QtWidgets as qtw, sip
 
 from src import domain
 from src.presentation import widgets
@@ -108,7 +108,6 @@ class EditFormBase(qtw.QDialog):
 def create_form_body(
     model: edit_form_model.TodoEditFormModel, frequency: str
 ) -> qtw.QGroupBox:
-    print(f"{frequency=}")
     if frequency == "daily":
         new_form = qtw.QGroupBox()
         new_form.setStyleSheet("border: 0;")
