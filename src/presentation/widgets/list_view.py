@@ -17,10 +17,15 @@ class ListView(qtw.QWidget):
         self._view_model = view_model
 
         self._table = qtw.QTableView()
-
         self._table.setSortingEnabled(True)
         self._table.setSizeAdjustPolicy(qtw.QAbstractScrollArea.AdjustToContents)
         self._table.setModel(self._view_model)
+
+        self._selected_row_id: typing.Optional[int] = None
+
+        self._table.selectionModel().selectionChanged.connect(  # noqa
+            self._set_selected_row_id
+        )
 
         self.refresh()
 
@@ -29,16 +34,23 @@ class ListView(qtw.QWidget):
         self._view_model.refresh()
         self._table.resizeColumnsToContents()
 
-    def selected_row_id(self) -> typing.Optional[typing.List[typing.Any]]:
-        if selected_index := self._table.selectedIndexes():
-            first_row_selected = selected_index[0].row()
+    @property
+    def selected_row_id(self) -> typing.Optional[int]:
+        return self._selected_row_id
+
+    def _set_selected_row_id(self, selection: qtc.QItemSelection) -> None:
+        if ixs := selection.indexes():
+            first_row_selected = ixs[0].row()
             first_col_index = self._table.model().index(first_row_selected, 0)
-            todo_id = self._table.model().data(first_col_index, qtc.Qt.DisplayRole)
-            logger.debug(f"Selected row = {first_row_selected}, todo_id = {todo_id}")
-            return todo_id
+            self._selected_row_id = self._table.model().data(
+                first_col_index, qtc.Qt.DisplayRole
+            )
+            logger.debug(
+                f"Selected row {first_row_selected}, id = {self._selected_row_id}"
+            )
         else:
-            logger.debug("Nothing is selected.")
-            return None
+            logger.debug("Selection cleared.")
+            self._selected_row_id = None
 
     @property
     def view_model(self) -> list_view_model.ListViewModel:

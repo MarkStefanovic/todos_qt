@@ -42,7 +42,7 @@ class TodoEditFormModel(qtc.QObject):
 
         if edit_mode == domain.EditMode.EDIT:
             assert todo_id is not None
-            self._initial_state = todo_service.get_id(todo_id).to_dto()
+            self._initial_state = todo_service.get_by_id(todo_id).to_dto()
         else:
             self._initial_state = domain.TodoDTO.default()
 

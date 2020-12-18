@@ -11,15 +11,17 @@ class TodoListViewModel(widgets.ListViewModel):
     def __init__(
         self, todo_service: service.TodoService, category: domain.TodoCategory
     ):
-        super().__init__([
-            "id",
-            "Description",
-            "Frequency",
-            "Days",
-            "Day",
-            "Due",
-            "Completed",
-        ])
+        super().__init__(
+            [
+                "id",
+                "Description",
+                "Frequency",
+                "Days",
+                "Day",
+                "Due",
+                "Completed",
+            ]
+        )
 
         self._todo_service = todo_service
         self._category = category
@@ -43,12 +45,12 @@ class TodoListViewModel(widgets.ListViewModel):
         super().delete(todo_id)
 
     def mark_complete(self, /, todo_id: int) -> None:
-        if row_num := self.get_row_number(todo_id=todo_id):
+        if row_num := self.get_row_number(item_id=todo_id):
             self._todo_service.mark_complete(todo_id)
             self.removeRows(row_num, 1)
 
     def get_todo(self, /, todo_id: int) -> domain.Todo:
-        return self._todo_service.get_id(todo_id)
+        return self._todo_service.get_by_id(todo_id)
 
     def create_add_todo_form_model(self) -> todo_edit_form.TodoEditFormModel:
         return todo_edit_form.TodoEditFormModel(

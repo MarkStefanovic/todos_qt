@@ -82,7 +82,7 @@ class TodoListView(widgets.ListView):
 
     def mark_complete(self) -> None:
         logger.debug("mark_complete_button clicked.")
-        if todo_id := self.selected_row_id():
+        if todo_id := self.selected_row_id:
             self.view_model.mark_complete(todo_id)
         else:
             logger.debug("Nothing is selected.")
@@ -106,8 +106,8 @@ class TodoListView(widgets.ListView):
         self._popup.exec()
 
     def open_edit_form(self) -> None:
-        if todo_id := self.selected_id:
-            logger.debug(f"opening edit form: {self.selected_id=}")
+        if todo_id := self.selected_row_id:
+            logger.debug(f"opening edit form for todo id {todo_id}")
             model = self.view_model.create_edit_todo_form_model(todo_id)
             self._popup = edit_form_base.EditFormBase(model)
             self._popup.exec()
@@ -115,6 +115,6 @@ class TodoListView(widgets.ListView):
             logger.debug("Nothing is selected.")
 
     def selected_todo(self) -> typing.Optional[domain.Todo]:
-        if todo_id := self.selected_row_id():
+        if todo_id := self.selected_row_id:
             return self.view_model.get_todo(todo_id)
         return None

@@ -31,10 +31,9 @@ class TodoService:
             uow.save()
         self._todos = None
 
-    def get_id(self, todo_id: int) -> domain.Todo:
+    def get_by_id(self, todo_id: int) -> domain.Todo:
         assert todo_id > 0, f"Todo id values should be positive, but got {todo_id!r}."
-        with self._uow as uow:
-            return uow.todo_repository.get_id(todo_id)
+        return next(todo for todo in self.all() if todo_id == todo_id)
 
     def get_current_todos(
         self,

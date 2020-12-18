@@ -28,24 +28,30 @@ class ListViewModel(qtc.QAbstractTableModel):
             value = self._data[index.row()][index.column()]
             if isinstance(value, datetime.date):
                 return value.strftime("%Y-%m-%d")
+            elif isinstance(value, datetime.datetime):
+                return value.strftime("%Y-%m-%d %H:%M:%S")
             else:
                 return value
 
-    def delete(self, /, todo_id: int) -> None:
-        if row_num := self.get_row_number(todo_id=todo_id):
+    def delete(self, /, item_id: int) -> None:
+        if row_num := self.get_row_number(item_id=item_id):
             self.removeRows(row_num, 1)
 
     def flags(self, index: qtc.QModelIndex) -> qtc.Qt.ItemFlags:
         return super().flags(index) | qtc.Qt.ItemIsEditable  # type: ignore
 
-    def get_row(self, /, todo_id: int) -> typing.Optional[typing.List[typing.Any]]:
-        return next((row for row in self._data if row[0] == todo_id), None)
+    def get_row(self, /, item_id: int) -> typing.Optional[typing.List[typing.Any]]:
+        return next((row for row in self._data if row[0] == item_id), None)
 
-    def get_row_number(self, /, todo_id: int) -> typing.Optional[int]:
+    def get_row_number(self, /, item_id: int) -> typing.Optional[int]:
         return next(
-            (row_num for row_num, row in enumerate(self._data) if row[0] == todo_id),
+            (row_num for row_num, row in enumerate(self._data) if row[0] == item_id),
             None,
         )
+
+    @property
+    def header(self) -> typing.List[str]:
+        return self._header
 
     def headerData(
         self,
