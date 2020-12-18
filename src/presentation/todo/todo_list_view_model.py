@@ -11,12 +11,7 @@ class TodoListViewModel(widgets.ListViewModel):
     def __init__(
         self, todo_service: service.TodoService, category: domain.TodoCategory
     ):
-        super().__init__()
-
-        self._todo_service = todo_service
-        self._category = category
-
-        self._header = [
+        super().__init__([
             "id",
             "Description",
             "Frequency",
@@ -24,7 +19,10 @@ class TodoListViewModel(widgets.ListViewModel):
             "Day",
             "Due",
             "Completed",
-        ]
+        ])
+
+        self._todo_service = todo_service
+        self._category = category
 
     def fetch_data(self) -> typing.List[typing.List[typing.Any]]:
         return [

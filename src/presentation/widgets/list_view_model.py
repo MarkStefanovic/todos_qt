@@ -9,8 +9,10 @@ __all__ = ("ListViewModel",)
 
 
 class ListViewModel(qtc.QAbstractTableModel):
-    def __init__(self) -> None:
+    def __init__(self, /, header: typing.List[str]) -> None:
         super().__init__()
+
+        self._header = header
 
         self._data: typing.List[typing.Any] = []
 
