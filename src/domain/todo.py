@@ -46,7 +46,6 @@ class TodoDTO(pydantic.BaseModel):
 
     class Config:
         allow_mutation = False
-        anystr_strip_whitespace = True
         validate_assignment = True
 
     @staticmethod

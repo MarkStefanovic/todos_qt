@@ -16,11 +16,12 @@ class Db(abc.ABC):
 
     @abc.abstractmethod
     def execute(
-        self,
-        *,
-        sql: str,
-        params: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None,
+        self, sql: str, /, **params: typing.Any
     ) -> typing.Optional[rows.Rows]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def executemany(self, sql: str, /, *params: dict[str, typing.Any]) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

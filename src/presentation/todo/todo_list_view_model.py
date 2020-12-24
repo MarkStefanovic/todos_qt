@@ -26,7 +26,7 @@ class TodoListViewModel(widgets.ListViewModel):
         self._todo_service = todo_service
         self._category = category
 
-    def fetch_data(self) -> typing.List[typing.List[typing.Any]]:
+    def fetch(self) -> typing.List[typing.List[typing.Any]]:
         return [
             [
                 row.todo_id,
@@ -45,7 +45,8 @@ class TodoListViewModel(widgets.ListViewModel):
         super().delete(todo_id)
 
     def mark_complete(self, /, todo_id: int) -> None:
-        if row_num := self.get_row_number(item_id=todo_id):
+        row_num = self.get_row_number(item_id=todo_id)
+        if row_num is not None:
             self._todo_service.mark_complete(todo_id)
             self.removeRows(row_num, 1)
 
@@ -60,7 +61,7 @@ class TodoListViewModel(widgets.ListViewModel):
         )
 
     def create_edit_todo_form_model(
-        self, todo_id: int
+        self, /, todo_id: int
     ) -> todo_edit_form.TodoEditFormModel:
         return todo_edit_form.TodoEditFormModel(
             edit_mode=domain.EditMode.EDIT,

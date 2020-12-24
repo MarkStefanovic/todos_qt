@@ -11,7 +11,7 @@ from loguru import logger
 import src.adapter.sqlite_db
 from src import adapter, service, presentation
 
-all = ("main",)
+__all__ = ("main",)
 
 
 def exception_hook(
@@ -43,17 +43,16 @@ def main() -> None:
     error_log_fp = config.log_dir() / "error.log"
     logger.add(
         error_log_fp,
-        # format="{time} {level} {message}",
         rotation="5 MB",
         retention="7 days",
         level="ERROR",
     )
     logger.info(f"Logging errors to {error_log_fp!s}.")
-    logger.info("Starting Todo app.")
+    logger.info("Starting Todo appun.")
 
     db_path = pathlib.Path(config.db_path())
     with src.adapter.sqlite_db.SqliteDb(db_path) as db:
-        uow = adapter.DefaultTodoUnitOfWork(db)
+        uow = adapter.SqliteTodoUnitOfWork(db)
         todo_service = service.TodoService(uow)
 
         # workaround for PyQt exceptions somehow bypassing outer context manager's __exit__ methods

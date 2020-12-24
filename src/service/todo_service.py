@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import typing
 
@@ -11,29 +12,24 @@ class TodoService:
     def __init__(self, /, uow: src.domain.todo_unit_of_work.TodoUnitOfWork):
         self._uow = uow
 
-        self._todos: typing.Optional[typing.List[domain.Todo]] = None
-
     def all(self) -> typing.List[domain.Todo]:
-        if self._todos is None:
-            with self._uow as uow:
-                self._todos = uow.todo_repository.all()
-        return self._todos
+        with self._uow as uow:
+            return uow.todo_repository.all()
 
     def add_todo(self, /, todo: domain.Todo) -> None:
+        new_todo = dataclasses.replace(todo, date_added=datetime.date.today())
         with self._uow as uow:
-            uow.todo_repository.add(todo)
+            uow.todo_repository.add(new_todo)
             uow.save()
-        self._todos = None
 
     def delete_todo(self, /, todo_id: int) -> None:
         with self._uow as uow:
             uow.todo_repository.remove(todo_id)
             uow.save()
-        self._todos = None
 
     def get_by_id(self, todo_id: int) -> domain.Todo:
         assert todo_id > 0, f"Todo id values should be positive, but got {todo_id!r}."
-        return next(todo for todo in self.all() if todo_id == todo_id)
+        return next(todo for todo in self.all() if todo.todo_id == todo_id)
 
     def get_current_todos(
         self,
@@ -56,10 +52,8 @@ class TodoService:
         with self._uow as uow:
             uow.todo_repository.mark_completed(todo_id)
             uow.save()
-        self._todos = None
 
     def update_todo(self, /, todo: domain.Todo) -> None:
         with self._uow as uow:
             uow.todo_repository.update(todo)
             uow.save()
-        self._todos = None

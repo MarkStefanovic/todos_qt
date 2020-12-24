@@ -1,7 +1,6 @@
 import abc
 import pathlib
 
-
 __all__ = ("Config",)
 
 

@@ -31,8 +31,6 @@ class ValidatedLineEdit(qtw.QLineEdit):
         ]
         if validation_errors:
             self.setStyleSheet("border: 1px solid red;")
-            # self.setStyleSheet("QLineEdit { color : red; }")
-            # self.setStyleSheet("QLineEdit { background : red; }")
             self.validation_error_occurred.emit(validation_errors)
         else:
             self.setStyleSheet("")

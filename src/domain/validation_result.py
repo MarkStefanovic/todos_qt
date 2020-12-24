@@ -2,6 +2,12 @@ from __future__ import annotations
 
 import dataclasses
 
+__all__ = (
+    "ValidationResult",
+    "ValidationFailed",
+    "ValidationPassed",
+)
+
 
 @dataclasses.dataclass(frozen=True)
 class ValidationResult:
@@ -19,6 +25,12 @@ class ValidationResult:
 @dataclasses.dataclass(frozen=True)
 class ValidationFailed(ValidationResult):
     error_message: str
+
+    def __eq__(self, o: object) -> bool:
+        assert isinstance(o, ValidationResult)
+        if isinstance(o, ValidationFailed):
+            return o.error_message == self.error_message
+        return False
 
 
 @dataclasses.dataclass(frozen=True)

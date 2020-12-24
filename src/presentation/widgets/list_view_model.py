@@ -17,7 +17,7 @@ class ListViewModel(qtc.QAbstractTableModel):
         self._data: typing.List[typing.Any] = []
 
     @abc.abstractmethod
-    def fetch_data(self) -> typing.List[typing.List[typing.Any]]:
+    def fetch(self) -> typing.List[typing.List[typing.Any]]:
         raise NotImplementedError
 
     def columnCount(self, parent: qtc.QModelIndex = qtc.QModelIndex()) -> int:
@@ -76,7 +76,7 @@ class ListViewModel(qtc.QAbstractTableModel):
 
     def refresh(self) -> None:
         self.beginResetModel()
-        self._data = self.fetch_data()
+        self._data = self.fetch()
         self.endResetModel()
 
     def removeRows(

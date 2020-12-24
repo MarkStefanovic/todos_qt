@@ -40,6 +40,7 @@ class TodoListView(widgets.ListView):
         self._delete_button = qtw.QPushButton("Delete")
         self._delete_button.clicked.connect(self.delete)
         self._delete_button.setMinimumWidth(100)
+        self._delete_button.setDisabled(True)
 
         spacer = qtw.QSpacerItem(20, 40, qtw.QSizePolicy.Expanding)
 
@@ -56,19 +57,22 @@ class TodoListView(widgets.ListView):
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
-        self._table.selectionModel().selectionChanged.connect(self.on_selection_changed)  # type: ignore
+        self._table.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
         self._popup: typing.Optional[qtw.QDialog] = None
 
     def delete(self) -> None:
         logger.debug("delete_button clicked.")
-        if todo_id := self.selected_id:
-            description = self.view_model.get_row_by_id(todo_id)[1]
+        if todo_id := self.selected_row_id:
+            row = self.view_model.get_row(todo_id)
+            assert row is not None
+            assert len(row) >= 1
+            description = row[1]
             confirmation = qtw.QMessageBox.question(
                 self,
                 "Confirm Delete",
                 f"Are you sure you want to delete {description!r}?",
-                qtw.QMessageBox.Yes | qtw.QMessageBox.No,  # type: ignore
+                qtw.QMessageBox.Yes | qtw.QMessageBox.No,
                 qtw.QMessageBox.No,
             )
             if confirmation == qtw.QMessageBox.Yes:
@@ -95,9 +99,11 @@ class TodoListView(widgets.ListView):
                 self._mark_complete_button.setText("Mark Incomplete")
             self._mark_complete_button.setDisabled(False)
             self._edit_button.setDisabled(False)
+            self._delete_button.setDisabled(False)
         else:
             self._mark_complete_button.setDisabled(True)
             self._edit_button.setDisabled(True)
+            self._delete_button.setDisabled(True)
 
     def open_add_form(self) -> None:
         logger.debug(f"opening add form")

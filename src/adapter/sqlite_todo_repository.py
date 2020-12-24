@@ -15,7 +15,7 @@ class SqliteTodoRepository(domain.TodoRepository):
     def add(self, /, item: domain.Todo) -> None:
         dto = item.to_dto()
         self._db.execute(
-            sql="""
+            """
                 INSERT INTO todo ( 
                     description,
                     frequency,
@@ -48,28 +48,24 @@ class SqliteTodoRepository(domain.TodoRepository):
                     :category
                 )
             """,
-            params=[
-                {
-                    "description": dto.description,
-                    "frequency": dto.frequency,
-                    "month": dto.month,
-                    "week_day": dto.week_day,
-                    "month_day": dto.month_day,
-                    "year": dto.year,
-                    "week_number": dto.week_number,
-                    "date_added": dto.date_added,
-                    "date_completed": dto.date_completed,
-                    "advance_days": dto.advance_days,
-                    "start_date": dto.start_date,
-                    "days": dto.days,
-                    "note": dto.note,
-                    "category": dto.category,
-                }
-            ],
+            description=dto.description,
+            frequency=dto.frequency,
+            month=dto.month,
+            week_day=dto.week_day,
+            month_day=dto.month_day,
+            year=dto.year,
+            week_number=dto.week_number,
+            date_added=dto.date_added,
+            date_completed=dto.date_completed,
+            advance_days=dto.advance_days,
+            start_date=dto.start_date,
+            days=dto.days,
+            note=dto.note,
+            category=dto.category,
         )
 
     def all(self) -> typing.List[domain.Todo]:
-        rows = self._db.execute(sql="SELECT * FROM todo")
+        rows = self._db.execute("SELECT * FROM todo")
         dtos = rows.as_dtos(domain.TodoDTO)
         return sorted(
             (row.to_domain() for row in dtos),
@@ -79,11 +75,11 @@ class SqliteTodoRepository(domain.TodoRepository):
     def create_if_not_exists(self) -> None:
         # fmt: off
         result = self._db.execute(
-            sql="SELECT COUNT(*) AS ct FROM sqlite_master WHERE type = 'table' AND name = :table_name",
-            params=[{"table_name": "todo"}],
+            "SELECT COUNT(*) AS ct FROM sqlite_master WHERE type = 'table' AND name = :table_name",
+            table_name="todo",
         )
         if result.first_value and result.first_value == 0:
-            self._db.execute(sql="""
+            self._db.execute("""
                 CREATE TABLE todo (
                     id INTEGER PRIMARY KEY,
                     description VARCHAR(100) NOT NULL,
@@ -101,10 +97,9 @@ class SqliteTodoRepository(domain.TodoRepository):
                     note TEXT NULL,
                     category TEXT NULL
                 );
-            """, params=None)
+            """)
             self._db.execute(
-                sql="CREATE INDEX ix_todo_category ON todo (category, description);",
-                params=None,
+                "CREATE INDEX ix_todo_category ON todo (category, description);"
             )
             for holiday in domain.HOLIDAYS:
                 self.add(holiday)
@@ -112,8 +107,8 @@ class SqliteTodoRepository(domain.TodoRepository):
 
     def get_id(self, /, todo_id: int) -> domain.Todo:
         result = self._db.execute(
-            sql="SELECT * FROM todo WHERE id = :id",
-            params=[{"id": todo_id}],
+            "SELECT * FROM todo WHERE id = :id",
+            id=todo_id,
         )
         if result:
             dto = result.as_dtos(domain.TodoDTO)[0]
@@ -127,20 +122,21 @@ class SqliteTodoRepository(domain.TodoRepository):
         self, item_id: int, today: datetime.date = datetime.date.today()
     ) -> None:
         self._db.execute(
-            sql="UPDATE todo SET date_completed = :date_completed WHERE id = :id",
-            params=[{"date_completed": datetime.date.today(), "id": item_id}],
+            "UPDATE todo SET date_completed = :date_completed WHERE id = :id",
+            date_completed=datetime.date.today(),
+            id=item_id,
         )
 
     def remove(self, /, item_id: int) -> None:
         self._db.execute(
-            sql="DELETE FROM todo WHERE id = :id",
-            params=[{"id": item_id}],
+            "DELETE FROM todo WHERE id = :id",
+            id=item_id,
         )
 
     def update(self, /, item: domain.Todo) -> None:
         dto = item.to_dto()
         self._db.execute(
-            sql="""
+            """
                 UPDATE todo 
                 SET description = :description,
                     frequency = :frequency,
@@ -158,23 +154,19 @@ class SqliteTodoRepository(domain.TodoRepository):
                     category = :category
                 WHERE id = :id
             """,
-            params=[
-                {
-                    "description": dto.description,
-                    "frequency": dto.frequency,
-                    "month": dto.month,
-                    "week_day": dto.week_day,
-                    "month_day": dto.month_day,
-                    "year": dto.year,
-                    "week_number": dto.week_number,
-                    "date_added": dto.date_added,
-                    "date_completed": dto.date_completed,
-                    "advance_days": dto.advance_days,
-                    "start_date": dto.start_date,
-                    "days": dto.days,
-                    "note": dto.note,
-                    "category": dto.category,
-                    "id": dto.id,
-                }
-            ],
+            description=dto.description,
+            frequency=dto.frequency,
+            month=dto.month,
+            week_day=dto.week_day,
+            month_day=dto.month_day,
+            year=dto.year,
+            week_number=dto.week_number,
+            date_added=dto.date_added,
+            date_completed=dto.date_completed,
+            advance_days=dto.advance_days,
+            start_date=dto.start_date,
+            days=dto.days,
+            note=dto.note,
+            category=dto.category,
+            id=dto.id,
         )

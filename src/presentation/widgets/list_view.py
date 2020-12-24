@@ -23,9 +23,8 @@ class ListView(qtw.QWidget):
 
         self._selected_row_id: typing.Optional[int] = None
 
-        self._table.selectionModel().selectionChanged.connect(  # noqa
-            self._set_selected_row_id
-        )
+        # noinspection PyUnresolvedReferences
+        self._table.selectionModel().selectionChanged.connect(self._set_selected_row_id)
 
         self.refresh()
 

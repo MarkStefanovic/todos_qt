@@ -144,3 +144,5 @@ cython_debug/
 scripts
 .log
 *scratch.py
+poetry.lock
+poetry.toml
