@@ -39,8 +39,8 @@ def exception_hook(
 
 @logger.catch
 def main() -> None:
-    config = adapter.EnvironConfig()
-    error_log_fp = config.log_dir() / "error.log"
+    config = adapter.DefaultConfig()
+    error_log_fp = config.log_dir / "error.log"
     logger.add(
         error_log_fp,
         rotation="5 MB",
@@ -50,7 +50,7 @@ def main() -> None:
     logger.info(f"Logging errors to {error_log_fp!s}.")
     logger.info("Starting Todo appun.")
 
-    db_path = pathlib.Path(config.db_path())
+    db_path = pathlib.Path(config.db_path)
     with src.adapter.sqlite_db.SqliteDb(db_path) as db:
         uow = adapter.SqliteTodoUnitOfWork(db)
         todo_service = service.TodoService(uow)
