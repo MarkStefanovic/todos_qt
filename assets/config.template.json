@@ -1,0 +1,4 @@
+{
+  "instructions": "rename this file to config.json",
+  "sqlalchemy_url": "postgresql+psycopg2://test:mypassword@localhost/testdb"
+}

@@ -1,41 +1,125 @@
 from __future__ import annotations
 
-import abc
 import datetime
-import typing
 
+import pydantic
+
+from src.domain.frequency_type import FrequencyType
+from src.domain.month import Month
+from src.domain.weekday import Weekday
 
 __all__ = ("Frequency",)
 
-from src.domain import frequency_db_name
 
+class Frequency(pydantic.BaseModel):
+    name: FrequencyType
+    month: Month | None
+    week_day: Weekday | None
+    week_number: int | None
+    month_day: int | None
+    days: int | None
+    due_date: datetime.date | None
 
-class Frequency(abc.ABC):
-    def display(
-        self,
-        advance_days: int,
-        date_completed: typing.Optional[datetime.date],
-        today: datetime.date = datetime.date.today(),
-    ) -> bool:
-        current_date = self.current_date(advance_days=advance_days, today=today)
-        current_advance_date = current_date - datetime.timedelta(days=advance_days)
-        if date_completed and date_completed >= current_advance_date:  # noqa
-            return False
-        elif today >= current_advance_date:
-            return True
-        else:
-            return False
-
-    @abc.abstractmethod
-    def current_date(
-        self, *, advance_days: int, today: datetime.date = datetime.date.today()
-    ) -> datetime.date:
-        raise NotImplementedError
+    class Config:
+        frozen = True
 
     @staticmethod
-    @abc.abstractmethod
-    def db_name() -> frequency_db_name.FrequencyDbName:
-        raise NotImplementedError
+    def daily() -> Frequency:
+        return Frequency(
+            name=FrequencyType.Daily,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=None,
+            days=None,
+            due_date=None,
+        )
 
-    def __repr__(self) -> str:
-        return self.__class__.__name__
+    @staticmethod
+    def easter() -> Frequency:
+        return Frequency(
+            name=FrequencyType.Easter,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=None,
+            days=None,
+            due_date=None,
+        )
+
+    @staticmethod
+    def irregular(
+        *,
+        month: Month,
+        week_day: Weekday,
+        week_number: int,
+    ) -> Frequency:
+        return Frequency(
+            name=FrequencyType.Irregular,
+            month=month,
+            week_day=week_day,
+            week_number=week_number,
+            month_day=None,
+            days=None,
+            due_date=None,
+        )
+
+    @staticmethod
+    def monthly(*, month_day: int) -> Frequency:
+        return Frequency(
+            name=FrequencyType.Monthly,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=month_day,
+            days=None,
+            due_date=None,
+        )
+
+    @staticmethod
+    def once(*, due_date: datetime.date) -> Frequency:
+        return Frequency(
+            name=FrequencyType.Once,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=None,
+            days=None,
+            due_date=due_date,
+        )
+
+    @staticmethod
+    def weekly(*, week_day: Weekday) -> Frequency:
+        return Frequency(
+            name=FrequencyType.Weekly,
+            month=None,
+            week_day=week_day,
+            week_number=None,
+            month_day=None,
+            days=None,
+            due_date=None,
+        )
+
+    @staticmethod
+    def xdays(*, days: int) -> Frequency:
+        return Frequency(
+            name=FrequencyType.XDays,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=None,
+            days=days,
+            due_date=None,
+        )
+
+    @staticmethod
+    def yearly(*, month: Month, month_day: int) -> Frequency:
+        return Frequency(
+            name=FrequencyType.Yearly,
+            month=month,
+            week_day=None,
+            week_number=None,
+            month_day=month_day,
+            days=None,
+            due_date=None,
+        )

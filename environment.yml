@@ -1,0 +1,19 @@
+# to create new env: conda env create --file environment.yml
+# to update env: conda env update --file environment.yml
+name: todos-qt
+dependencies:
+- python>=3.10
+- pip
+- loguru
+- pydantic
+- pyqt
+- sqlmodel
+# dev
+- mypy
+- pytest
+- sqlalchemy
+- psycopg2-binary
+- pip:
+  # the following dependencies have to be installed via pip
+  - PyQt5-stubs
+  - qt-material

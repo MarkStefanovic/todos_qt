@@ -1,8 +1,7 @@
 import abc
 import datetime
-import typing
 
-from src.domain import todo
+from src.domain.todo import Todo
 
 
 __all__ = ("TodoRepository",)
@@ -10,31 +9,21 @@ __all__ = ("TodoRepository",)
 
 class TodoRepository(abc.ABC):
     @abc.abstractmethod
-    def add(self, /, item: todo.Todo) -> None:
+    def add(self, *, todo: Todo) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def all(self) -> typing.List[todo.Todo]:
+    def all(self) -> list[Todo]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create_if_not_exists(self) -> None:
+    def delete(self, *, todo_id: str) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_id(self, /, todo_id: int) -> todo.Todo:
+    def get(self, *, todo_id: str) -> Todo:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mark_completed(
-        self, item_id: int, today: datetime.date = datetime.date.today()
-    ) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def remove(self, /, item_id: int) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def update(self, /, item: todo.Todo) -> None:
+    def update(self, *, todo: Todo) -> None:
         raise NotImplementedError

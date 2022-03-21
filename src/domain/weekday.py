@@ -3,8 +3,10 @@ from __future__ import annotations
 import datetime
 import enum
 
+__all__ = ("Weekday",)
 
-class Weekday(enum.IntEnum):
+
+class Weekday(enum.Enum):
     Sunday = 1
     Monday = 2
     Tuesday = 3
@@ -14,7 +16,7 @@ class Weekday(enum.IntEnum):
     Saturday = 7
 
     @property
-    def display_name(self) -> str:
+    def full_name(self) -> str:
         return {
             Weekday.Monday: "Monday",
             Weekday.Tuesday: "Tuesday",
@@ -26,7 +28,7 @@ class Weekday(enum.IntEnum):
         }[self]
 
     @staticmethod
-    def from_date(dt: datetime.date) -> Weekday:
+    def from_date(date: datetime.date) -> Weekday:
         return {
             0: Weekday.Monday,
             1: Weekday.Tuesday,
@@ -35,10 +37,21 @@ class Weekday(enum.IntEnum):
             4: Weekday.Friday,
             5: Weekday.Saturday,
             6: Weekday.Sunday,
-        }[dt.weekday()]
+        }[date.weekday()]
 
-    @property
-    def py_weekday(self) -> int:
+    @staticmethod
+    def from_int(weekday_number: int) -> Weekday:
+        return {
+            0: Weekday.Monday,
+            1: Weekday.Tuesday,
+            2: Weekday.Wednesday,
+            3: Weekday.Thursday,
+            4: Weekday.Friday,
+            5: Weekday.Saturday,
+            6: Weekday.Sunday,
+        }[weekday_number]
+
+    def to_int(self) -> int:
         return {
             Weekday.Monday: 0,
             Weekday.Tuesday: 1,
@@ -62,4 +75,4 @@ class Weekday(enum.IntEnum):
         }[self]
 
     def __str__(self) -> str:
-        return self.display_name
+        return self.short_name

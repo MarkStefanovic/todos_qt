@@ -1,9 +1,0 @@
-loguru
-pydantic
-pyqt5
-qdarkgraystyle
-
-# dev
-mypy
-pylint
-pytest
