@@ -1,8 +1,6 @@
 import abc
-import datetime
 
 from src.domain.todo import Todo
-
 
 __all__ = ("TodoRepository",)
 

@@ -6,6 +6,42 @@ from src.domain import Todo
 
 __all__ = ("DbTodoRepository",)
 
+CATEGORY_LKP = {
+    "birthday": domain.TodoCategory.Birthday,
+    "holiday": domain.TodoCategory.Holiday,
+    "reminder": domain.TodoCategory.Reminder,
+    "todo": domain.TodoCategory.Todo,
+}
+
+CATEGORY_NAME_LKP = {
+    domain.TodoCategory.Birthday: "birthday",
+    domain.TodoCategory.Holiday: "holiday",
+    domain.TodoCategory.Reminder: "reminder",
+    domain.TodoCategory.Todo: "todo",
+}
+
+FREQUENCY_LKP = {
+    "daily": domain.FrequencyType.Daily,
+    "easter": domain.FrequencyType.Easter,
+    "irregular": domain.FrequencyType.Irregular,
+    "monthly": domain.FrequencyType.Monthly,
+    "once": domain.FrequencyType.Once,
+    "weekly": domain.FrequencyType.Weekly,
+    "xdays": domain.FrequencyType.XDays,
+    "yearly": domain.FrequencyType.Yearly,
+}
+
+FREQUENCY_NAME_LKP = {
+    domain.FrequencyType.Daily: "daily",
+    domain.FrequencyType.Easter: "easter",
+    domain.FrequencyType.Irregular: "irregular",
+    domain.FrequencyType.Monthly: "monthly",
+    domain.FrequencyType.Once: "once",
+    domain.FrequencyType.Weekly: "weekly",
+    domain.FrequencyType.XDays: "xdays",
+    domain.FrequencyType.Yearly: "yearly",
+}
+
 
 class DbTodoRepository(domain.TodoRepository):
     def __init__(self, *, session: sm.Session):
@@ -29,14 +65,14 @@ class DbTodoRepository(domain.TodoRepository):
             todo_id=todo.todo_id,
             expire_days=todo.expire_days,
             advance_days=todo.advance_days,
-            category=todo.category.to_str(),
+            category=CATEGORY_NAME_LKP[todo.category],
             description=todo.description,
             note=todo.note,
             start_date=todo.start_date,
             date_added=todo.date_added,
             date_updated=todo.date_updated,
             date_deleted=todo.date_deleted,
-            frequency=todo.frequency.name,
+            frequency=FREQUENCY_NAME_LKP[todo.frequency.name],
             week_day=week_day,
             week_number=todo.frequency.week_number,
             month=month,
@@ -53,7 +89,7 @@ class DbTodoRepository(domain.TodoRepository):
                 todo_id=todo_orm.todo_id,
                 expire_days=todo_orm.expire_days,
                 advance_days=todo_orm.advance_days,
-                category=domain.TodoCategory.from_str(todo_orm.category),
+                category=CATEGORY_LKP[todo_orm.category],
                 description=todo_orm.description,
                 frequency=_parse_frequency(row=todo_orm),
                 note=todo_orm.note,
@@ -76,7 +112,7 @@ class DbTodoRepository(domain.TodoRepository):
             todo_id=todo_orm.todo_id,
             expire_days=todo_orm.expire_days,
             advance_days=todo_orm.advance_days,
-            category=domain.TodoCategory.from_str(todo_orm.category),
+            category=CATEGORY_LKP[todo_orm.category],
             description=todo_orm.description,
             frequency=_parse_frequency(row=todo_orm),
             note=todo_orm.note,
@@ -101,14 +137,14 @@ class DbTodoRepository(domain.TodoRepository):
 
         todo_orm.expire_days = todo.expire_days
         todo_orm.advance_days = todo.advance_days
-        todo_orm.category = todo.category.to_str()
+        todo_orm.category = CATEGORY_NAME_LKP[todo.category]
         todo_orm.description = todo.description
         todo_orm.note = todo.note
         todo_orm.start_date = todo.start_date
         todo_orm.date_added = todo.date_added
         todo_orm.date_updated = todo.date_updated
         todo_orm.date_deleted = todo.date_deleted
-        todo_orm.frequency = todo.frequency.name
+        todo_orm.frequency = FREQUENCY_NAME_LKP[todo.frequency.name]
         todo_orm.week_day = week_day
         todo_orm.week_number = todo.frequency.week_number
         todo_orm.month = month

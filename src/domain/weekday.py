@@ -75,4 +75,4 @@ class Weekday(enum.Enum):
         }[self]
 
     def __str__(self) -> str:
-        return self.short_name
+        return self.full_name
