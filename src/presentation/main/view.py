@@ -14,7 +14,7 @@ class MainView(qtw.QDialog):
 
         state = MainState.initial()
 
-        self.setWindowTitle("Todos")
+        self.setWindowTitle("ToDo")
 
         self.setWindowIcon(window_icon)
 
