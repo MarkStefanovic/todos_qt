@@ -18,8 +18,8 @@ TODO_1 = domain.Todo.daily(
 
 TODO_2 = domain.Todo.monthly(
     todo_id="2" * 32,
-    advance_days=7,
-    expire_days=30,
+    advance_display_days=7,
+    expire_display_days=30,
     category=domain.TodoCategory.Todo,
     description="Clean garage",
     month_day=10,
@@ -32,8 +32,8 @@ TODO_2 = domain.Todo.monthly(
 
 TODO_3 = domain.Todo.yearly(
     todo_id="3" * 32,
-    advance_days=30,
-    expire_days=90,
+    advance_display_days=30,
+    expire_display_days=90,
     category=domain.TodoCategory.Todo,
     description="Pay taxes",
     month=domain.Month.February,

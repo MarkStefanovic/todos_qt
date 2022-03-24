@@ -13,16 +13,24 @@ class DbTodoService(domain.TodoService):
         self._session = session
         self._min_seconds_between_refreshes = min_seconds_between_refreshes
 
-        self._todos: dict[str, domain.Todo] = {}
+        self._todos: dict[str, domain.Todo] | None = None
         self._last_refresh: datetime.datetime | None = None
 
     def delete(self, *, todo_id: str) -> None:
         repo = adapter.DbTodoRepository(session=self._session)
         repo.delete(todo_id=todo_id)
-        del self._todos[todo_id]
+
+        if self._todos is not None:
+            del self._todos[todo_id]
+
+    def get(self, *, todo_id: str) -> domain.Todo | None:
+        if self._todos is None:
+            self.refresh()
+
+        return self._todos.get(todo_id)
 
     def get_all(self) -> list[Todo]:
-        if self._last_refresh is None:
+        if self._last_refresh is None or self._todos is None:
             self.refresh()
         else:
             seconds_since_last_refresh = (datetime.datetime.now() - self._last_refresh).total_seconds()
@@ -46,4 +54,5 @@ class DbTodoService(domain.TodoService):
         else:
             repo.add(todo=todo)
 
-        self._todos[todo.todo_id] = todo
+        if self._todos is not None:
+            self._todos[todo.todo_id] = todo

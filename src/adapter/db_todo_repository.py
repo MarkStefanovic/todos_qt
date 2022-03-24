@@ -1,3 +1,5 @@
+import datetime
+
 import sqlmodel as sm
 
 from src import domain
@@ -63,12 +65,12 @@ class DbTodoRepository(domain.TodoRepository):
 
         todo_orm = db.Todo(
             todo_id=todo.todo_id,
-            expire_days=todo.expire_days,
-            advance_days=todo.advance_days,
+            expire_days=todo.frequency.expire_display_days,
+            advance_days=todo.frequency.advance_display_days,
             category=CATEGORY_NAME_LKP[todo.category],
             description=todo.description,
             note=todo.note,
-            start_date=todo.start_date,
+            start_date=todo.frequency.start_date,
             date_added=todo.date_added,
             date_updated=todo.date_updated,
             date_deleted=todo.date_deleted,
@@ -79,6 +81,8 @@ class DbTodoRepository(domain.TodoRepository):
             month_day=todo.frequency.month_day,
             days=todo.frequency.days,
             due_date=todo.frequency.due_date,
+            last_completed=todo.last_completed,
+            prior_completed=todo.prior_completed,
         )
 
         self._session.add(todo_orm)
@@ -87,13 +91,17 @@ class DbTodoRepository(domain.TodoRepository):
         return [
             domain.Todo(
                 todo_id=todo_orm.todo_id,
-                expire_days=todo_orm.expire_days,
-                advance_days=todo_orm.advance_days,
                 category=CATEGORY_LKP[todo_orm.category],
                 description=todo_orm.description,
-                frequency=_parse_frequency(row=todo_orm),
+                frequency=_parse_frequency(
+                    row=todo_orm,
+                    advance_display_days=todo_orm.advance_days,
+                    expire_display_days=todo_orm.expire_days,
+                    start_date=todo_orm.start_date,
+                ),
                 note=todo_orm.note,
-                start_date=todo_orm.start_date,
+                last_completed=todo_orm.last_completed,
+                prior_completed=todo_orm.prior_completed,
                 date_added=todo_orm.date_added,
                 date_updated=todo_orm.date_updated,
                 date_deleted=todo_orm.date_deleted,
@@ -105,18 +113,25 @@ class DbTodoRepository(domain.TodoRepository):
         todo = self._get_orm(todo_id=todo_id)
         self._session.delete(todo)
 
-    def get(self, *, todo_id: str) -> domain.Todo:
+    def get(self, *, todo_id: str) -> domain.Todo | None:
         todo_orm = self._get_orm(todo_id=todo_id)
+
+        if todo_orm is None:
+            return None
 
         return domain.Todo(
             todo_id=todo_orm.todo_id,
-            expire_days=todo_orm.expire_days,
-            advance_days=todo_orm.advance_days,
             category=CATEGORY_LKP[todo_orm.category],
             description=todo_orm.description,
-            frequency=_parse_frequency(row=todo_orm),
+            frequency=_parse_frequency(
+                row=todo_orm,
+                advance_display_days=todo_orm.advance_days,
+                expire_display_days=todo_orm.expire_days,
+                start_date=todo_orm.start_date,
+            ),
             note=todo_orm.note,
-            start_date=todo_orm.start_date,
+            last_completed=todo_orm.last_completed,
+            prior_completed=todo_orm.prior_completed,
             date_added=todo_orm.date_added,
             date_updated=todo_orm.date_updated,
             date_deleted=todo_orm.date_deleted,
@@ -124,6 +139,8 @@ class DbTodoRepository(domain.TodoRepository):
 
     def update(self, *, todo: Todo) -> None:
         todo_orm = self._get_orm(todo_id=todo.todo_id)
+
+        assert todo_orm is not None
 
         if todo.frequency.week_day is None:
             week_day = None
@@ -135,12 +152,12 @@ class DbTodoRepository(domain.TodoRepository):
         else:
             month = todo.frequency.month.to_int()
 
-        todo_orm.expire_days = todo.expire_days
-        todo_orm.advance_days = todo.advance_days
+        todo_orm.expire_days = todo.frequency.expire_display_days
+        todo_orm.advance_days = todo.frequency.advance_display_days
         todo_orm.category = CATEGORY_NAME_LKP[todo.category]
         todo_orm.description = todo.description
         todo_orm.note = todo.note
-        todo_orm.start_date = todo.start_date
+        todo_orm.start_date = todo.frequency.start_date
         todo_orm.date_added = todo.date_added
         todo_orm.date_updated = todo.date_updated
         todo_orm.date_deleted = todo.date_deleted
@@ -151,20 +168,32 @@ class DbTodoRepository(domain.TodoRepository):
         todo_orm.month_day = todo.frequency.month_day
         todo_orm.days = todo.frequency.days
         todo_orm.due_date = todo.frequency.due_date
+        todo_orm.last_completed = todo.last_completed
+        todo_orm.prior_completed = todo.prior_completed
 
         self._session.add(todo_orm)
 
-    def _get_orm(self, *, todo_id: str) -> db.Todo:
+    def _get_orm(self, *, todo_id: str) -> db.Todo | None:
         return self._session.exec(
             sm.select(db.Todo).where(db.Todo.todo_id == todo_id)
-        ).one()
+        ).one_or_none()
 
 
-def _parse_frequency(*, row: db.Todo) -> domain.Frequency:
+def _parse_frequency(
+    *,
+    row: db.Todo,
+    advance_display_days: int,
+    expire_display_days: int,
+    start_date: datetime.date,
+) -> domain.Frequency:
     if row.frequency == "daily":
-        return domain.Frequency.daily()
+        return domain.Frequency.daily(start_date=start_date)
     elif row.frequency == "easter":
-        return domain.Frequency.easter()
+        return domain.Frequency.easter(
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "irregular":
         assert row.month is not None, "[month] is required for an irregular todo."
         assert row.week_day is not None, "[week_day] is required for an irregular todo."
@@ -174,23 +203,46 @@ def _parse_frequency(*, row: db.Todo) -> domain.Frequency:
             month=domain.Month.from_int(row.month),
             week_day=domain.Weekday.from_int(row.week_day),
             week_number=row.week_number,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
     elif row.frequency == "monthly":
         assert row.month_day is not None, "[month_day] is required if the frequency is 'monthly'."
 
-        return domain.Frequency.monthly(month_day=row.month_day)
+        return domain.Frequency.monthly(
+            month_day=row.month_day,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "once":
         assert row.due_date is not None, "[due_date] is required if the frequency is 'once'."
 
-        return domain.Frequency.once(due_date=row.due_date)
+        return domain.Frequency.once(
+            due_date=row.due_date,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "weekly":
         assert row.week_day is not None, "[week_day] is required if the frequency is 'weekly'."
 
-        return domain.Frequency.weekly(week_day=domain.Weekday.from_int(row.week_day))
+        return domain.Frequency.weekly(
+            week_day=domain.Weekday.from_int(row.week_day),
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "xdays":
         assert row.days is not None, "[days] is required if the frequency is 'xdays'."
 
-        return domain.Frequency.xdays(days=row.days)
+        return domain.Frequency.xdays(
+            days=row.days,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "yearly":
         assert row.month is not None, "[month] is required if the frequency is 'yearly'."
         assert row.month_day is not None, "[month_day] is required if the frequency is 'yearly'."
@@ -198,6 +250,9 @@ def _parse_frequency(*, row: db.Todo) -> domain.Frequency:
         return domain.Frequency.yearly(
             month=domain.Month.from_int(row.month),
             month_day=row.month_day,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
     else:
         raise ValueError(f"Unrecognized frequency, {row.frequency!r}.")

@@ -18,13 +18,16 @@ class Frequency(pydantic.BaseModel):
     week_number: int | None
     month_day: int | None
     days: int | None
+    start_date: datetime.date
+    advance_display_days: int
+    expire_display_days: int
     due_date: datetime.date | None
 
     class Config:
         frozen = True
 
     @staticmethod
-    def daily() -> Frequency:
+    def daily(*, start_date: datetime.date) -> Frequency:
         return Frequency(
             name=FrequencyType.Daily,
             month=None,
@@ -33,10 +36,18 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=None,
             due_date=None,
+            advance_display_days=0,
+            expire_display_days=1,
+            start_date=start_date,
         )
 
     @staticmethod
-    def easter() -> Frequency:
+    def easter(
+        *,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.Easter,
             month=None,
@@ -45,6 +56,9 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=None,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
@@ -53,6 +67,9 @@ class Frequency(pydantic.BaseModel):
         month: Month,
         week_day: Weekday,
         week_number: int,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
     ) -> Frequency:
         return Frequency(
             name=FrequencyType.Irregular,
@@ -62,10 +79,19 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=None,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
-    def monthly(*, month_day: int) -> Frequency:
+    def monthly(
+        *,
+        month_day: int,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.Monthly,
             month=None,
@@ -74,10 +100,19 @@ class Frequency(pydantic.BaseModel):
             month_day=month_day,
             days=None,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
-    def once(*, due_date: datetime.date) -> Frequency:
+    def once(
+        *,
+        due_date: datetime.date,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.Once,
             month=None,
@@ -86,10 +121,19 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=None,
             due_date=due_date,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
-    def weekly(*, week_day: Weekday) -> Frequency:
+    def weekly(
+        *,
+        week_day: Weekday,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.Weekly,
             month=None,
@@ -98,10 +142,19 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=None,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
-    def xdays(*, days: int) -> Frequency:
+    def xdays(
+        *,
+        days: int,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.XDays,
             month=None,
@@ -110,10 +163,20 @@ class Frequency(pydantic.BaseModel):
             month_day=None,
             days=days,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )
 
     @staticmethod
-    def yearly(*, month: Month, month_day: int) -> Frequency:
+    def yearly(
+        *,
+        month: Month,
+        month_day: int,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
         return Frequency(
             name=FrequencyType.Yearly,
             month=month,
@@ -122,4 +185,7 @@ class Frequency(pydantic.BaseModel):
             month_day=month_day,
             days=None,
             due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )

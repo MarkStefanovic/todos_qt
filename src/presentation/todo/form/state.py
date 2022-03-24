@@ -37,7 +37,7 @@ class TodoFormState(pydantic.BaseModel):
             expire_days=1,
             category=domain.TodoCategory.Todo,
             description="",
-            frequency=domain.Frequency.daily(),
+            frequency=domain.Frequency.daily(start_date=datetime.date.today()),
             note="",
             start_date=datetime.date.today(),
             irregular_frequency_form_state=IrregularFrequencyFormState.initial(),
@@ -58,13 +58,10 @@ class TodoFormState(pydantic.BaseModel):
     ) -> domain.Todo:
         return domain.Todo(
             todo_id=todo_id,
-            advance_days=self.advance_days,
-            expire_days=self.expire_days,
+            frequency=self.frequency,
             category=self.category,
             description=self.description,
-            frequency=self.frequency,
             note=self.note,
-            start_date=self.start_date,
             date_added=date_added,
             date_updated=date_updated,
             date_deleted=date_deleted,
@@ -73,13 +70,10 @@ class TodoFormState(pydantic.BaseModel):
     @staticmethod
     def from_domain(*, todo: domain.Todo) -> TodoFormState:
         return TodoFormState(
-            advance_days=todo.advance_days,
-            expire_days=todo.expire_days,
             category=todo.category,
             description=todo.description,
             frequency=todo.frequency,
             note=todo.note,
-            start_date=todo.start_date,
             irregular_frequency_form_state=IrregularFrequencyFormState.from_domain(frequency=todo.frequency),
             monthly_frequency_form_state=MonthlyFrequencyFormState.from_domain(frequency=todo.frequency),
             once_frequency_form_state=OnceFrequencyFormState.from_domain(frequency=todo.frequency),

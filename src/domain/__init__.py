@@ -6,6 +6,7 @@ from src.domain.frequency import *
 from src.domain.frequency_type import *
 from src.domain.holidays import *
 from src.domain.month import *
+from src.domain.should_display import *
 from src.domain.todo import *
 from src.domain.todo_category import *
 from src.domain.todo_repository import *

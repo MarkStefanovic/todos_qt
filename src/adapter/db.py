@@ -15,11 +15,14 @@ class Todo(sm.SQLModel, table=True):
     advance_days: int
     expire_days: int
     start_date: datetime.date
+    last_completed: datetime.date | None
+    prior_completed: datetime.date | None
+
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
     date_deleted: datetime.datetime | None
 
-    # frequncy fields
+    # frequency fields
     frequency: str
     month: int | None
     week_day: int | None
@@ -27,19 +30,6 @@ class Todo(sm.SQLModel, table=True):
     month_day: int | None
     days: int | None
     due_date: datetime.date | None 
-
-
-class Schedule(sm.SQLModel, table=True):
-    schedule_id: str = sm.Field(primary_key=True)
-    todo_id: str = sm.Field(foreign_key="todo.todo_id")
-    due_date: datetime.date
-    start_display: datetime.date
-    end_display: datetime.date
-    note: str
-    date_completed: datetime.date | None
-    date_added: datetime.datetime = sm.Field(default_factory=datetime.datetime.now)
-    date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
 
 
 @functools.lru_cache(1)

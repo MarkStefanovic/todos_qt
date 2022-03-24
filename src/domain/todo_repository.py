@@ -19,7 +19,7 @@ class TodoRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, *, todo_id: str) -> Todo:
+    def get(self, *, todo_id: str) -> Todo | None:
         raise NotImplementedError
 
     @abc.abstractmethod

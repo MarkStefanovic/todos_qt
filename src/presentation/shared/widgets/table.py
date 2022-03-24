@@ -6,13 +6,10 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
-from src import domain
-
 __all__ = ("ColAlignment", "ColSpec", "ColSpecType", "Table", "TableSpec")
 
 Key = typing.TypeVar("Key")
 Row = typing.TypeVar("Row")
-T = typing.TypeVar("T")
 
 
 class ColAlignment(enum.Enum):
@@ -22,11 +19,12 @@ class ColAlignment(enum.Enum):
 
     @property
     def qt(self) -> qtc.Qt.AlignmentFlag:
-        return {
+        alignment = {
             ColAlignment.Center: qtc.Qt.AlignHCenter | qtc.Qt.AlignTop,
             ColAlignment.Left: qtc.Qt.AlignLeft | qtc.Qt.AlignTop,
             ColAlignment.Right: qtc.Qt.AlignRight | qtc.Qt.AlignTop,
-        }[self.value]
+        }[self]
+        return typing.cast(qtc.Qt.AlignmentFlag, alignment)
 
 
 class ColSpecType(enum.Enum):
@@ -41,24 +39,24 @@ class ColSpecType(enum.Enum):
 
 
 @dataclasses.dataclass(frozen=True)
-class ColSpec(typing.Generic[T]):
+class ColSpec(typing.Generic[Row]):
     attr_name: str | None
     display_name: str | None
-    display_fn: typing.Callable[[typing.Any], str] | None
     column_width: int | None
     hidden: bool
     type: ColSpecType
     alignment: ColAlignment
-    on_click: typing.Callable[[T], None] | None
-    
+    on_click: typing.Callable[[Row], None] | None
+    display_fn: typing.Callable[[typing.Any], str] | None
+
     @staticmethod
     def button(
         *,
         button_text: str,
         column_width: int = 100,
         alignment: ColAlignment = ColAlignment.Center,
-        on_click: typing.Callable[[T], None],
-    ) -> ColSpec:
+        on_click: typing.Callable[[Row], None],
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=None,
             display_name=button_text,
@@ -79,7 +77,7 @@ class ColSpec(typing.Generic[T]):
         column_width: int = 100,
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Right,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -100,7 +98,7 @@ class ColSpec(typing.Generic[T]):
         column_width: int | None = None,
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Right,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -121,7 +119,7 @@ class ColSpec(typing.Generic[T]):
         column_width: int | None = None,
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Right,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -142,7 +140,7 @@ class ColSpec(typing.Generic[T]):
         column_width: int | None = None,
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Right,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -159,10 +157,10 @@ class ColSpec(typing.Generic[T]):
         *,
         attr_name: str,
         display_name: str,
-        column_width: int | None = None,
+        column_width: int | None = None,  # type: ignore
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Left,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -179,10 +177,10 @@ class ColSpec(typing.Generic[T]):
         *,
         attr_name: str,
         display_name: str,
-        column_width: int | None = None,
+        column_width: int | None = None,  # type: ignore
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Left,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -200,10 +198,10 @@ class ColSpec(typing.Generic[T]):
         attr_name: str,
         display_name: str,
         display_format: str = "%m/%d/%y %I:%M:%S %p",
-        column_width: int = 200,
+        column_width: int | None = 200,  # type: ignore
         hidden: bool = False,
         alignment: ColAlignment = ColAlignment.Right,
-    ) -> ColSpec:
+    ) -> ColSpec[Row]:
         return ColSpec(
             attr_name=attr_name,
             display_name=display_name,
@@ -217,13 +215,13 @@ class ColSpec(typing.Generic[T]):
 
 
 @dataclasses.dataclass(frozen=True)
-class TableSpec:
-    col_specs: list[ColSpec]
+class TableSpec(typing.Generic[Row]):
+    col_specs: list[ColSpec[Row]]
     key_attr: str
 
 
 class Table(typing.Generic[Row, Key], qtw.QTableWidget):
-    def __init__(self, *, spec: TableSpec):
+    def __init__(self, *, spec: TableSpec[Row]):
         super().__init__()
 
         self._spec = spec
@@ -234,7 +232,7 @@ class Table(typing.Generic[Row, Key], qtw.QTableWidget):
                 self._col_indices[col_spec.attr_name] = col_num
 
         headers = [
-            "" if col_spec.type == ColSpecType.Button else col_spec.display_name
+            ("" if col_spec.type == ColSpecType.Button else col_spec.display_name) or ""
             for col_spec in self._spec.col_specs
         ]
 

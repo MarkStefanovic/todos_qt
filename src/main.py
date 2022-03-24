@@ -9,7 +9,7 @@ from loguru import logger
 from PyQt5 import QtGui as qtg, QtWidgets as qtw
 from qt_material import apply_stylesheet
 
-from src import adapter, presentation, service
+from src import adapter, domain, presentation, service
 
 __all__ = ("main",)
 
@@ -73,9 +73,12 @@ def main() -> None:
     window.show()
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
-
     with sm.Session(engine) as session:
         todo_service = service.DbTodoService(session=session)
+        for holiday in domain.HOLIDAYS:
+            if todo_service.get(todo_id=holiday.todo_id) is None:
+                todo_service.upsert(todo=holiday)
+                session.commit()
 
         sys.exit(app.exec())
 
