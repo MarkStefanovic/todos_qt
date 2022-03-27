@@ -1,8 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import datetime
-
-import pydantic
 
 from src.domain.frequency_type import FrequencyType
 from src.domain.month import Month
@@ -11,7 +10,8 @@ from src.domain.weekday import Weekday
 __all__ = ("Frequency",)
 
 
-class Frequency(pydantic.BaseModel):
+@dataclasses.dataclass(frozen=True)
+class Frequency:
     name: FrequencyType
     month: Month | None
     week_day: Weekday | None
@@ -22,9 +22,6 @@ class Frequency(pydantic.BaseModel):
     advance_display_days: int
     expire_display_days: int
     due_date: datetime.date | None
-
-    class Config:
-        frozen = True
 
     @staticmethod
     def daily(*, start_date: datetime.date) -> Frequency:

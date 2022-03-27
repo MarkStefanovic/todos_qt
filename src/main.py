@@ -60,7 +60,7 @@ def main() -> None:
 
     app_icon = qtg.QIcon(str((root_dir() / "assets" / "icons" / "app.png").resolve()))
 
-    window = presentation.MainView(window_icon=app_icon)
+    main_view = presentation.MainView(window_icon=app_icon)
 
     apply_stylesheet(app, theme="dark_amber.xml")
 
@@ -69,8 +69,8 @@ def main() -> None:
         width = 2050
     else:
         width = screen.width()
-    window.setGeometry(0, 0, width, screen.height())
-    window.show()
+    main_view.setGeometry(0, 0, width, screen.height())
+    main_view.show()
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
     with sm.Session(engine) as session:
@@ -79,6 +79,11 @@ def main() -> None:
             if todo_service.get(todo_id=holiday.todo_id) is None:
                 todo_service.upsert(todo=holiday)
                 session.commit()
+
+        todo_controller = presentation.TodoController(
+            todo_service=todo_service,
+            view=main_view.todos,
+        )
 
         sys.exit(app.exec())
 

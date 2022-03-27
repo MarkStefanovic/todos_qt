@@ -29,6 +29,10 @@ class MapCBO(typing.Generic[Display, Value], qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self._cbo.currentIndexChanged.connect(lambda _: self._cbo.currentData())
 
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self._cbo)
+        self.setLayout(layout)
+
     def set_value(self, *, value: Value) -> None:
         self._cbo.setCurrentIndex(self._index_by_value[value])
 

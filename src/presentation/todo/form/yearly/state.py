@@ -12,9 +12,6 @@ __all__ = ("YearlyFrequencyFormState",)
 class YearlyFrequencyFormState:
     month: domain.Month
     month_day: int
-    advance_display_days: int
-    expire_display_days: int
-    start_date: datetime.date
 
     @staticmethod
     def from_domain(*, frequency: domain.Frequency) -> YearlyFrequencyFormState:
@@ -24,9 +21,6 @@ class YearlyFrequencyFormState:
         return YearlyFrequencyFormState(
             month=frequency.month,
             month_day=frequency.month_day,
-            advance_display_days=frequency.advance_display_days,
-            expire_display_days=frequency.expire_display_days,
-            start_date=frequency.start_date,
         )
 
     @staticmethod
@@ -34,16 +28,19 @@ class YearlyFrequencyFormState:
         return YearlyFrequencyFormState(
             month=domain.Month.January,
             month_day=1,
-            advance_display_days=7,
-            expire_display_days=90,
-            start_date=datetime.date.today(),
         )
 
-    def to_domain(self) -> domain.Frequency:
+    def to_domain(
+        self,
+        *,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> domain.Frequency:
         return domain.Frequency.yearly(
             month=self.month,
             month_day=self.month_day,
-            advance_display_days=self.advance_display_days,
-            expire_display_days=self.expire_display_days,
-            start_date=self.start_date,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
         )

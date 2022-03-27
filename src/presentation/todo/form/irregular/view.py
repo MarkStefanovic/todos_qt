@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, widgets
@@ -30,12 +30,13 @@ class IrregularFrequencyForm(qtw.QWidget):
             },
             value=state.month,
         )
+        self._month_cbo.setFixedWidth(150)
 
         week_number_lbl = qtw.QLabel("Week #")
         week_number_lbl.setFont(fonts.bold)
         self._week_number_sb = qtw.QSpinBox()
         self._week_number_sb.setRange(1, 5)
-        self._week_number_sb.setValue(state.week_number)
+        self._week_number_sb.setFixedWidth(150)
 
         weekday_lbl = qtw.QLabel("Weekday")
         weekday_lbl.setFont(fonts.bold)
@@ -51,13 +52,17 @@ class IrregularFrequencyForm(qtw.QWidget):
             },
             value=state.week_day,
         )
+        self._weekday_cbo.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
+        form_layout.setAlignment(qtc.Qt.AlignLeft)
         form_layout.addRow(month_lbl, self._month_cbo)
         form_layout.addRow(week_number_lbl, self._week_number_sb)
         form_layout.addRow(weekday_lbl, self._weekday_cbo)
 
         self.setLayout(form_layout)
+
+        self.set_state(state=state)
 
     def get_state(self) -> IrregularFrequencyFormState:
         return IrregularFrequencyFormState(

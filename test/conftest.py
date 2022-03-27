@@ -3,10 +3,13 @@ import typing
 
 import pytest
 import sqlmodel as sm
+from PyQt5 import QtWidgets as qtw
 
 from src import adapter
 
 logger = logging.getLogger("test")
+
+QT_APP = qtw.QApplication([])
 
 
 @pytest.fixture(scope="function")

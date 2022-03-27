@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import typing
 
-from src.domain.should_display import should_display
 from src.domain.due_date import due_date
 from src.domain.frequency import Frequency
 from src.domain.month import Month
+from src.domain.should_display import should_display
 from src.domain.todo_category import TodoCategory
 from src.domain.weekday import Weekday
 
@@ -51,18 +52,18 @@ class Todo:
         note: str,
         start_date: datetime.date,
         todo_id: str,
-        last_completed: datetime.date | None,
-        prior_completed: datetime.date | None,
+        last_completed: typing.Optional[datetime.date],
+        prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: datetime.datetime | None,
-        date_updated: datetime.datetime | None,
+        date_deleted: typing.Optional[datetime.datetime],
+        date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
             category=category,
             description=description,
             frequency=Frequency.daily(start_date=start_date),
-            note=note,
+            note=str(note.encode()),
             last_completed=last_completed,
             prior_completed=prior_completed,
             date_added=date_added,
@@ -76,10 +77,10 @@ class Todo:
         todo_id: str,
         advance_display_days: int,
         expire_display_days: int,
-        last_completed: datetime.date | None,
-        prior_completed: datetime.date | None,
-        date_updated: datetime.datetime | None,
-        date_deleted: datetime.datetime | None,
+        last_completed: typing.Optional[datetime.date],
+        prior_completed: typing.Optional[datetime.date],
+        date_updated: typing.Optional[datetime.datetime],
+        date_deleted: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,

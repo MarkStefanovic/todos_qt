@@ -14,6 +14,8 @@ TODO_1 = domain.Todo.daily(
     date_added=datetime.datetime(2011, 1, 2, 3, 4, 5, 6),
     date_updated=datetime.datetime(2011, 2, 3, 4, 5, 6, 7),
     date_deleted=None,
+    last_completed=None,
+    prior_completed=None,
 )
 
 TODO_2 = domain.Todo.monthly(
@@ -28,6 +30,8 @@ TODO_2 = domain.Todo.monthly(
     date_added=datetime.datetime(2011, 1, 2, 3, 4, 5, 6),
     date_updated=datetime.datetime(2011, 2, 3, 4, 5, 6, 7),
     date_deleted=None,
+    last_completed=datetime.date(2010, 1, 2),
+    prior_completed=None,
 )
 
 TODO_3 = domain.Todo.yearly(
@@ -43,6 +47,8 @@ TODO_3 = domain.Todo.yearly(
     date_added=datetime.datetime(2011, 1, 2, 3, 4, 5, 6),
     date_updated=datetime.datetime(2011, 2, 3, 4, 5, 6, 7),
     date_deleted=None,
+    last_completed=datetime.date(2012, 3, 4),
+    prior_completed=datetime.date(2011, 2, 3),
 )
 
 

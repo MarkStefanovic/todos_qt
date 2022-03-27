@@ -20,30 +20,18 @@ class MainView(qtw.QDialog):
 
         # noinspection PyTypeChecker
         self.setWindowFlags(
-            self.windowFlags()
+            self.windowFlags()  # type: ignore
             | qtc.Qt.WindowMinimizeButtonHint
             | qtc.Qt.WindowMaximizeButtonHint
             | qtc.Qt.WindowSystemMenuHint
         )
 
-        todo_view = TodoView(state=state.todo_state)
-
-        # self._tabs = qtw.QTabWidget()
-        # self._tabs.addTab(self._todo_view, "Todos")
-        # self._tabs.addTab(self._reminder_view, "Reminders")
+        self.todos = TodoView(state=state.todo_state)
 
         layout = qtw.QHBoxLayout()
-        layout.addWidget(todo_view)
+        layout.addWidget(self.todos)
 
         self.setLayout(layout)
 
-        # self.setCentralWidget(self._tabs)
-
-        # menu = self.menuBar()
-        # file_menu = menu.addMenu("File")
-        # file_menu.addAction("Open", self.select_file)
-        # file_menu.addAction("Save", self.save)
-        # edit_menu = menu.addMenu("Edit")
-        # edit_menu.addAction("Insert Above", self.insert_above)
-        # edit_menu.addAction("Insert Below", self.insert_below)
-        # edit_menu.addAction("Remove Row(s)", self.remove_rows)
+        self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
+        self.enter_key_shortcut.activated.connect(self.todos.dash.refresh_btn.click)

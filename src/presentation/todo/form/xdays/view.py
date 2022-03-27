@@ -14,15 +14,17 @@ class XDaysFrequencyForm(qtw.QWidget):
         days_lbl.setFont(fonts.bold)
         self._days_sb = qtw.QSpinBox()
         self._days_sb.setRange(1, 364)
-        self._days_sb.setValue(state.days)
+        self._days_sb.setFixedWidth(100)
 
         form_layout = qtw.QFormLayout()
         form_layout.addRow(days_lbl, self._days_sb)
 
         self.setLayout(form_layout)
 
+        self.set_state(state=state)
+
     def get_state(self) -> XDaysFrequencyFormState:
         return XDaysFrequencyFormState(days=self._days_sb.value())
 
     def set_state(self, *, state: XDaysFrequencyFormState) -> None:
-        self._days_sb.set_value(value=state.days)
+        self._days_sb.setValue(state.days)

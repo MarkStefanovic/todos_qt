@@ -9,8 +9,10 @@ dependencies:
 - pyqt
 - sqlmodel
 # dev
+- hypothesis
 - mypy
 - pytest
+- pytest-qt
 - sqlalchemy
 - psycopg2-binary
 - pyinstaller

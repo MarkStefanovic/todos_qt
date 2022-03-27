@@ -5,7 +5,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = ("EnumCBO",)
 
-T = typing.TypeVar("T", enum.Enum, str)
+T = typing.TypeVar("T", bound=enum.Enum)
 
 
 class EnumCBO(typing.Generic[T], qtw.QWidget):
@@ -18,7 +18,7 @@ class EnumCBO(typing.Generic[T], qtw.QWidget):
 
         self._index_by_value = {data.value: ix for ix, data in enumerate(cls)}  # type: ignore
 
-        for data in cls:  # type: ignore
+        for data in cls:
             self._cbo.addItem(data.value, userData=data)
 
         self.set_value(value=value)
@@ -26,8 +26,12 @@ class EnumCBO(typing.Generic[T], qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self._cbo.currentIndexChanged.connect(lambda _: self.value_changed.emit(self._cbo.currentData()))
 
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self._cbo)
+        self.setLayout(layout)
+
     def set_value(self, *, value: T) -> None:
-        self._cbo.setCurrentIndex(self._index_by_value[value.value])  # type: ignore
+        self._cbo.setCurrentIndex(self._index_by_value[value.value])
 
     def get_value(self) -> T:
         return self._cbo.currentData()

@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
@@ -25,15 +27,21 @@ class TodoForm(qtw.QWidget):
         advance_days_lbl.setFont(fonts.bold)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setRange(0, 364)
+        self._advance_days_sb.setFixedWidth(80)
 
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.setFont(fonts.bold)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setRange(0, 364)
+        self._expire_days_sb.setFixedWidth(80)
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo = widgets.EnumCBO(cls=domain.TodoCategory, value=state.category)
+        self._category_cbo = widgets.EnumCBO(
+            cls=domain.TodoCategory,
+            value=state.category,
+        )
+        self._category_cbo.setFixedWidth(150)
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.setFont(fonts.bold)
@@ -42,11 +50,15 @@ class TodoForm(qtw.QWidget):
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
         self._start_date_edit = qtw.QDateEdit()
-        self._start_date_edit.setDate(state.start_date)
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.bold)
-        self._frequency_cbo = widgets.EnumCBO(cls=domain.FrequencyType, value=state.frequency.name)
+        self._frequency_cbo = widgets.EnumCBO(
+            cls=domain.FrequencyType,
+            value=state.frequency_name,
+        )
+        self._frequency_cbo.value_changed.connect(self._frequency_changed)
+        self._frequency_cbo.setFixedWidth(150)
 
         self._irregular_frequency_form = IrregularFrequencyForm(state=state.irregular_frequency_form_state)
         self._monthly_frequency_form = MonthlyFrequencyForm(state=state.monthly_frequency_form_state)
@@ -84,37 +96,61 @@ class TodoForm(qtw.QWidget):
         main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)
         main_layout.addLayout(form_layout)
         main_layout.addLayout(self._frequency_subform_layout)
+        main_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Expanding))
         main_layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignRight)
 
         self.setLayout(main_layout)
 
+        self._todo_id: str = state.todo_id
+        self._date_added: datetime.datetime = state.date_added
+        self._date_updated: datetime.datetime | None = state.date_updated
+        self._date_deleted: datetime.datetime | None = state.date_deleted
+        self._last_completed: datetime.datetime | None = state.last_completed
+        self._prior_completed: datetime.datetime | None = state.prior_completed
+
+        self.set_state(state=state)
+
     def get_state(self) -> TodoFormState:
         return TodoFormState(
+            todo_id=self._todo_id,
             advance_days=self._advance_days_sb.value(),
             expire_days=self._expire_days_sb.value(),
             category=self._category_cbo.get_value(),
             description=self._description_txt.text(),
-            frequency=self._frequency_cbo.get_value(),
+            frequency_name=self._frequency_cbo.get_value(),
             note=self._note_txt.toPlainText(),
             start_date=self._start_date_edit.date().toPyDate(),
+            date_added=self._date_added,
+            date_updated=self._date_updated,
+            date_deleted=self._date_deleted,
+            last_completed=self._last_completed,
+            prior_completed=self._prior_completed,
             irregular_frequency_form_state=self._irregular_frequency_form.get_state(),
             monthly_frequency_form_state=self._monthly_frequency_form.get_state(),
-            once_frequency_form_state=self._once_frequency_form.get_state(),
+            once_frequency_form_state=self._one_off_frequency_form.get_state(),
             weekly_frequency_form_state=self._weekly_frequency_form.get_state(),
             xdays_frequency_form_state=self._xdays_frequency_form.get_state(),
             yearly_frequency_form_state=self._yearly_frequency_form.get_state(),
         )
 
     def set_state(self, *, state: TodoFormState) -> None:
+        self._todo_id = state.todo_id
+        self._date_added = state.date_added
+        self._date_updated = state.date_updated
+        self._date_deleted = state.date_deleted
+        self._last_completed = state.last_completed
+        self._prior_completed = state.prior_completed
+
         self._description_txt.setText(state.description)
         self._advance_days_sb.setValue(state.advance_days)
         self._expire_days_sb.setValue(state.expire_days)
         self._category_cbo.set_value(value=state.category)
-        self._note_txt.setText(state.note)
+        self._note_txt.setPlainText(state.note)
+        # self._note_txt.setText(state.note)
         self._start_date_edit.setDate(state.start_date)
-        self._frequency_cbo.set_value(value=state.frequency.name)
+        self._frequency_cbo.set_value(value=state.frequency_name)
 
-        if (freq := state.frequency.name) in (domain.FrequencyType.Daily, domain.FrequencyType.Easter):
+        if (freq := state.frequency_name) in (domain.FrequencyType.Daily, domain.FrequencyType.Easter):
             self._frequency_subform_layout.setCurrentIndex(0)
         elif freq == domain.FrequencyType.Irregular:
             self._frequency_subform_layout.setCurrentIndex(1)
@@ -129,7 +165,7 @@ class TodoForm(qtw.QWidget):
         elif freq == domain.FrequencyType.Yearly:
             self._frequency_subform_layout.setCurrentIndex(6)
         else:
-            raise ValueError(f"Unrecognized frequency: {state.frequency.name!r}.")
+            raise ValueError(f"Unrecognized frequency: {state.frequency_name!r}.")
 
         self._irregular_frequency_form = IrregularFrequencyForm(state=state.irregular_frequency_form_state)
         self._monthly_frequency_form = MonthlyFrequencyForm(state=state.monthly_frequency_form_state)
@@ -137,3 +173,21 @@ class TodoForm(qtw.QWidget):
         self._weekly_frequency_form = WeeklyFrequencyForm(state=state.weekly_frequency_form_state)
         self._xdays_frequency_form = XDaysFrequencyForm(state=state.xdays_frequency_form_state)
         self._yearly_frequency_form = YearlyFrequencyForm(state=state.yearly_frequency_form_state)
+
+    def _frequency_changed(self) -> None:
+        if (freq := self._frequency_cbo.get_value()) in (domain.FrequencyType.Daily, domain.FrequencyType.Easter):
+            self._frequency_subform_layout.setCurrentIndex(0)
+        elif freq == domain.FrequencyType.Irregular:
+            self._frequency_subform_layout.setCurrentIndex(1)
+        elif freq == domain.FrequencyType.Monthly:
+            self._frequency_subform_layout.setCurrentIndex(2)
+        elif freq == domain.FrequencyType.Once:
+            self._frequency_subform_layout.setCurrentIndex(3)
+        elif freq == domain.FrequencyType.Weekly:
+            self._frequency_subform_layout.setCurrentIndex(4)
+        elif freq == domain.FrequencyType.XDays:
+            self._frequency_subform_layout.setCurrentIndex(5)
+        elif freq == domain.FrequencyType.Yearly:
+            self._frequency_subform_layout.setCurrentIndex(6)
+        else:
+            raise ValueError(f"Unrecognized frequency: {freq!r}.")

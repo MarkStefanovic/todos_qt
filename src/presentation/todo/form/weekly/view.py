@@ -25,11 +25,14 @@ class WeeklyFrequencyForm(qtw.QWidget):
             },
             value=state.week_day,
         )
+        self._weekday_cbo.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
         form_layout.addRow(weekday_lbl, self._weekday_cbo)
 
         self.setLayout(form_layout)
+
+        self.set_state(state=state)
 
     def get_state(self) -> WeeklyFrequencyFormState:
         return WeeklyFrequencyFormState(week_day=self._weekday_cbo.get_value())

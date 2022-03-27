@@ -30,18 +30,21 @@ class YearlyFrequencyForm(qtw.QWidget):
             },
             value=state.month,
         )
+        self._month_cbo.setFixedWidth(100)
 
         month_day_lbl = qtw.QLabel("Month Day")
         month_day_lbl.setFont(fonts.bold)
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 28)
-        self._month_day_sb.setValue(state.month_day)
+        self._month_day_sb.setFixedWidth(100)
 
         form_layout = qtw.QFormLayout()
         form_layout.addRow(month_lbl, self._month_cbo)
         form_layout.addRow(month_day_lbl, self._month_day_sb)
 
         self.setLayout(form_layout)
+
+        self.set_state(state=state)
 
     def get_state(self) -> YearlyFrequencyFormState:
         return YearlyFrequencyFormState(

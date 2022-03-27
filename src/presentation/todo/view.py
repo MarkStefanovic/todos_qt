@@ -11,25 +11,25 @@ class TodoView(qtw.QWidget):
     def __init__(self, *, state: TodoState):
         super().__init__()
 
-        self._dash = TodoDash(state=state.dash_state)
-        self._form = TodoForm(state=state.form_state)
+        self.dash = TodoDash(state=state.dash_state)
+        self.form = TodoForm(state=state.form_state)
 
         self._stacked_layout = qtw.QStackedLayout()
-        self._stacked_layout.addWidget(self._dash)
-        self._stacked_layout.addWidget(self._form)
+        self._stacked_layout.addWidget(self.dash)
+        self._stacked_layout.addWidget(self.form)
 
         self.setLayout(self._stacked_layout)
 
     def get_state(self) -> TodoState:
         return TodoState(
-            dash_state=self._dash.get_state(),
-            form_state=self._form.get_state(),
+            dash_state=self.dash.get_state(),
+            form_state=self.form.get_state(),
             dash_active=self._stacked_layout.currentIndex() == 0,
         )
 
     def set_state(self, *, state: TodoState) -> None:
-        self._dash.set_state(state=state.dash_state)
-        self._form.set_state(state=state.form_state)
+        self.dash.set_state(state=state.dash_state)
+        self.form.set_state(state=state.form_state)
         if state.dash_active:
             self._stacked_layout.setCurrentIndex(0)
         else:

@@ -3,7 +3,7 @@ import enum
 __all__ = ("FrequencyType",)
 
 
-class FrequencyType(enum.Enum):
+class FrequencyType(str, enum.Enum):
     Daily = "Daily"
     Easter = "Easter"
     Irregular = "Irregular"
@@ -12,3 +12,6 @@ class FrequencyType(enum.Enum):
     Weekly = "Weekly"
     XDays = "XDays"
     Yearly = "Yearly"
+
+    def __str__(self) -> str:
+        return str.__str__(self)
