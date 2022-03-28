@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import datetime
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
@@ -88,6 +90,7 @@ class TodoDash(qtw.QWidget):
                         display_name="Due Date",
                         alignment=table.ColAlignment.Center,
                         column_width=120,
+                        display_fn=lambda due_date: due_date_description(due_date=due_date, today=self._date_edit.date().toPyDate()),
                     ),
                     table.date_col(
                         attr_name="last_completed",
@@ -95,11 +98,6 @@ class TodoDash(qtw.QWidget):
                         alignment=table.ColAlignment.Center,
                         column_width=160,
                     ),
-                    # table.date_col(
-                    #     selector=lambda todo: todo.frequency.start_date,
-                    #     display_name="Start",
-                    #     alignment=table.ColAlignment.Center,
-                    # ),
                     table.timestamp_col(
                         attr_name="date_added",
                         display_name="Added",
@@ -165,3 +163,8 @@ class TodoDash(qtw.QWidget):
             self._table.clear_selection()
         else:
             self._table.select_item_by_key(key=state.selected_todo.todo_id)
+
+
+def due_date_description(*, due_date: datetime.date, today: datetime.date) -> str:
+    days_until = (due_date - today).days
+    return f"{due_date:%m/%d/%y}\n{days_until} days"

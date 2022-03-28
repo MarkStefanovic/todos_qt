@@ -104,12 +104,16 @@ def date_col(
     column_width: int = 100,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
+    display_fn: typing.Callable[[datetime.date], str] | None = None,
 ) -> ColSpec[Row, datetime.date]:
+    if display_fn is None:
+        display_fn = lambda dt: "" if dt is None else dt.strftime(display_format)
+
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
         display_name=display_name,
-        display_fn=lambda dt: "" if dt is None else dt.strftime(display_format),
+        display_fn=display_fn,
         column_width=column_width,
         type=ColSpecType.Date,
         hidden=hidden,
@@ -223,12 +227,16 @@ def timestamp_col(
     column_width: int | None = 200,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
+    display_fn: typing.Callable[[datetime.date], str] | None = None,
 ) -> ColSpec[Row, datetime.datetime]:
+    if display_fn is None:
+        display_fn = lambda ts: "" if ts is None else ts.strftime(display_format)
+
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
         display_name=display_name,
-        display_fn=lambda ts: "" if ts is None else ts.strftime(display_format),
+        display_fn=display_fn,
         type=ColSpecType.Timestamp,
         column_width=column_width,
         hidden=hidden,
@@ -358,10 +366,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     value = col_spec.selector(data)
                 display_value = col_spec.display_fn(value)  # type: ignore
-                item = qtw.QTableWidgetItem()
-                item.setData(qtc.Qt.EditRole, value)
-                assert col_spec.display_fn is not None
-                item.setText(display_value)
+                item = TableItem(value=value, display_value=display_value)
                 item.setTextAlignment(col_spec.alignment.qt_alignment)
                 self._table.setItem(row_num, col_num, item)
             # elif col_spec.type == ColSpecType.RichText:
@@ -384,7 +389,6 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
                     btn.setFixedWidth(col_spec.column_width - 6)
-                    # btn.setFixedHeight(30)
                     btn.clicked.connect(col_spec.on_click)
                     self._table.setCellWidget(row_num, col_num, btn)
 
@@ -399,3 +403,24 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 self._table.setColumnWidth(col_num, col_spec.column_width)
 
         self._table.resizeRowsToContents()
+
+
+class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
+    def __init__(self, value: Value | None, display_value: str):
+        super().__init__(display_value)
+
+        self._value = value
+
+    def __lt__(self, other: object) -> bool:
+        assert isinstance(other, TableItem)
+
+        if self._value is None and other is None:
+            return False
+
+        if self._value is None:
+            return True
+
+        if other._value is None:
+            return False
+
+        return self._value < other._value
