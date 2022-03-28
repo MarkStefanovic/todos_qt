@@ -65,8 +65,8 @@ def main() -> None:
     apply_stylesheet(app, theme="dark_amber.xml")
 
     screen = app.desktop().screenGeometry()
-    if screen.width() >= 2050:
-        width = 2050
+    if screen.width() >= 2100:
+        width = 2100
     else:
         width = screen.width()
     main_view.setGeometry(0, 0, width, screen.height())

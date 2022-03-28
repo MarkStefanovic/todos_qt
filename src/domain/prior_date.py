@@ -18,7 +18,7 @@ def prior_date(
         return today - datetime.timedelta(days=1)
     elif frequency.name == FrequencyType.Easter:
         cy = calculate_easter(today.year)
-        if cy > today:
+        if cy < today:
             return cy
         return calculate_easter(today.year - 1)
     elif frequency.name == FrequencyType.Irregular:
@@ -31,7 +31,7 @@ def prior_date(
             week_num=frequency.week_number,
             week_day=frequency.week_day,
         )
-        if cy > today:
+        if cy < today:
             return cy
         return x_weekday_of_month(
             year=today.year - 1,
@@ -47,7 +47,7 @@ def prior_date(
             month=today.month,
             month_day=frequency.month_day,
         )
-        if cy > today:
+        if cy < today:
             return cy
         return _monthly_prior(
             year=today.year - 1,
@@ -57,7 +57,7 @@ def prior_date(
     elif frequency.name == FrequencyType.Once:
         assert frequency.due_date is not None, f"The frequency was 'once' but [due_date] was {frequency.due_date!r}."
 
-        if frequency.due_date > today:
+        if frequency.due_date < today:
             return None
         return frequency.due_date
     elif frequency.name == FrequencyType.Weekly:
@@ -82,7 +82,7 @@ def prior_date(
         days_since_last = days_since_start % frequency.days
 
         current = today - datetime.timedelta(days=days_since_last)
-        if current > today:
+        if current < today:
             return current
         return current - datetime.timedelta(days=frequency.days)
     elif frequency.name == FrequencyType.Yearly:
@@ -90,7 +90,7 @@ def prior_date(
         assert frequency.month_day is not None, f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
 
         cy = datetime.date(today.year, month=frequency.month.value, day=frequency.month_day)
-        if cy > today:
+        if cy < today:
             return cy
         return datetime.date(today.year - 1, month=frequency.month.value, day=frequency.month_day)
     else:

@@ -53,8 +53,21 @@ class TodoForm(qtw.QWidget):
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.bold)
-        self._frequency_cbo = widgets.EnumCBO(
-            cls=domain.FrequencyType,
+        # self._frequency_cbo = widgets.EnumCBO(
+        #     cls=domain.FrequencyType,
+        #     value=state.frequency_name,
+        # )
+        self._frequency_cbo = widgets.MapCBO(
+            mapping={
+                "Daily": domain.FrequencyType.Daily,
+                # "Easter": domain.FrequencyType.Easter,
+                "Irregular": domain.FrequencyType.Irregular,
+                "Monthly": domain.FrequencyType.Monthly,
+                "Once": domain.FrequencyType.Once,
+                "Weekly": domain.FrequencyType.Weekly,
+                "XDays": domain.FrequencyType.XDays,
+                "Yearly": domain.FrequencyType.Yearly,
+            },
             value=state.frequency_name,
         )
         self._frequency_cbo.value_changed.connect(self._frequency_changed)

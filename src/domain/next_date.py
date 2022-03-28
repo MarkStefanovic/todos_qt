@@ -44,15 +44,8 @@ def next_date(
     elif frequency.name == FrequencyType.Monthly:
         assert frequency.month_day is not None, f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
 
-        cy = _monthly_next(
-            year=today.year,
-            month=today.month,
-            month_day=frequency.month_day,
-        )
-        if cy < today:
-            return cy
         return _monthly_next(
-            year=today.year + 1,
+            year=today.year,
             month=today.month,
             month_day=frequency.month_day,
         )
