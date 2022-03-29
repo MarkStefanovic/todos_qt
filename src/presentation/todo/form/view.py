@@ -32,7 +32,7 @@ class TodoForm(qtw.QWidget):
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.setFont(fonts.bold)
         self._expire_days_sb = qtw.QSpinBox()
-        self._expire_days_sb.setRange(0, 364)
+        self._expire_days_sb.setRange(1, 364)
         self._expire_days_sb.setFixedWidth(80)
 
         category_lbl = qtw.QLabel("Category")
@@ -50,17 +50,13 @@ class TodoForm(qtw.QWidget):
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
         self._start_date_edit = qtw.QDateEdit()
+        self._start_date_edit.setMinimumDate(datetime.date(1900, 1, 1))
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.bold)
-        # self._frequency_cbo = widgets.EnumCBO(
-        #     cls=domain.FrequencyType,
-        #     value=state.frequency_name,
-        # )
         self._frequency_cbo = widgets.MapCBO(
             mapping={
                 "Daily": domain.FrequencyType.Daily,
-                # "Easter": domain.FrequencyType.Easter,
                 "Irregular": domain.FrequencyType.Irregular,
                 "Monthly": domain.FrequencyType.Monthly,
                 "Once": domain.FrequencyType.Once,
@@ -118,8 +114,8 @@ class TodoForm(qtw.QWidget):
         self._date_added: datetime.datetime = state.date_added
         self._date_updated: datetime.datetime | None = state.date_updated
         self._date_deleted: datetime.datetime | None = state.date_deleted
-        self._last_completed: datetime.datetime | None = state.last_completed
-        self._prior_completed: datetime.datetime | None = state.prior_completed
+        self._last_completed: datetime.date | None = state.last_completed
+        self._prior_completed: datetime.date | None = state.prior_completed
 
         self.set_state(state=state)
 
@@ -159,26 +155,8 @@ class TodoForm(qtw.QWidget):
         self._expire_days_sb.setValue(state.expire_days)
         self._category_cbo.set_value(value=state.category)
         self._note_txt.setPlainText(state.note)
-        # self._note_txt.setText(state.note)
         self._start_date_edit.setDate(state.start_date)
         self._frequency_cbo.set_value(value=state.frequency_name)
-
-        if (freq := state.frequency_name) in (domain.FrequencyType.Daily, domain.FrequencyType.Easter):
-            self._frequency_subform_layout.setCurrentIndex(0)
-        elif freq == domain.FrequencyType.Irregular:
-            self._frequency_subform_layout.setCurrentIndex(1)
-        elif freq == domain.FrequencyType.Monthly:
-            self._frequency_subform_layout.setCurrentIndex(2)
-        elif freq == domain.FrequencyType.Once:
-            self._frequency_subform_layout.setCurrentIndex(3)
-        elif freq == domain.FrequencyType.Weekly:
-            self._frequency_subform_layout.setCurrentIndex(4)
-        elif freq == domain.FrequencyType.XDays:
-            self._frequency_subform_layout.setCurrentIndex(5)
-        elif freq == domain.FrequencyType.Yearly:
-            self._frequency_subform_layout.setCurrentIndex(6)
-        else:
-            raise ValueError(f"Unrecognized frequency: {state.frequency_name!r}.")
 
         self._irregular_frequency_form = IrregularFrequencyForm(state=state.irregular_frequency_form_state)
         self._monthly_frequency_form = MonthlyFrequencyForm(state=state.monthly_frequency_form_state)
@@ -188,19 +166,29 @@ class TodoForm(qtw.QWidget):
         self._yearly_frequency_form = YearlyFrequencyForm(state=state.yearly_frequency_form_state)
 
     def _frequency_changed(self) -> None:
-        if (freq := self._frequency_cbo.get_value()) in (domain.FrequencyType.Daily, domain.FrequencyType.Easter):
+        frequency = self._frequency_cbo.get_value()
+
+        self._advance_days_sb.setEnabled(True)
+        self._expire_days_sb.setEnabled(True)
+
+        if frequency == domain.FrequencyType.Daily:
+            self._advance_days_sb.setEnabled(False)
+            self._expire_days_sb.setEnabled(False)
+
             self._frequency_subform_layout.setCurrentIndex(0)
-        elif freq == domain.FrequencyType.Irregular:
+        elif frequency == domain.FrequencyType.Easter:
+            raise ValueError("Easter is not meant to be created by the user.")
+        elif frequency == domain.FrequencyType.Irregular:
             self._frequency_subform_layout.setCurrentIndex(1)
-        elif freq == domain.FrequencyType.Monthly:
+        elif frequency == domain.FrequencyType.Monthly:
             self._frequency_subform_layout.setCurrentIndex(2)
-        elif freq == domain.FrequencyType.Once:
+        elif frequency == domain.FrequencyType.Once:
             self._frequency_subform_layout.setCurrentIndex(3)
-        elif freq == domain.FrequencyType.Weekly:
+        elif frequency == domain.FrequencyType.Weekly:
             self._frequency_subform_layout.setCurrentIndex(4)
-        elif freq == domain.FrequencyType.XDays:
+        elif frequency == domain.FrequencyType.XDays:
             self._frequency_subform_layout.setCurrentIndex(5)
-        elif freq == domain.FrequencyType.Yearly:
+        elif frequency == domain.FrequencyType.Yearly:
             self._frequency_subform_layout.setCurrentIndex(6)
         else:
-            raise ValueError(f"Unrecognized frequency: {freq!r}.")
+            raise ValueError(f"Unrecognized frequency: {frequency!r}.")

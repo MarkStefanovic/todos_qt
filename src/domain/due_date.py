@@ -14,9 +14,9 @@ def due_date(*, frequency: Frequency, today: datetime.date) -> datetime.date:
         return frequency.due_date
 
     prior_due_date = prior_date(frequency=frequency, today=today)
-    current_due_date = next_date(frequency=frequency, today=prior_due_date)
+    current_due_date = next_date(frequency=frequency, today=prior_due_date)  # type: ignore
     next_due_date = next_date(frequency=frequency, today=today)
-    return min(
+    return min(  # type: ignore
         dt for dt in (prior_due_date, current_due_date, next_due_date)
-        if today <= dt + datetime.timedelta(days=frequency.expire_display_days)
+        if today <= dt + datetime.timedelta(days=frequency.expire_display_days)  # type: ignore
     )

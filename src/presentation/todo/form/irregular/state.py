@@ -14,6 +14,9 @@ class IrregularFrequencyFormState:
     week_number: int
     week_day: domain.Weekday
 
+    def __post_init__(self):
+        assert 1 <= self.week_number <= 5, f"[week_number] must be between 1 and 5, but got {self.week_number!r}."
+
     @staticmethod
     def from_domain(*, frequency: domain.Frequency) -> IrregularFrequencyFormState:
         assert frequency.month is not None, "[month] is required for an irregular todo."

@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts
@@ -13,6 +15,7 @@ class OnceFrequencyForm(qtw.QWidget):
         due_date_lbl = qtw.QLabel("Due Date")
         due_date_lbl.setFont(fonts.bold)
         self._due_date_edit = qtw.QDateEdit()
+        self._due_date_edit.setMinimumDate(datetime.date(1900, 1, 1))
         self._due_date_edit.setDate(state.due_date)
         self._due_date_edit.setFixedWidth(150)
 

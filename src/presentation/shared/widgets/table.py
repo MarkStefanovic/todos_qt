@@ -388,6 +388,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     raise ValueError("[on_click] is required for a Button column.")
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
+                    assert col_spec.column_width is not None
                     btn.setFixedWidth(col_spec.column_width - 6)
                     btn.clicked.connect(col_spec.on_click)
                     self._table.setCellWidget(row_num, col_num, btn)
@@ -405,8 +406,8 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.resizeRowsToContents()
 
 
-class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
-    def __init__(self, value: Value | None, display_value: str):
+class TableItem(qtw.QTableWidgetItem):
+    def __init__(self, value: typing.Any, display_value: str):
         super().__init__(display_value)
 
         self._value = value

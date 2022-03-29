@@ -79,7 +79,8 @@ class DbTodoService(domain.TodoService):
 
             self._session.commit()
 
-            self._todos[todo_id] = updated_todo
+            if self._todos is not None:
+                self._todos[todo_id] = updated_todo
 
     def mark_incomplete(self, *, todo_id: str) -> None:
         repo = adapter.DbTodoRepository(session=self._session)
@@ -101,7 +102,8 @@ class DbTodoService(domain.TodoService):
 
                 self._session.commit()
 
-                self._todos[todo_id] = updated_todo
+                if self._todos is not None:
+                    self._todos[todo_id] = updated_todo
 
     def refresh(self) -> None:
         repo = adapter.DbTodoRepository(session=self._session)

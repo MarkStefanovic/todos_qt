@@ -116,6 +116,7 @@ class TodoDash(qtw.QWidget):
                         button_text="Edit",
                         on_click=self.edit_btn_clicked.emit,
                         column_width=100,
+                        enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter,
                     ),
                     table.button_col(
                         button_text="Delete",
