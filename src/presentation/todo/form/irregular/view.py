@@ -15,18 +15,18 @@ class IrregularFrequencyForm(qtw.QWidget):
         month_lbl.setFont(fonts.bold)
         self._month_cbo = widgets.MapCBO(
             mapping={
-                "Jan": domain.Month.January,
-                "Feb": domain.Month.February,
-                "Mar": domain.Month.March,
-                "Apr": domain.Month.April,
-                "May": domain.Month.May,
-                "Jun": domain.Month.June,
-                "Jul": domain.Month.July,
-                "Aug": domain.Month.August,
-                "Sep": domain.Month.September,
-                "Oct": domain.Month.October,
-                "Nov": domain.Month.November,
-                "Dec": domain.Month.December,
+                domain.Month.January: "Jan",
+                domain.Month.February: "Feb",
+                domain.Month.March: "Mar",
+                domain.Month.April: "Apr",
+                domain.Month.May: "May",
+                domain.Month.June: "Jun",
+                domain.Month.July: "Jul",
+                domain.Month.August: "Aug",
+                domain.Month.September: "Sep",
+                domain.Month.October: "Oct",
+                domain.Month.November: "Nov",
+                domain.Month.December: "Dec",
             },
             value=state.month,
         )
@@ -42,13 +42,13 @@ class IrregularFrequencyForm(qtw.QWidget):
         weekday_lbl.setFont(fonts.bold)
         self._weekday_cbo = widgets.MapCBO(
             mapping={
-                "Monday": domain.Weekday.Monday,
-                "Tuesday": domain.Weekday.Tuesday,
-                "Wednesday": domain.Weekday.Wednesday,
-                "Thursday": domain.Weekday.Thursday,
-                "Friday": domain.Weekday.Friday,
-                "Saturday": domain.Weekday.Saturday,
-                "Sunday": domain.Weekday.Sunday,
+                domain.Weekday.Monday: "Monday",
+                domain.Weekday.Tuesday: "Tuesday",
+                domain.Weekday.Wednesday: "Wednesday",
+                domain.Weekday.Thursday: "Thursday",
+                domain.Weekday.Friday: "Friday",
+                domain.Weekday.Saturday: "Saturday",
+                domain.Weekday.Sunday: "Sunday",
             },
             value=state.week_day,
         )

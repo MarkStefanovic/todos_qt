@@ -14,7 +14,7 @@ class IrregularFrequencyFormState:
     week_number: int
     week_day: domain.Weekday
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         assert 1 <= self.week_number <= 5, f"[week_number] must be between 1 and 5, but got {self.week_number!r}."
 
     @staticmethod

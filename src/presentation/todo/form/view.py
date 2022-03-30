@@ -4,6 +4,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, widgets
+from src.presentation.shared.widgets import MapCBO
 from src.presentation.todo.form.irregular.view import IrregularFrequencyForm
 from src.presentation.todo.form.monthly.view import MonthlyFrequencyForm
 from src.presentation.todo.form.once.view import OnceFrequencyForm
@@ -37,9 +38,14 @@ class TodoForm(qtw.QWidget):
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo = widgets.EnumCBO(
-            cls=domain.TodoCategory,
-            value=state.category,
+        self._category_cbo = MapCBO(
+            mapping={
+                domain.TodoCategory.Birthday: "Birthday",
+                domain.TodoCategory.Holiday: "Holiday",
+                domain.TodoCategory.Reminder: "Reminder",
+                domain.TodoCategory.Todo: "Todo",
+            },
+            value=domain.TodoCategory.Todo,
         )
         self._category_cbo.setFixedWidth(150)
 
@@ -56,13 +62,13 @@ class TodoForm(qtw.QWidget):
         frequency_lbl.setFont(fonts.bold)
         self._frequency_cbo = widgets.MapCBO(
             mapping={
-                "Daily": domain.FrequencyType.Daily,
-                "Irregular": domain.FrequencyType.Irregular,
-                "Monthly": domain.FrequencyType.Monthly,
-                "Once": domain.FrequencyType.Once,
-                "Weekly": domain.FrequencyType.Weekly,
-                "XDays": domain.FrequencyType.XDays,
-                "Yearly": domain.FrequencyType.Yearly,
+                domain.FrequencyType.Daily: "Daily",
+                domain.FrequencyType.Irregular: "Irregular",
+                domain.FrequencyType.Monthly: "Monthly",
+                domain.FrequencyType.Once: "Once",
+                domain.FrequencyType.Weekly: "Weekly",
+                domain.FrequencyType.XDays: "XDays",
+                domain.FrequencyType.Yearly: "Yearly",
             },
             value=state.frequency_name,
         )

@@ -47,18 +47,24 @@ class DbTodoService(domain.TodoService):
         date_filter: datetime.date,
         due_filter: bool,
         description_like: str,
+        category_filter: domain.TodoCategory,
     ) -> list[Todo]:
         if due_filter:
-            return [
+            todos = [
                 todo for todo in self.get_all()
                 if description_like.strip().lower() in todo.description.lower()
                 and todo.should_display(today=date_filter)
             ]
+        else:
+            todos = [
+                todo for todo in self.get_all()
+                if description_like.strip().lower() in todo.description.lower()
+            ]
 
-        return [
-            todo for todo in self.get_all()
-            if description_like.strip().lower() in todo.description.lower()
-        ]
+        if category_filter == domain.TodoCategory.All:
+            return todos
+
+        return [todo for todo in todos if todo.category == category_filter]
 
     def mark_complete(self, *, todo_id: str) -> None:
         repo = adapter.DbTodoRepository(session=self._session)

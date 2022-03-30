@@ -6,6 +6,7 @@ __all__ = ("TodoCategory",)
 
 
 class TodoCategory(str, enum.Enum):
+    All = "All"
     Birthday = "Birthday"
     Holiday = "Holiday"
     Reminder = "Reminder"

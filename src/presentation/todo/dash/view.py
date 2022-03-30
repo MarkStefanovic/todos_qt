@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts
-from src.presentation.shared.widgets import table
+from src.presentation.shared.widgets import MapCBO, table
 from src.presentation.todo.dash.state import TodoDashState
 
 __all__ = ("TodoDash",)
@@ -31,10 +31,27 @@ class TodoDash(qtw.QWidget):
         date_lbl = qtw.QLabel("Today")
         date_lbl.setFont(fonts.bold)
         self._date_edit = qtw.QDateEdit()
+        self._date_edit.dateChanged.connect(self.refresh_btn.click)
 
         due_lbl = qtw.QLabel("Due?")
         due_lbl.setFont(fonts.bold)
         self._due_chk = qtw.QCheckBox()
+        self._due_chk.stateChanged.connect(self.refresh_btn.click)
+
+        category_lbl = qtw.QLabel("Category")
+        category_lbl.setFont(fonts.bold)
+        self._category_cbo = MapCBO(
+            mapping={
+                domain.TodoCategory.All: "All",
+                domain.TodoCategory.Birthday: "Birthday",
+                domain.TodoCategory.Holiday: "Holiday",
+                domain.TodoCategory.Reminder: "Reminder",
+                domain.TodoCategory.Todo: "Todo",
+            },
+            value=domain.TodoCategory.All,
+        )
+        self._category_cbo.setMinimumWidth(150)
+        self._category_cbo.value_changed.connect(self.refresh_btn.click)
 
         description_lbl = qtw.QLabel("Description")
         description_lbl.setFont(fonts.bold)
@@ -49,6 +66,8 @@ class TodoDash(qtw.QWidget):
         toolbar_layout.addWidget(self._date_edit)
         toolbar_layout.addWidget(due_lbl)
         toolbar_layout.addWidget(self._due_chk)
+        toolbar_layout.addWidget(category_lbl)
+        toolbar_layout.addWidget(self._category_cbo)
         toolbar_layout.addWidget(description_lbl)
         toolbar_layout.addWidget(self._description_filter_txt)
         toolbar_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
@@ -151,6 +170,7 @@ class TodoDash(qtw.QWidget):
             date_filter=self._date_edit.date().toPyDate(),
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
+            category_filter=self._category_cbo.get_value(),
             selected_todo=self._table.selected_item,
             todos=self._table.items,
         )

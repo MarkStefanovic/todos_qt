@@ -46,6 +46,7 @@ class TodoController:
                 description_like=state.dash_state.description_filter,
                 date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
+                category_filter=state.dash_state.category_filter,
             )
 
             new_state = dataclasses.replace(
@@ -66,6 +67,7 @@ class TodoController:
                 description_like=state.dash_state.description_filter,
                 date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
+                category_filter=state.dash_state.category_filter,
             )
 
             new_state = dataclasses.replace(
@@ -101,6 +103,7 @@ class TodoController:
                 description_like=state.dash_state.description_filter,
                 date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
+                category_filter=state.dash_state.category_filter,
             )
 
             new_state = dataclasses.replace(
@@ -117,6 +120,7 @@ class TodoController:
             description_like=state.dash_state.description_filter,
             date_filter=state.dash_state.date_filter,
             due_filter=state.dash_state.due_filter,
+            category_filter=state.dash_state.category_filter,
         )
 
         new_state = dataclasses.replace(
@@ -147,6 +151,7 @@ class TodoController:
             description_like=state.dash_state.description_filter,
             date_filter=state.dash_state.date_filter,
             due_filter=state.dash_state.due_filter,
+            category_filter=state.dash_state.category_filter,
         )
 
         new_state = dataclasses.replace(

@@ -15,13 +15,13 @@ class WeeklyFrequencyForm(qtw.QWidget):
         weekday_lbl.setFont(fonts.bold)
         self._weekday_cbo = widgets.MapCBO(
             mapping={
-                "Monday": domain.Weekday.Monday,
-                "Tuesday": domain.Weekday.Tuesday,
-                "Wednesday": domain.Weekday.Wednesday,
-                "Thursday": domain.Weekday.Thursday,
-                "Friday": domain.Weekday.Friday,
-                "Saturday": domain.Weekday.Saturday,
-                "Sunday": domain.Weekday.Sunday,
+                domain.Weekday.Monday: "Monday",
+                domain.Weekday.Tuesday: "Tuesday",
+                domain.Weekday.Wednesday: "Wednesday",
+                domain.Weekday.Thursday: "Thursday",
+                domain.Weekday.Friday: "Friday",
+                domain.Weekday.Saturday: "Saturday",
+                domain.Weekday.Sunday: "Sunday",
             },
             value=state.week_day,
         )
