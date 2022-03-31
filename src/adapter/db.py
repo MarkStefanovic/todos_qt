@@ -4,7 +4,7 @@ import functools
 import sqlalchemy as sa
 import sqlmodel as sm
 
-__all__ = ("get_engine", "Schedule", "Todo")
+__all__ = ("get_engine", "Todo")
 
 
 class Todo(sm.SQLModel, table=True):
@@ -30,6 +30,15 @@ class Todo(sm.SQLModel, table=True):
     month_day: int | None
     days: int | None
     due_date: datetime.date | None 
+
+
+class Category(sm.SQLModel, table=True):
+    category_id: str = sm.Field(primary_key=True)
+    name: str
+    note: str
+    date_added: datetime.datetime
+    date_updated: datetime.datetime | None
+    date_deleted: datetime.datetime | None
 
 
 @functools.lru_cache(1)

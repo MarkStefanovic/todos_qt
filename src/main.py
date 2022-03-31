@@ -75,10 +75,10 @@ def main() -> None:
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
     with sm.Session(engine) as session:
         todo_service = service.DbTodoService(session=session)
-        for holiday in domain.HOLIDAYS:
-            if todo_service.get(todo_id=holiday.todo_id) is None:
-                todo_service.upsert(todo=holiday)
-                session.commit()
+        # for holiday in domain.HOLIDAYS:
+        #     if todo_service.get(todo_id=holiday.todo_id) is None:
+        #         todo_service.upsert(todo=holiday)
+        #         session.commit()
 
         todo_controller = presentation.TodoController(
             todo_service=todo_service,
