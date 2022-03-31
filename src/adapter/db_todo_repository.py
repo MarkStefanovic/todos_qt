@@ -115,7 +115,8 @@ class DbTodoRepository(domain.TodoRepository):
 
     def delete(self, *, todo_id: str) -> None:
         todo = self._get_orm(todo_id=todo_id)
-        self._session.delete(todo)
+        todo.date_deleted = datetime.datetime.now()
+        self._session.add(todo)
 
     def get(self, *, todo_id: str) -> domain.Todo | None:
         todo_orm = self._get_orm(todo_id=todo_id)
