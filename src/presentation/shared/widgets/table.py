@@ -107,7 +107,7 @@ def date_col(
     display_fn: typing.Callable[[datetime.date], str] | None = None,
 ) -> ColSpec[Row, datetime.date]:
     if display_fn is None:
-        display_fn = lambda dt: "" if dt is None else dt.strftime(display_format)
+        display_fn = lambda dt: "" if dt is None or dt == datetime.date(1900, 1, 1) else dt.strftime(display_format)
 
     return ColSpec(
         attr_name=attr_name,
@@ -230,7 +230,7 @@ def timestamp_col(
     display_fn: typing.Callable[[datetime.date], str] | None = None,
 ) -> ColSpec[Row, datetime.datetime]:
     if display_fn is None:
-        display_fn = lambda ts: "" if ts is None else ts.strftime(display_format)
+        display_fn = lambda ts: "" if ts is None or ts == datetime.datetime(1900, 1, 1) else ts.strftime(display_format)
 
     return ColSpec(
         attr_name=attr_name,

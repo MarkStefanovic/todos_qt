@@ -1,4 +1,6 @@
 from src.domain import exceptions
+from src.domain.category import *
+from src.domain.category_repository import *
 from src.domain.config import *
 from src.domain.create_uuid import *
 from src.domain.create_uuid import *

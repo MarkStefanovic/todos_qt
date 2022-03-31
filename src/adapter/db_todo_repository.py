@@ -45,6 +45,7 @@ FREQUENCY_NAME_LKP = {
 }
 
 
+# noinspection PyComparisonWithNone
 class DbTodoRepository(domain.TodoRepository):
     def __init__(self, *, session: sm.Session):
         self._session = session
@@ -106,7 +107,10 @@ class DbTodoRepository(domain.TodoRepository):
                 date_updated=todo_orm.date_updated,
                 date_deleted=todo_orm.date_deleted,
             )
-            for todo_orm in self._session.exec(sm.select(db.Todo))
+            for todo_orm in self._session.exec(
+                sm.select(db.Todo)
+                .where(db.Todo.date_deleted == None)
+            )
         ]
 
     def delete(self, *, todo_id: str) -> None:
