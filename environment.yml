@@ -16,6 +16,7 @@ dependencies:
 - sqlalchemy
 - psycopg2-binary
 - pyinstaller
+- python-dateutil
 - pip:
   # the following dependencies have to be installed via pip
   - PyQt5-stubs
