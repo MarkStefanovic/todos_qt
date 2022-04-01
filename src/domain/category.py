@@ -4,7 +4,7 @@ import datetime
 __all__ = ("Category",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, order=True)
 class Category:
     category_id: str
     name: str

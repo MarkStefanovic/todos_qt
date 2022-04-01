@@ -11,7 +11,7 @@ class Todo(sm.SQLModel, table=True):
     todo_id: str = sm.Field(primary_key=True)
     description: str
     note: str
-    category: str
+    category_id: str
     advance_days: int
     expire_days: int
     start_date: datetime.date

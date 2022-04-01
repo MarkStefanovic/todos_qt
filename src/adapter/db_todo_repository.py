@@ -124,23 +124,7 @@ class DbTodoRepository(domain.TodoRepository):
         if todo_orm is None:
             return None
 
-        return domain.Todo(
-            todo_id=todo_orm.todo_id,
-            category=CATEGORY_LKP[todo_orm.category],
-            description=todo_orm.description,
-            frequency=_parse_frequency(
-                row=todo_orm,
-                advance_display_days=todo_orm.advance_days,
-                expire_display_days=todo_orm.expire_days,
-                start_date=todo_orm.start_date,
-            ),
-            note=todo_orm.note,
-            last_completed=todo_orm.last_completed,
-            prior_completed=todo_orm.prior_completed,
-            date_added=todo_orm.date_added,
-            date_updated=todo_orm.date_updated,
-            date_deleted=todo_orm.date_deleted,
-        )
+        return _orm_to_domain(todo_orm=todo_orm)
 
     def update(self, *, todo: Todo) -> None:
         todo_orm = self._get_orm(todo_id=todo.todo_id)
@@ -177,6 +161,16 @@ class DbTodoRepository(domain.TodoRepository):
         todo_orm.prior_completed = todo.prior_completed
 
         self._session.add(todo_orm)
+
+    def where_category(self, *, category_id: str) -> list[domain.Todo]:
+        return [
+            _orm_to_domain(todo_orm=todo_orm)
+            for todo_orm in self._session.exec(
+                sm.select(db.Todo)
+                .where(db.Todo.date_deleted == None)  # noqa
+                .where(db.Todo.category_id == category_id)
+            )
+        ]
 
     def _get_orm(self, *, todo_id: str) -> db.Todo | None:
         return self._session.exec(
@@ -261,3 +255,23 @@ def _parse_frequency(
         )
     else:
         raise ValueError(f"Unrecognized frequency, {row.frequency!r}.")
+
+
+def _orm_to_domain(*, todo_orm: db.Todo) -> domain.Todo:
+    return domain.Todo(
+        todo_id=todo_orm.todo_id,
+        category=CATEGORY_LKP[todo_orm.category],
+        description=todo_orm.description,
+        frequency=_parse_frequency(
+            row=todo_orm,
+            advance_display_days=todo_orm.advance_days,
+            expire_display_days=todo_orm.expire_days,
+            start_date=todo_orm.start_date,
+        ),
+        note=todo_orm.note,
+        last_completed=todo_orm.last_completed,
+        prior_completed=todo_orm.prior_completed,
+        date_added=todo_orm.date_added,
+        date_updated=todo_orm.date_updated,
+        date_deleted=todo_orm.date_deleted,
+    )

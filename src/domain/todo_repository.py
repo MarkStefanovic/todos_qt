@@ -25,3 +25,7 @@ class TodoRepository(abc.ABC):
     @abc.abstractmethod
     def update(self, *, todo: Todo) -> None:
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def where_category(self, *, category_id: str) -> list[Todo]:
+        raise NotImplementedError

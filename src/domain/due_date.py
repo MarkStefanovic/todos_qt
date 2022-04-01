@@ -1,7 +1,7 @@
 import datetime
 
-from src.domain import FrequencyType
 from src.domain.frequency import Frequency
+from src.domain.frequency_type import FrequencyType
 from src.domain.next_date import next_date
 from src.domain.prior_date import prior_date
 

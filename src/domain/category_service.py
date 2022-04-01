@@ -1,14 +1,17 @@
 import abc
 
 from src.domain.category import Category
-from src.domain.todo import Todo
 
-__all__ = ("CategoryRepository",)
+__all__ = ("CategoryService",)
 
 
-class CategoryRepository(abc.ABC):
+class CategoryService(abc.ABC):
     @abc.abstractmethod
     def add(self, *, category: Category) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def all(self) -> list[Category]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -17,10 +20,6 @@ class CategoryRepository(abc.ABC):
 
     @abc.abstractmethod
     def get(self, *, category_id: str) -> Category | None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_active(self) -> list[Category]:
         raise NotImplementedError
 
     @abc.abstractmethod
