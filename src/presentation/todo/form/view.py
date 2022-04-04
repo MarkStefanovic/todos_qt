@@ -38,20 +38,16 @@ class TodoForm(qtw.QWidget):
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo = MapCBO(
-            mapping={
-                domain.TodoCategory.Birthday: "Birthday",
-                domain.TodoCategory.Holiday: "Holiday",
-                domain.TodoCategory.Reminder: "Reminder",
-                domain.TodoCategory.Todo: "Todo",
-            },
-            value=domain.TodoCategory.Todo,
+        self._category_cbo: MapCBO[domain.Category] = MapCBO(
+            mapping={category: category.name for category in state.category_options},
+            value=state.category,
         )
         self._category_cbo.setFixedWidth(150)
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.setFont(fonts.bold)
-        self._note_txt = qtw.QTextEdit(state.note)
+        self._note_txt = qtw.QTextEdit()
+        self._note_txt.setPlainText(state.note)
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
@@ -116,7 +112,7 @@ class TodoForm(qtw.QWidget):
 
         self.setLayout(main_layout)
 
-        self._todo_id: str = state.todo_id
+        self._todo_id = state.todo_id
         self._date_added: datetime.datetime = state.date_added
         self._date_updated: datetime.datetime | None = state.date_updated
         self._date_deleted: datetime.datetime | None = state.date_deleted
@@ -146,6 +142,7 @@ class TodoForm(qtw.QWidget):
             weekly_frequency_form_state=self._weekly_frequency_form.get_state(),
             xdays_frequency_form_state=self._xdays_frequency_form.get_state(),
             yearly_frequency_form_state=self._yearly_frequency_form.get_state(),
+            category_options=self._category_cbo.get_values(),
         )
 
     def set_state(self, *, state: TodoFormState) -> None:
@@ -159,6 +156,14 @@ class TodoForm(qtw.QWidget):
         self._description_txt.setText(state.description)
         self._advance_days_sb.setValue(state.advance_days)
         self._expire_days_sb.setValue(state.expire_days)
+        self._advance_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
+        self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
+        self._category_cbo.set_values(
+            mapping={
+                category: category.name
+                for category in state.category_options
+            }
+        )
         self._category_cbo.set_value(value=state.category)
         self._note_txt.setPlainText(state.note)
         self._start_date_edit.setDate(state.start_date)
@@ -174,13 +179,10 @@ class TodoForm(qtw.QWidget):
     def _frequency_changed(self) -> None:
         frequency = self._frequency_cbo.get_value()
 
-        self._advance_days_sb.setEnabled(True)
-        self._expire_days_sb.setEnabled(True)
+        self._advance_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
+        self._expire_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
 
         if frequency == domain.FrequencyType.Daily:
-            self._advance_days_sb.setEnabled(False)
-            self._expire_days_sb.setEnabled(False)
-
             self._frequency_subform_layout.setCurrentIndex(0)
         elif frequency == domain.FrequencyType.Easter:
             raise ValueError("Easter is not meant to be created by the user.")

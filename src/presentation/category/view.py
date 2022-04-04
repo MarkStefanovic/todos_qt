@@ -1,18 +1,18 @@
 from PyQt5 import QtWidgets as qtw
 
-from src.presentation.todo.state import TodoState
-from src.presentation.todo.dash.view import TodoDash
-from src.presentation.todo.form.view import TodoForm
+from src.presentation.category.dash.view import CategoryDash
+from src.presentation.category.form.view import CategoryForm
+from src.presentation.category.state import CategoryState
 
-__all__ = ("TodoView",)
+__all__ = ("CategoryView",)
 
 
-class TodoView(qtw.QWidget):
-    def __init__(self, *, state: TodoState):
+class CategoryView(qtw.QWidget):
+    def __init__(self, *, state: CategoryState):
         super().__init__()
 
-        self.dash = TodoDash(state=state.dash_state)
-        self.form = TodoForm(state=state.form_state)
+        self.dash = CategoryDash(state=state.dash_state)
+        self.form = CategoryForm(state=state.form_state)
 
         self.stacked_layout = qtw.QStackedLayout()
         self.stacked_layout.addWidget(self.dash)
@@ -20,14 +20,16 @@ class TodoView(qtw.QWidget):
 
         self.setLayout(self.stacked_layout)
 
-    def get_state(self) -> TodoState:
-        return TodoState(
+        self.set_state(state=state)
+
+    def get_state(self) -> CategoryState:
+        return CategoryState(
             dash_state=self.dash.get_state(),
             form_state=self.form.get_state(),
             dash_active=self.stacked_layout.currentIndex() == 0,
         )
 
-    def set_state(self, *, state: TodoState) -> None:
+    def set_state(self, *, state: CategoryState) -> None:
         self.dash.set_state(state=state.dash_state)
         self.form.set_state(state=state.form_state)
         if state.dash_active:

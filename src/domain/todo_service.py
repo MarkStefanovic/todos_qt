@@ -2,7 +2,7 @@ import abc
 import datetime
 
 from src.domain.todo import Todo
-from src.domain.todo_category import TodoCategory
+from src.domain.category import Category
 
 __all__ = ("TodoService",)
 
@@ -23,7 +23,7 @@ class TodoService(abc.ABC):
         date_filter: datetime.date,
         due_filter: bool,
         description_like: str,
-        category_filter: TodoCategory,
+        category_filter: Category | None,
     ) -> list[Todo]:
         raise NotImplementedError
 

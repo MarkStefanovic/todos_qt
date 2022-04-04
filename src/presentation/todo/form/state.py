@@ -4,6 +4,7 @@ import dataclasses
 import datetime
 
 from src import domain
+from src.domain import TODO_CATEGORY
 from src.presentation.todo.form.irregular.state import IrregularFrequencyFormState
 from src.presentation.todo.form.monthly.state import MonthlyFrequencyFormState
 from src.presentation.todo.form.once.state import OnceFrequencyFormState
@@ -19,7 +20,7 @@ class TodoFormState:
     todo_id: str
     advance_days: int
     expire_days: int
-    category: domain.TodoCategory
+    category: domain.Category
     description: str
     frequency_name: domain.FrequencyType
     note: str
@@ -35,14 +36,15 @@ class TodoFormState:
     weekly_frequency_form_state: WeeklyFrequencyFormState
     xdays_frequency_form_state: XDaysFrequencyFormState
     yearly_frequency_form_state: YearlyFrequencyFormState
+    category_options: list[domain.Category]
 
     @staticmethod
-    def initial() -> TodoFormState:
+    def initial(*, category_options: list[domain.Category]) -> TodoFormState:
         return TodoFormState(
             todo_id=domain.create_uuid(),
             advance_days=0,
             expire_days=1,
-            category=domain.TodoCategory.Todo,
+            category=TODO_CATEGORY,
             description="",
             frequency_name=domain.FrequencyType.Daily,
             note="",
@@ -58,6 +60,7 @@ class TodoFormState:
             weekly_frequency_form_state=WeeklyFrequencyFormState.initial(),
             xdays_frequency_form_state=XDaysFrequencyFormState.initial(),
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
+            category_options=category_options,
         )
 
     def to_domain(self) -> domain.Todo:
@@ -122,7 +125,7 @@ class TodoFormState:
         )
 
     @staticmethod
-    def from_domain(*, todo: domain.Todo) -> TodoFormState:
+    def from_domain(*, todo: domain.Todo, category_options: list[domain.Category]) -> TodoFormState:
         irregular_frequency_form_state = IrregularFrequencyFormState.initial()
         monthly_frequency_form_state = MonthlyFrequencyFormState.initial()
         once_frequency_form_state = OnceFrequencyFormState.initial()
@@ -163,4 +166,17 @@ class TodoFormState:
             date_deleted=todo.date_deleted,
             last_completed=todo.last_completed,
             prior_completed=todo.prior_completed,
+            category_options=category_options,
         )
+
+    def __eq__(self, other: object) -> bool:
+        assert isinstance(other, TodoFormState)
+
+        mod_self = dataclasses.replace(self, note=_standardize_str(self.note))
+        mod_other = dataclasses.replace(other, note=_standardize_str(other.note))
+
+        return dataclasses.astuple(mod_self) == dataclasses.astuple(mod_other)
+
+
+def _standardize_str(s: str) -> str:
+    return s.replace("\xa0", " ").replace("\r", "\n").strip("\xef\xbb\xbf ")

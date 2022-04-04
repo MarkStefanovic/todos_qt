@@ -21,3 +21,4 @@ dependencies:
   # the following dependencies have to be installed via pip
   - PyQt5-stubs
   - qt-material
+  - types-python-dateutil

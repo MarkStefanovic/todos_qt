@@ -16,12 +16,12 @@ from src.presentation.todo.form.view import TodoForm
     )
 )
 def test_daily_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._start_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -37,7 +37,7 @@ def test_daily_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_irregular_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
@@ -46,7 +46,7 @@ def test_irregular_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._irregular_frequency_form._week_number_sb.maximum() == 5
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -61,7 +61,7 @@ def test_irregular_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_monthly_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
@@ -70,7 +70,7 @@ def test_monthly_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._monthly_frequency_form._month_day_sb.maximum() == 28
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -85,7 +85,7 @@ def test_monthly_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_once_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
@@ -93,7 +93,7 @@ def test_once_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._one_off_frequency_form._due_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -107,14 +107,14 @@ def test_once_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_weekly_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
     assert todo_form._start_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -129,7 +129,7 @@ def test_weekly_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_xdays_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
@@ -138,7 +138,7 @@ def test_xdays_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._xdays_frequency_form._days_sb.maximum() == 364
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -154,7 +154,7 @@ def test_xdays_todo_form_round_trip(todo: domain.Todo):
     )
 )
 def test_yearly_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial()
+    initial_state = TodoFormState.initial(category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form = TodoForm(state=initial_state)
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
@@ -163,6 +163,6 @@ def test_yearly_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._yearly_frequency_form._month_day_sb.maximum() == 28
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(todo=todo)
+    new_state = TodoFormState.from_domain(todo=todo, category_options=[domain.TODO_CATEGORY, todo.category])
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state

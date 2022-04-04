@@ -1,10 +1,10 @@
+import datetime
 import functools
 import pathlib
 import sys
 import types
 import typing
 
-import sqlmodel as sm
 from loguru import logger
 from PyQt5 import QtGui as qtg, QtWidgets as qtw
 from qt_material import apply_stylesheet
@@ -60,7 +60,48 @@ def main() -> None:
 
     app_icon = qtg.QIcon(str((root_dir() / "assets" / "icons" / "app.png").resolve()))
 
-    main_view = presentation.MainView(window_icon=app_icon)
+    engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
+
+    category_service = service.DbCategoryService(engine=engine)
+
+    for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
+        if not category_service.get(category_id=category.category_id):
+            category_service.add(category=category)
+
+    todo_service = service.DbTodoService(engine=engine)
+
+    for holiday in domain.HOLIDAYS:
+        if todo_service.get(todo_id=holiday.todo_id) is None:
+            todo_service.upsert(todo=holiday)
+
+    todos = todo_service.get_where(
+        date_filter=datetime.date.today(),
+        due_filter=True,
+        description_like="",
+        category_filter=presentation.ALL_CATEGORY,
+    )
+
+    categories = category_service.all()
+
+    state = presentation.MainState(
+        today=datetime.date.today(),
+        active_tab="todo",
+        todo_state=presentation.TodoState.initial(
+            todos=todos,
+            category_options=categories,
+        ),
+        category_state=presentation.CategoryState(
+            dash_state=presentation.CategoryDashState(
+                categories=categories,
+                selected_category=None,
+                status="",
+            ),
+            form_state=presentation.CategoryFormState.initial(),
+            dash_active=True,
+        ),
+    )
+
+    main_view = presentation.MainView(state=state, window_icon=app_icon)
 
     apply_stylesheet(app, theme="dark_amber.xml")
 
@@ -70,22 +111,21 @@ def main() -> None:
     else:
         width = screen.width()
     main_view.setGeometry(0, 0, width, screen.height())
+
     main_view.show()
 
-    engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
-    with sm.Session(engine) as session:
-        todo_service = service.DbTodoService(session=session)
-        # for holiday in domain.HOLIDAYS:
-        #     if todo_service.get(todo_id=holiday.todo_id) is None:
-        #         todo_service.upsert(todo=holiday)
-        #         session.commit()
+    todo_controller = presentation.TodoController(
+        category_service=category_service,
+        todo_service=todo_service,
+        view=main_view.todos,
+    )
 
-        todo_controller = presentation.TodoController(
-            todo_service=todo_service,
-            view=main_view.todos,
-        )
+    category_controller = presentation.CategoryController(
+        category_service=category_service,
+        view=main_view.categories,
+    )
 
-        sys.exit(app.exec())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

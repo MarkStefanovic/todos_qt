@@ -1,10 +1,11 @@
 import dataclasses
 import datetime
 
-from src import adapter, domain, service
+import sqlalchemy as sa
 
-import sqlmodel as sm
+from src import domain, service
 
+# noinspection DuplicatedCode
 CATEGORY_1 = domain.Category(
     category_id="1" * 32,
     name="Category 1",
@@ -20,7 +21,7 @@ CATEGORY_2 = domain.Category(
     note="Test Note 2",
     date_added=datetime.datetime(2011, 2, 3, 4, 5, 6, 7),
     date_updated=None,
-    date_deleted=datetime.datetime(2011, 2, 4, 5, 6, 7, 8),
+    date_deleted=None,
 )
 
 CATEGORY_3 = domain.Category(
@@ -33,14 +34,14 @@ CATEGORY_3 = domain.Category(
 )
 
 
-def test_round_trip(session: sm.Session):
-    category_service = service.DbCategoryService(session=session)
+def test_round_trip(engine: sa.engine.Engine):
+    category_service = service.DbCategoryService(engine=engine)
 
     category_service.add(category=CATEGORY_1)
     category_service.add(category=CATEGORY_2)
     category_service.add(category=CATEGORY_3)
 
-    assert len(category_service.all()) == 2  # 1 is deleted
+    assert len(category_service.all()) == 3
 
     updated_category = dataclasses.replace(
         CATEGORY_1,
@@ -49,15 +50,11 @@ def test_round_trip(session: sm.Session):
 
     category_service.update(category=updated_category)
 
-    session.commit()
-
     assert category_service.get(category_id=CATEGORY_1.category_id).note == "Updated note 1."
 
-    assert len(category_service.all()) == 2
+    assert len(category_service.all()) == 3
 
     category_service.delete(category_id=CATEGORY_3.category_id)
 
-    session.commit()
-
-    assert len(category_service.all()) == 1
+    assert len(category_service.all()) == 2
 

@@ -56,7 +56,7 @@ class DtEditor(qtw.QWidget):
                 self._dt = parse(self._text_edit.text()).date()
                 self._is_valid = True
                 self._text_edit.setStyleSheet("")
-                self.date_changed.emit()  # type: ignore
+                self.date_changed.emit()
             except ParserError as pe:
                 print(pe)
                 self._dt = None

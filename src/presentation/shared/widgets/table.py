@@ -6,7 +6,7 @@ import decimal
 import enum
 import typing
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 __all__ = (
     "ColAlignment",
@@ -48,6 +48,7 @@ class ColSpecType(enum.Enum):
     Button = enum.auto()
     Date = enum.auto()
     Decimal = enum.auto()
+    Dropdown = enum.auto()
     Float = enum.auto()
     Int = enum.auto()
     RichText = enum.auto()
@@ -67,6 +68,8 @@ class ColSpec(typing.Generic[Row, Value]):
     on_click: typing.Callable[[Row], None] | None
     display_fn: typing.Callable[[typing.Any], str]
     enable_when: typing.Callable[[Row], bool] | None
+    values: dict[Value, str] | None
+    on_value_changed: typing.Callable[[Value], None] | None
 
     def __post_init__(self) -> None:
         if self.type != ColSpecType.Button:
@@ -92,6 +95,8 @@ def button_col(
         alignment=alignment,
         on_click=on_click,
         enable_when=enable_when,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -120,6 +125,8 @@ def date_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -144,6 +151,35 @@ def decimal_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
+    )
+
+
+def dropdown_col(
+    *,
+    display_name: str,
+    values: dict[Value, str],
+    on_value_changed: typing.Callable[[Value], None],
+    attr_name: str | None = None,
+    selector: typing.Callable[[Row], decimal.Decimal] | None = None,
+    column_width: int = 100,
+    alignment: ColAlignment = ColAlignment.Center,
+    enable_when: typing.Callable[[Row], bool] | None = None,
+) -> ColSpec[Row, Value]:
+    return ColSpec(
+        attr_name=attr_name,
+        selector=selector,
+        display_name=display_name,
+        display_fn=str,
+        column_width=column_width,
+        type=ColSpecType.Dropdown,
+        hidden=False,
+        alignment=alignment,
+        on_click=None,
+        enable_when=enable_when,
+        values=values,
+        on_value_changed=on_value_changed,
     )
 
 
@@ -168,6 +204,8 @@ def float_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -192,6 +230,8 @@ def int_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -215,6 +255,8 @@ def text_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -243,6 +285,8 @@ def timestamp_col(
         alignment=alignment,
         on_click=None,
         enable_when=None,
+        values=None,
+        on_value_changed=None,
     )
 
 
@@ -361,7 +405,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
             ):
                 if col_spec.selector is None:
                     if col_spec.attr_name is None:
-                        raise ValueError("If a [selector] is not provided, then [attr_name] is required.")
+                        raise Exception("If a [selector] is not provided, then [attr_name] is required.")
                     value = getattr(data, col_spec.attr_name)
                 else:
                     value = col_spec.selector(data)
@@ -369,23 +413,9 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 item = TableItem(value=value, display_value=display_value)
                 item.setTextAlignment(col_spec.alignment.qt_alignment)
                 self._table.setItem(row_num, col_num, item)
-            # elif col_spec.type == ColSpecType.RichText:
-            #     if col_spec.selector is None:
-            #         if col_spec.attr_name is None:
-            #             raise ValueError("If a [selector] is not provided, then [attr_name] is required.")
-            #         value = getattr(data, col_spec.attr_name)
-            #     else:
-            #         value = col_spec.selector(data)
-            #     text_edit = qtw.QTextEdit()
-            #     text_edit.setHtml(value)
-            #     text_edit.setReadOnly(True)
-            #     text_edit.setSizePolicy(qtw.QSizePolicy.MinimumExpanding, qtw.QSizePolicy.Expanding)
-            #     # text_edit.setEnabled(False)
-            #     self._table.setCellWidget(row_num, col_num, text_edit)
-            #     self._table.setRowHeight(row_num, text_edit.height())
             elif col_spec.type == ColSpecType.Button:
                 if col_spec.on_click is None:
-                    raise ValueError("[on_click] is required for a Button column.")
+                    raise Exception("[on_click] is required for a Button column.")
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
                     assert col_spec.column_width is not None
@@ -395,8 +425,36 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
 
                 if col_spec.enable_when is not None:
                     btn.setEnabled(col_spec.enable_when(data))
+            elif col_spec.type == ColSpecType.Dropdown:
+                if col_spec.on_value_changed is None:
+                    raise Exception("[on_value_changed] is required for a Dropdown column.")
+
+                if col_spec.values is None:
+                    raise Exception("[values] is required for a Dropdown column.")
+
+                if col_spec.selector is None:
+                    if col_spec.attr_name is None:
+                        raise Exception("If a [selector] is not provided, then [attr_name] is required.")
+                    value = getattr(data, col_spec.attr_name)
+                else:
+                    value = col_spec.selector(data)
+
+                cbo = qtw.QComboBox()
+                for ix, (v, display_value) in enumerate(col_spec.values.items()):
+                    cbo.addItem(display_value, v)
+                    if value == v:
+                        cbo.setCurrentIndex(ix)
+
+                assert col_spec.column_width is not None
+                cbo.setFixedWidth(col_spec.column_width - 6)
+
+                cbo.currentIndexChanged.connect(lambda _: col_spec.on_value_changed(cbo.currentData()))  # type: ignore
+                self._table.setCellWidget(row_num, col_num, cbo)
+
+                if col_spec.enable_when is not None:
+                    cbo.setEnabled(col_spec.enable_when(data))
             else:
-                raise ValueError(f"Unrecognized ColSpecType: {col_spec.type!r}.")
+                raise Exception(f"Unrecognized ColSpecType: {col_spec.type!r}.")
 
             if col_spec.column_width is None:
                 self._table.resizeColumnToContents(col_num)
@@ -411,6 +469,9 @@ class TableItem(qtw.QTableWidgetItem):
         super().__init__(display_value)
 
         self._value = value
+
+        # noinspection PyTypeChecker
+        self.setFlags(qtc.Qt.ItemIsSelectable | qtc.Qt.ItemIsEnabled)  # type: ignore
 
     def __lt__(self, other: object) -> bool:
         assert isinstance(other, TableItem)

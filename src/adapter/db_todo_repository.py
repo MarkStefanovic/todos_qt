@@ -4,23 +4,11 @@ import sqlmodel as sm
 
 from src import domain
 from src.adapter import db
+from src.adapter.db_category_repository import DbCategoryRepository
 from src.domain import Todo
 
 __all__ = ("DbTodoRepository",)
 
-CATEGORY_LKP = {
-    "birthday": domain.TodoCategory.Birthday,
-    "holiday": domain.TodoCategory.Holiday,
-    "reminder": domain.TodoCategory.Reminder,
-    "todo": domain.TodoCategory.Todo,
-}
-
-CATEGORY_NAME_LKP = {
-    domain.TodoCategory.Birthday: "birthday",
-    domain.TodoCategory.Holiday: "holiday",
-    domain.TodoCategory.Reminder: "reminder",
-    domain.TodoCategory.Todo: "todo",
-}
 
 FREQUENCY_LKP = {
     "daily": domain.FrequencyType.Daily,
@@ -68,7 +56,7 @@ class DbTodoRepository(domain.TodoRepository):
             todo_id=todo.todo_id,
             expire_days=todo.frequency.expire_display_days,
             advance_days=todo.frequency.advance_display_days,
-            category=CATEGORY_NAME_LKP[todo.category],
+            category_id=todo.category.category_id,
             description=todo.description,
             note=todo.note,
             start_date=todo.frequency.start_date,
@@ -89,10 +77,17 @@ class DbTodoRepository(domain.TodoRepository):
         self._session.add(todo_orm)
 
     def all(self) -> list[domain.Todo]:
+        category_repo = DbCategoryRepository(session=self._session)
+
+        category_lkp = {
+            category.category_id: category
+            for category in category_repo.get_active()
+        }
+
         return [
             domain.Todo(
                 todo_id=todo_orm.todo_id,
-                category=CATEGORY_LKP[todo_orm.category],
+                category=category_lkp[todo_orm.category_id],
                 description=todo_orm.description,
                 frequency=_parse_frequency(
                     row=todo_orm,
@@ -114,9 +109,9 @@ class DbTodoRepository(domain.TodoRepository):
         ]
 
     def delete(self, *, todo_id: str) -> None:
-        todo = self._get_orm(todo_id=todo_id)
-        todo.date_deleted = datetime.datetime.now()
-        self._session.add(todo)
+        if todo := self._get_orm(todo_id=todo_id):
+            todo.date_deleted = datetime.datetime.now()
+            self._session.add(todo)
 
     def get(self, *, todo_id: str) -> domain.Todo | None:
         todo_orm = self._get_orm(todo_id=todo_id)
@@ -124,7 +119,12 @@ class DbTodoRepository(domain.TodoRepository):
         if todo_orm is None:
             return None
 
-        return _orm_to_domain(todo_orm=todo_orm)
+        category_repo = DbCategoryRepository(session=self._session)
+
+        if category := category_repo.get(category_id=todo_orm.category_id):
+            return _orm_to_domain(todo_orm=todo_orm, category=category)
+
+        return None
 
     def update(self, *, todo: Todo) -> None:
         todo_orm = self._get_orm(todo_id=todo.todo_id)
@@ -143,7 +143,7 @@ class DbTodoRepository(domain.TodoRepository):
 
         todo_orm.expire_days = todo.frequency.expire_display_days
         todo_orm.advance_days = todo.frequency.advance_display_days
-        todo_orm.category = CATEGORY_NAME_LKP[todo.category]
+        todo_orm.category_id = todo.category.category_id
         todo_orm.description = todo.description
         todo_orm.note = todo.note
         todo_orm.start_date = todo.frequency.start_date
@@ -163,14 +163,19 @@ class DbTodoRepository(domain.TodoRepository):
         self._session.add(todo_orm)
 
     def where_category(self, *, category_id: str) -> list[domain.Todo]:
-        return [
-            _orm_to_domain(todo_orm=todo_orm)
-            for todo_orm in self._session.exec(
-                sm.select(db.Todo)
-                .where(db.Todo.date_deleted == None)  # noqa
-                .where(db.Todo.category_id == category_id)
-            )
-        ]
+        category_repo = DbCategoryRepository(session=self._session)
+
+        if category := category_repo.get(category_id=category_id):
+            return [
+                _orm_to_domain(todo_orm=todo_orm, category=category)
+                for todo_orm in self._session.exec(
+                    sm.select(db.Todo)
+                    .where(db.Todo.date_deleted == None)  # noqa
+                    .where(db.Todo.category_id == category_id)
+                )
+            ]
+
+        return []
 
     def _get_orm(self, *, todo_id: str) -> db.Todo | None:
         return self._session.exec(
@@ -257,10 +262,10 @@ def _parse_frequency(
         raise ValueError(f"Unrecognized frequency, {row.frequency!r}.")
 
 
-def _orm_to_domain(*, todo_orm: db.Todo) -> domain.Todo:
+def _orm_to_domain(*, todo_orm: db.Todo, category: domain.Category) -> domain.Todo:
     return domain.Todo(
         todo_id=todo_orm.todo_id,
-        category=CATEGORY_LKP[todo_orm.category],
+        category=category,
         description=todo_orm.description,
         frequency=_parse_frequency(
             row=todo_orm,

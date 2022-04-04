@@ -1,5 +1,6 @@
 import datetime
 
+import sqlalchemy as sa
 import sqlmodel as sm
 
 from src import adapter, domain
@@ -9,8 +10,8 @@ __all__ = ("DbCategoryService",)
 
 
 class DbCategoryService(domain.CategoryService):
-    def __init__(self, *, session: sm.Session):
-        self._session = session
+    def __init__(self, *, engine: sa.engine.Engine):
+        self._engine = engine
 
         self._categories: dict[str, domain.Category] = {}
         self._last_refresh: datetime.datetime | None = None
@@ -18,61 +19,68 @@ class DbCategoryService(domain.CategoryService):
     def add(self, *, category: Category) -> None:
         self._refresh()
 
-        self._repo.add(category=category)
-        self._session.commit()
-        self._categories[category.category_id] = category
+        with sm.Session(self._engine) as session:
+            repo = adapter.DbCategoryRepository(session=session)
+            repo.add(category=category)
+            session.commit()
+            self._categories[category.category_id] = category
 
     def all(self) -> list[Category]:
         self._refresh()
 
         # noinspection PyTypeChecker
-        return sorted(self._categories.values())
+        return sorted(self._categories.values(), key=lambda c: c.name)
 
     def delete(self, *, category_id: str) -> None:
         self._refresh()
 
-        todo_repo = adapter.DbTodoRepository(session=self._session)
-        if matching_todos := todo_repo.where_category(category_id=category_id):
-            if category := self._categories[category_id]:
-                raise ValueError(
-                    f"Cannot delete the category, {category.name}, as it is used "
-                    f"by {len(matching_todos)} todos."
-                )
-            else:
-                raise Exception("Category does not exist in the database.")
+        with sm.Session(self._engine) as session:
+            todo_repo = adapter.DbTodoRepository(session=session)
+            if matching_todos := todo_repo.where_category(category_id=category_id):
+                if category := self._categories[category_id]:
+                    raise ValueError(
+                        f"Cannot delete the category, {category.name}, as it is used "
+                        f"by {len(matching_todos)} todos."
+                    )
+                else:
+                    raise Exception("Category does not exist in the database.")
 
-        self._repo.delete(category_id=category_id)
-        self._session.commit()
-        del self._categories[category_id]
+            category_repo = adapter.DbCategoryRepository(session=session)
+            category_repo.delete(category_id=category_id)
+            session.commit()
+            del self._categories[category_id]
 
     def get(self, *, category_id: str) -> Category | None:
         self._refresh()
 
         return self._categories.get(category_id)
 
+    def refresh(self) -> None:
+        with sm.Session(self._engine) as session:
+            repo = adapter.DbCategoryRepository(session=session)
+            self._categories = {
+                category.category_id: category
+                for category in repo.get_active()
+            }
+            self._last_refresh = datetime.datetime.now()
+
     def update(self, *, category: Category) -> None:
         self._refresh()
 
-        self._repo.update(category=category)
-        self._session.commit()
-        self._categories[category.category_id] = category
+        with sm.Session(self._engine) as session:
+            repo = adapter.DbCategoryRepository(session=session)
+            repo.update(category=category)
+            session.commit()
+            self._categories[category.category_id] = category
 
     def _refresh(self) -> None:
         if self._last_refresh is None:
             time_to_refresh = True
         else:
             if (datetime.datetime.now() - self._last_refresh).seconds > 300:
-                time_to_refresh = False
-            else:
                 time_to_refresh = True
+            else:
+                time_to_refresh = False
 
         if time_to_refresh:
-            self._categories = {
-                category.category_id: category
-                for category in self._repo.get_active()
-            }
-            self._last_refresh = datetime.datetime.now()
-
-    @property
-    def _repo(self) -> domain.CategoryRepository:
-        return adapter.DbCategoryRepository(session=self._session)
+            self.refresh()
