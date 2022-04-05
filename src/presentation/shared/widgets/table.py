@@ -13,7 +13,6 @@ __all__ = (
     "ColSpec",
     "ColSpecType",
     "Table",
-    "TableSpec",
     "button_col",
     "date_col",
     "decimal_col",
