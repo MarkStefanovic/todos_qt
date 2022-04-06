@@ -6,19 +6,19 @@ import decimal
 import enum
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = (
     "ColAlignment",
     "ColSpec",
     "ColSpecType",
     "Table",
-    "TableSpec",
     "button_col",
     "date_col",
     "decimal_col",
     "float_col",
     "int_col",
+    "rich_text_col",
     "text_col",
     "timestamp_col",
 )
@@ -235,6 +235,31 @@ def int_col(
     )
 
 
+def rich_text_col(
+    *,
+    display_name: str,
+    attr_name: str | None = None,
+    selector: typing.Callable[[Row], str] | None = None,
+    column_width: int | None = None,
+    hidden: bool = False,
+    alignment: ColAlignment = ColAlignment.Left,
+) -> ColSpec[Row, str]:
+    return ColSpec(
+        attr_name=attr_name,
+        selector=selector,
+        display_name=display_name,
+        display_fn=str,
+        type=ColSpecType.Text,
+        column_width=column_width,
+        hidden=hidden,
+        alignment=alignment,
+        on_click=None,
+        enable_when=None,
+        values=None,
+        on_value_changed=None,
+    )
+
+
 def text_col(
     *,
     display_name: str,
@@ -290,26 +315,21 @@ def timestamp_col(
     )
 
 
-@dataclasses.dataclass(frozen=True)
-class TableSpec(typing.Generic[Row]):
-    col_specs: list[ColSpec[Row, typing.Any]]
-    key_attr: str
-
-
 class Table(typing.Generic[Row, Key], qtw.QWidget):
-    def __init__(self, *, spec: TableSpec[Row]):
+    def __init__(self, *, col_specs: list[ColSpec[Row, typing.Any]], key_attr: str):
         super().__init__()
 
-        self._spec = spec
+        self._col_specs = col_specs
+        self._key_attr = key_attr
 
         self._col_indices: dict[str, int] = {}
-        for col_num, col_spec in enumerate(self._spec.col_specs):
+        for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.attr_name is not None:
                 self._col_indices[col_spec.attr_name] = col_num
 
         headers = [
             ("" if col_spec.type == ColSpecType.Button else col_spec.display_name) or ""
-            for col_spec in self._spec.col_specs
+            for col_spec in self._col_specs
         ]
 
         self._table = qtw.QTableWidget()
@@ -319,7 +339,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.setHorizontalHeaderLabels(headers)
         self._table.setSortingEnabled(True)
 
-        for col_num, col_spec in enumerate(self._spec.col_specs):
+        for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.hidden:
                 self._table.setColumnHidden(col_num, True)
 
@@ -334,7 +354,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._items: dict[Key, Row] = {}
 
     def add_item(self, /, item: Row) -> None:
-        key = getattr(item, self._spec.key_attr)
+        key = getattr(item, self._key_attr)
         self._items[key] = item
         self._table.setRowCount(self.rowCount() + 1)
         self._set_row(row_num=self.rowCount(), data=item)
@@ -357,7 +377,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
     def selected_item(self) -> Row | None:
         if indices := self._table.selectedIndexes():
             row_num = indices[0].row()
-            key = self._table.item(row_num, self._col_indices[self._spec.key_attr]).data(qtc.Qt.EditRole)
+            key = self._table.item(row_num, self._col_indices[self._key_attr]).data(qtc.Qt.EditRole)
             return self._items[key]
         return None
 
@@ -368,7 +388,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
 
     def set_all(self, /, data: list[Row]) -> None:
         self._items = {
-            getattr(row, self._spec.key_attr): row
+            getattr(row, self._key_attr): row
             for row in data
         }
 
@@ -383,18 +403,18 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
             self._table.setSortingEnabled(True)
 
     def update_item(self, /, item: Row) -> None:
-        row_num = self._get_row_num_for_key(key=getattr(item, self._spec.key_attr))
+        row_num = self._get_row_num_for_key(key=getattr(item, self._key_attr))
         if row_num is not None:
             self._set_row(row_num=row_num, data=item)
 
     def _get_row_num_for_key(self, *, key: Key) -> int | None:
         for row_num in range(self._table.rowCount()):
-            if key == self._table.item(row_num, self._col_indices[self._spec.key_attr]).data(qtc.Qt.EditRole):
+            if key == self._table.item(row_num, self._col_indices[self._key_attr]).data(qtc.Qt.EditRole):
                 return row_num
         return None
 
     def _set_row(self, *, row_num: int, data: Row) -> None:
-        for col_num, col_spec in enumerate(self._spec.col_specs):
+        for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.type in (
                 ColSpecType.Date,
                 ColSpecType.Decimal,
@@ -413,6 +433,17 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 item = TableItem(value=value, display_value=display_value)
                 item.setTextAlignment(col_spec.alignment.qt_alignment)
                 self._table.setItem(row_num, col_num, item)
+            elif col_spec.type == ColSpecType.RichText:
+                if col_spec.selector is None:
+                    if col_spec.attr_name is None:
+                        raise ValueError("If a [selector] is not provided, then [attr_name] is required.")
+                    value = getattr(data, col_spec.attr_name)
+                else:
+                    value = col_spec.selector(data)
+                text_edit = qtw.QTextEdit()
+                text_edit.setHtml(value)
+                text_edit.setReadOnly(True)
+                self._table.setCellWidget(row_num, col_num, text_edit)
             elif col_spec.type == ColSpecType.Button:
                 if col_spec.on_click is None:
                     raise Exception("[on_click] is required for a Button column.")
