@@ -88,7 +88,7 @@ class CategoryDash(qtw.QWidget):
 
     def _set_status(self, *, message: str) -> None:
         if message:
-            ts_str = datetime.datetime.now().strftime("%-m/%-d @ %-I:%M %p")
+            ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
             self._status_bar.showMessage(f"{ts_str}: {message}")
             self.repaint()
         else:

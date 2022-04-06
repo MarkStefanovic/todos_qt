@@ -28,7 +28,9 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
 
         self._cbo.currentIndexChanged.connect(self._on_current_index_changed)
 
-        layout = qtw.QVBoxLayout()
+        self.setMaximumHeight(self._cbo.height())
+
+        layout = qtw.QStackedLayout()
         layout.addWidget(self._cbo)
         self.setLayout(layout)
 
