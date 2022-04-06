@@ -23,6 +23,8 @@ __all__ = (
     "timestamp_col",
 )
 
+from src.presentation.shared import fonts
+
 Key = typing.TypeVar("Key")
 Row = typing.TypeVar("Row")
 Value = typing.TypeVar("Value")
@@ -249,7 +251,7 @@ def rich_text_col(
         selector=selector,
         display_name=display_name,
         display_fn=str,
-        type=ColSpecType.Text,
+        type=ColSpecType.RichText,
         column_width=column_width,
         hidden=hidden,
         alignment=alignment,
@@ -337,6 +339,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.setWordWrap(True)
         self._table.setColumnCount(len(headers))
         self._table.setHorizontalHeaderLabels(headers)
+        self._table.horizontalHeader().setFont(fonts.bold)
         self._table.setSortingEnabled(True)
 
         for col_num, col_spec in enumerate(self._col_specs):
@@ -377,7 +380,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
     def selected_item(self) -> Row | None:
         if indices := self._table.selectedIndexes():
             row_num = indices[0].row()
-            key = self._table.item(row_num, self._col_indices[self._key_attr]).data(qtc.Qt.EditRole)
+            key = self._table.item(row_num, self._col_indices[self._key_attr]).get_value()  # type: ignore
             return self._items[key]
         return None
 
@@ -409,7 +412,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
 
     def _get_row_num_for_key(self, *, key: Key) -> int | None:
         for row_num in range(self._table.rowCount()):
-            if key == self._table.item(row_num, self._col_indices[self._key_attr]).data(qtc.Qt.EditRole):
+            if key == self._table.item(row_num, self._col_indices[self._key_attr]).get_value():  # type: ignore
                 return row_num
         return None
 
@@ -441,6 +444,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     value = col_spec.selector(data)
                 text_edit = qtw.QTextEdit()
+                # text_edit.setMaximumHeight(100)
                 text_edit.setHtml(value)
                 text_edit.setReadOnly(True)
                 self._table.setCellWidget(row_num, col_num, text_edit)
@@ -449,8 +453,9 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     raise Exception("[on_click] is required for a Button column.")
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
+                    btn.setFont(fonts.bold)
                     assert col_spec.column_width is not None
-                    btn.setFixedWidth(col_spec.column_width - 6)
+                    btn.setFixedWidth(col_spec.column_width)
                     btn.clicked.connect(col_spec.on_click)
                     self._table.setCellWidget(row_num, col_num, btn)
 
@@ -470,16 +475,16 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     value = col_spec.selector(data)
 
-                cbo = qtw.QComboBox()
-                for ix, (v, display_value) in enumerate(col_spec.values.items()):
-                    cbo.addItem(display_value, v)
-                    if value == v:
-                        cbo.setCurrentIndex(ix)
+                cbo = DropdownCell(
+                    row_key=getattr(data, self._key_attr),
+                    values=col_spec.values,
+                    on_value_changed=col_spec.on_value_changed,
+                    initial_value=value,
+                )
 
                 assert col_spec.column_width is not None
-                cbo.setFixedWidth(col_spec.column_width - 6)
+                cbo.setFixedWidth(col_spec.column_width)
 
-                cbo.currentIndexChanged.connect(lambda _: col_spec.on_value_changed(cbo.currentData()))  # type: ignore
                 self._table.setCellWidget(row_num, col_num, cbo)
 
                 if col_spec.enable_when is not None:
@@ -495,14 +500,62 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.resizeRowsToContents()
 
 
-class TableItem(qtw.QTableWidgetItem):
-    def __init__(self, value: typing.Any, display_value: str):
+class DropdownCell(qtw.QComboBox):
+    def __init__(
+        self,
+        *,
+        row_key: Key,
+        values: dict[Value, str],
+        on_value_changed: typing.Callable[[Key, Value], None],
+        initial_value: Value,
+    ):
+        super().__init__()
+
+        self._row_key = row_key
+        self._on_value_changed = on_value_changed
+
+        self.set_values(values)
+        self.set_value(value=initial_value)
+
+        self.currentIndexChanged.connect(self._on_current_index_changed)
+
+    def get_value(self) -> Value:
+        return self.currentData()
+
+    def set_value(self, /, value: Value):
+        ix = next(
+            (
+                i
+                for i in range(self.count())
+                if value == self.itemData(i)
+            ),
+            -1,
+        )
+        self.setCurrentIndex(ix)
+
+    def set_values(self, /, values: dict[Value, str]) -> None:
+        self.blockSignals(True)
+        try:
+            for value, display_value in values.items():
+                self.addItem(display_value, value)
+        finally:
+            self.blockSignals(False)
+
+    def _on_current_index_changed(self) -> None:
+        self._on_value_changed(self._row_key, self.currentData())
+
+
+class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
+    def __init__(self, value: Value, display_value: str):
         super().__init__(display_value)
 
         self._value = value
 
         # noinspection PyTypeChecker
         self.setFlags(qtc.Qt.ItemIsSelectable | qtc.Qt.ItemIsEnabled)  # type: ignore
+
+    def get_value(self) -> Value:
+        return self._value
 
     def __lt__(self, other: object) -> bool:
         assert isinstance(other, TableItem)
