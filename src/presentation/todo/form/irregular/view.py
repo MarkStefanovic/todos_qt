@@ -8,12 +8,12 @@ __all__ = ("IrregularFrequencyForm",)
 
 
 class IrregularFrequencyForm(qtw.QWidget):
-    def __init__(self, *, state: IrregularFrequencyFormState):
+    def __init__(self):
         super().__init__()
 
         month_lbl = qtw.QLabel("Month")
         month_lbl.setFont(fonts.bold)
-        self._month_cbo = widgets.MapCBO(
+        self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO(
             mapping={
                 domain.Month.January: "Jan",
                 domain.Month.February: "Feb",
@@ -28,7 +28,7 @@ class IrregularFrequencyForm(qtw.QWidget):
                 domain.Month.November: "Nov",
                 domain.Month.December: "Dec",
             },
-            value=state.month,
+            value=domain.Month.January,
         )
         self._month_cbo.setFixedWidth(150)
 
@@ -50,7 +50,7 @@ class IrregularFrequencyForm(qtw.QWidget):
                 domain.Weekday.Saturday: "Saturday",
                 domain.Weekday.Sunday: "Sunday",
             },
-            value=state.week_day,
+            value=domain.Weekday.Monday,
         )
         self._weekday_cbo.setFixedWidth(150)
 
@@ -61,8 +61,6 @@ class IrregularFrequencyForm(qtw.QWidget):
         form_layout.addRow(weekday_lbl, self._weekday_cbo)
 
         self.setLayout(form_layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> IrregularFrequencyFormState:
         return IrregularFrequencyFormState(

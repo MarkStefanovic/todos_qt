@@ -9,7 +9,7 @@ BTN_SIZE = qtc.QSize(20, 20)
 
 
 class RichTextEditor(qtw.QWidget):
-    def __init__(self):
+    def __init__(self):  # type: ignore
         super().__init__()
 
         highlight_btn_icon = qta.icon("mdi6.format-color-highlight")
@@ -27,7 +27,7 @@ class RichTextEditor(qtw.QWidget):
         bold_btn_icon = qta.icon("mdi.format-bold")
         self._bold_btn = qtw.QPushButton(bold_btn_icon, "")
         self._bold_btn.clicked.connect(self._bold_btn_clicked)
-        self._bold_btn.setToolTip("Bold")
+        self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
         bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), self)
@@ -47,6 +47,12 @@ class RichTextEditor(qtw.QWidget):
         layout.addWidget(self._text_edit)
 
         self.setLayout(layout)
+
+    def get_value(self) -> str:
+        return self._text_edit.toHtml()
+
+    def set_value(self, /, value: str) -> None:
+        self._text_edit.setHtml(value)
 
     def _bold_btn_clicked(self) -> None:
         cursor = self._text_edit.textCursor()
@@ -82,6 +88,7 @@ class RichTextEditor(qtw.QWidget):
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     w = RichTextEditor()
+    w.set_value("<b>Te</b>st")
     w.show()
     app.exec()
 

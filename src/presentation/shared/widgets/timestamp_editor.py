@@ -1,30 +1,22 @@
 import datetime
-import typing
 
 from dateutil.parser import parse, ParserError
 from PyQt5 import QtWidgets as qtw
 
-__all__ = ("TsEditor",)
+__all__ = ("TimestampEditor",)
 
 
-class TsEditor(qtw.QWidget):
-    def __init__(self, initial_value: typing.Optional[datetime.datetime] = None):
+class TimestampEditor(qtw.QWidget):
+    def __init__(self, *, fmt: str = "%-m/%-d/%y @ %-I:%M %p"):
         super().__init__()
 
-        if initial_value:
-            initial_text_value = initial_value.strftime("%m/%d/%Y %I:%M %p")
-        else:
-            initial_text_value = ""
+        self._fmt = fmt
 
-        self._text_edit = qtw.QLineEdit(initial_text_value)
+        self._text_edit = qtw.QLineEdit("")
         self._text_edit.textChanged.connect(self.validate)
         self._text_edit.setFixedWidth(130)
         self._text_edit.setFixedHeight(20)
         self._text_edit.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
-
-        self._ts: typing.Optional[datetime.datetime] = initial_value
-
-        self._is_valid = True
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)
@@ -33,16 +25,17 @@ class TsEditor(qtw.QWidget):
 
         self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
 
-    @property
-    def ts(self) -> typing.Optional[datetime.datetime]:
+        self._ts: datetime.datetime | None = None
+        self._is_valid = True
+
+    def get_value(self) -> datetime.datetime | None:
         if self._ts == "":
             self._ts = None
         return self._ts
 
-    @ts.setter
-    def ts(self, value: typing.Optional[datetime.datetime]) -> None:
+    def set_value(self, value: datetime.datetime | None) -> None:
         if value:
-            self._text_edit.setText(value.strftime("%m/%d/%Y %I:%M %p"))
+            self._text_edit.setText(value.strftime(self._fmt))
         else:
             self._text_edit.setText("")
 

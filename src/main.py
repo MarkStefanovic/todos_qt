@@ -1,4 +1,3 @@
-import datetime
 import functools
 import os
 import pathlib
@@ -63,7 +62,7 @@ def main() -> None:
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
 
-    username = os.environ.get("USERNAME", "unknown")
+    username = os.environ.get("USERNAME", "unknown").lower()
 
     category_service = service.DbCategoryService(engine=engine)
 
@@ -79,37 +78,7 @@ def main() -> None:
         if todo_service.get(todo_id=holiday.todo_id) is None:
             todo_service.upsert(todo=holiday)
 
-    todos = todo_service.get_where(
-        date_filter=datetime.date.today(),
-        due_filter=True,
-        description_like="",
-        category_filter=presentation.ALL_CATEGORY,
-    )
-
-    categories = category_service.all()
-
-    users = user_service.all()
-
-    state = presentation.MainState(
-        today=datetime.date.today(),
-        active_tab="todo",
-        todo_state=presentation.TodoState.initial(
-            todos=todos,
-            category_options=categories,
-            user_options=users,
-        ),
-        category_state=presentation.CategoryState(
-            dash_state=presentation.CategoryDashState(
-                categories=categories,
-                selected_category=None,
-                status="",
-            ),
-            form_state=presentation.CategoryFormState.initial(),
-            dash_active=True,
-        ),
-    )
-
-    main_view = presentation.MainView(state=state, window_icon=app_icon)
+    main_view = presentation.MainView(window_icon=app_icon)
 
     apply_stylesheet(app, theme="dark_amber.xml")
 
@@ -133,6 +102,8 @@ def main() -> None:
         category_service=category_service,
         view=main_view.categories,
     )
+
+    main_view.todos.dash.refresh_btn.click()
 
     sys.exit(app.exec())
 

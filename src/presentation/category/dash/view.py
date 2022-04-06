@@ -13,7 +13,7 @@ class CategoryDash(qtw.QWidget):
     delete_btn_clicked = qtc.pyqtSignal()
     edit_btn_clicked = qtc.pyqtSignal()
 
-    def __init__(self, *, state: CategoryDashState):
+    def __init__(self):
         super().__init__()
 
         self.refresh_btn = qtw.QPushButton("Refresh")
@@ -29,40 +29,38 @@ class CategoryDash(qtw.QWidget):
         toolbar_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
 
         self.table: table.Table[domain.Category, str] = table.Table(
-            spec=table.TableSpec(
-                col_specs=[
-                    table.text_col(display_name="ID", attr_name="category_id", hidden=True),
-                    table.text_col(display_name="Name", attr_name="name", column_width=200),
-                    table.text_col(display_name="Note", attr_name="note", column_width=400),
-                    table.timestamp_col(
-                        attr_name="date_added",
-                        display_name="Added",
-                        alignment=table.ColAlignment.Center,
-                        display_format="%m/%d/%Y %I:%M %p",
-                        column_width=110,
-                    ),
-                    table.timestamp_col(
-                        attr_name="date_updated",
-                        display_name="Updated",
-                        alignment=table.ColAlignment.Center,
-                        display_format="%m/%d/%Y %I:%M %p",
-                        column_width=110,
-                    ),
-                    table.button_col(
-                        button_text="Edit",
-                        on_click=self.edit_btn_clicked.emit,
-                        column_width=100,
-                        enable_when=lambda category: category.name not in ("Holiday", "Todo"),
-                    ),
-                    table.button_col(
-                        button_text="Delete",
-                        on_click=self.delete_btn_clicked.emit,
-                        column_width=100,
-                        enable_when=lambda category: category.name not in ("Holiday", "Todo"),
-                    ),
-                ],
-                key_attr="category_id",
-            ),
+            col_specs=[
+                table.text_col(display_name="ID", attr_name="category_id", hidden=True),
+                table.text_col(display_name="Name", attr_name="name", column_width=200),
+                table.text_col(display_name="Note", attr_name="note", column_width=400),
+                table.timestamp_col(
+                    attr_name="date_added",
+                    display_name="Added",
+                    alignment=table.ColAlignment.Center,
+                    display_format="%m/%d/%Y %I:%M %p",
+                    column_width=110,
+                ),
+                table.timestamp_col(
+                    attr_name="date_updated",
+                    display_name="Updated",
+                    alignment=table.ColAlignment.Center,
+                    display_format="%m/%d/%Y %I:%M %p",
+                    column_width=110,
+                ),
+                table.button_col(
+                    button_text="Edit",
+                    on_click=self.edit_btn_clicked.emit,
+                    column_width=100,
+                    enable_when=lambda category: category.name not in ("Holiday", "Todo"),
+                ),
+                table.button_col(
+                    button_text="Delete",
+                    on_click=self.delete_btn_clicked.emit,
+                    column_width=100,
+                    enable_when=lambda category: category.name not in ("Holiday", "Todo"),
+                ),
+            ],
+            key_attr="category_id",
         )
 
         self._status_bar = qtw.QStatusBar()
@@ -72,8 +70,6 @@ class CategoryDash(qtw.QWidget):
         layout.addWidget(self.table)
         layout.addWidget(self._status_bar)
         self.setLayout(layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> CategoryDashState:
         return CategoryDashState(

@@ -8,7 +8,7 @@ __all__ = ("WeeklyFrequencyForm",)
 
 
 class WeeklyFrequencyForm(qtw.QWidget):
-    def __init__(self, *, state: WeeklyFrequencyFormState):
+    def __init__(self):
         super().__init__()
 
         weekday_lbl = qtw.QLabel("Weekday")
@@ -23,7 +23,7 @@ class WeeklyFrequencyForm(qtw.QWidget):
                 domain.Weekday.Saturday: "Saturday",
                 domain.Weekday.Sunday: "Sunday",
             },
-            value=state.week_day,
+            value=domain.Weekday.Monday,
         )
         self._weekday_cbo.setFixedWidth(150)
 
@@ -31,8 +31,6 @@ class WeeklyFrequencyForm(qtw.QWidget):
         form_layout.addRow(weekday_lbl, self._weekday_cbo)
 
         self.setLayout(form_layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> WeeklyFrequencyFormState:
         return WeeklyFrequencyFormState(week_day=self._weekday_cbo.get_value())

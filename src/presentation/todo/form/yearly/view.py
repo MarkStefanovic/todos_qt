@@ -8,7 +8,7 @@ __all__ = ("YearlyFrequencyForm",)
 
 
 class YearlyFrequencyForm(qtw.QWidget):
-    def __init__(self, *, state: YearlyFrequencyFormState):
+    def __init__(self):
         super().__init__()
 
         month_lbl = qtw.QLabel("Month")
@@ -28,7 +28,7 @@ class YearlyFrequencyForm(qtw.QWidget):
                 domain.Month.November: "Nov",
                 domain.Month.December: "Dec",
             },
-            value=state.month,
+            value=domain.Month.January,
         )
         self._month_cbo.setFixedWidth(100)
 
@@ -43,8 +43,6 @@ class YearlyFrequencyForm(qtw.QWidget):
         form_layout.addRow(month_day_lbl, self._month_day_sb)
 
         self.setLayout(form_layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> YearlyFrequencyFormState:
         return YearlyFrequencyFormState(

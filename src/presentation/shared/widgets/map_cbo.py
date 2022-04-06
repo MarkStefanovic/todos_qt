@@ -23,8 +23,8 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
         if mapping is not None:
             self.set_values(mapping=mapping)
 
-        if value is not None:
-            self.set_value(value=value)
+            if value is not None:
+                self.set_value(value=value)
 
         self._cbo.currentIndexChanged.connect(self._on_current_index_changed)
 

@@ -1,22 +1,18 @@
-import datetime
-
 from PyQt5 import QtWidgets as qtw
 
-from src.presentation.shared import fonts
+from src.presentation.shared import fonts, widgets
 from src.presentation.todo.form.once.state import OnceFrequencyFormState
 
 __all__ = ("OnceFrequencyForm",)
 
 
 class OnceFrequencyForm(qtw.QWidget):
-    def __init__(self, *, state: OnceFrequencyFormState):
+    def __init__(self):
         super().__init__()
 
         due_date_lbl = qtw.QLabel("Due Date")
         due_date_lbl.setFont(fonts.bold)
-        self._due_date_edit = qtw.QDateEdit()
-        self._due_date_edit.setMinimumDate(datetime.date(1900, 1, 1))
-        self._due_date_edit.setDate(state.due_date)
+        self._due_date_edit = widgets.DateEditor()
         self._due_date_edit.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
@@ -24,10 +20,8 @@ class OnceFrequencyForm(qtw.QWidget):
 
         self.setLayout(form_layout)
 
-        self.set_state(state=state)
-
     def get_state(self) -> OnceFrequencyFormState:
-        return OnceFrequencyFormState(due_date=self._due_date_edit.date().toPyDate())
+        return OnceFrequencyFormState(due_date=self._due_date_edit.get_value())
 
     def set_state(self, *, state: OnceFrequencyFormState) -> None:
-        self._due_date_edit.setDate(state.due_date)
+        self._due_date_edit.set_value(state.due_date)

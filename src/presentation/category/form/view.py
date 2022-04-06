@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src.presentation.category.form.state import CategoryFormState
@@ -7,7 +9,7 @@ __all__ = ("CategoryForm",)
 
 
 class CategoryForm(qtw.QWidget):
-    def __init__(self, *, state: CategoryFormState):
+    def __init__(self):
         super().__init__()
 
         self.back_btn = qtw.QPushButton("Back")
@@ -27,9 +29,9 @@ class CategoryForm(qtw.QWidget):
         form_layout.addRow(name_lbl, self._name_txt)
         form_layout.addRow(note_lbl, self._note_txt)
 
-        self._category_id = state.category_id
-        self._date_added = state.date_added
-        self._date_updated = state.date_updated
+        self._category_id: str = ""
+        self._date_added: datetime.datetime = datetime.datetime.now()
+        self._date_updated: datetime.datetime | None = None
 
         self.save_btn = qtw.QPushButton("Save")
         self.save_btn.setFont(fonts.bold)
@@ -41,8 +43,6 @@ class CategoryForm(qtw.QWidget):
         layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignRight)
 
         self.setLayout(layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> CategoryFormState:
         return CategoryFormState(

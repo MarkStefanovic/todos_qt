@@ -1,18 +1,18 @@
 from PyQt5 import QtWidgets as qtw
 
-from src.presentation.todo.state import TodoState
-from src.presentation.todo.dash.view import TodoDash
-from src.presentation.todo.form.view import TodoForm
+from src.presentation.user.dash.view import UserDash
+from src.presentation.user.form.view import UserForm
+from src.presentation.user.state import UserState
 
-__all__ = ("TodoView",)
+__all__ = ("UserView",)
 
 
-class TodoView(qtw.QWidget):
+class UserView(qtw.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.dash = TodoDash()
-        self.form = TodoForm()
+        self.dash = UserDash()
+        self.form = UserForm()
 
         self.stacked_layout = qtw.QStackedLayout()
         self.stacked_layout.addWidget(self.dash)
@@ -20,14 +20,14 @@ class TodoView(qtw.QWidget):
 
         self.setLayout(self.stacked_layout)
 
-    def get_state(self) -> TodoState:
-        return TodoState(
+    def get_state(self) -> UserState:
+        return UserState(
             dash_state=self.dash.get_state(),
             form_state=self.form.get_state(),
             dash_active=self.stacked_layout.currentIndex() == 0,
         )
 
-    def set_state(self, *, state: TodoState) -> None:
+    def set_state(self, *, state: UserState) -> None:
         self.dash.set_state(state=state.dash_state)
         self.form.set_state(state=state.form_state)
         if state.dash_active:

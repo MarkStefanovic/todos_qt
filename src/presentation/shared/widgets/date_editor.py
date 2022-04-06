@@ -1,32 +1,24 @@
 import datetime
-import typing
 
 from dateutil.parser import parse, ParserError
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
-__all__ = ("DtEditor",)
+__all__ = ("DateEditor",)
 
 
-class DtEditor(qtw.QWidget):
+class DateEditor(qtw.QWidget):
     date_changed = qtc.pyqtSignal()
 
-    def __init__(self, initial_value: typing.Optional[datetime.date] = None):
+    def __init__(self, *, fmt: str = "%-m/%-d/%y"):
         super().__init__()
 
-        if initial_value:
-            initial_text_value = initial_value.strftime("%m/%d/%Y")
-        else:
-            initial_text_value = ""
+        self._fmt = fmt
 
-        self._text_edit = qtw.QLineEdit(initial_text_value)
+        self._text_edit = qtw.QLineEdit("")
         self._text_edit.textChanged.connect(self._on_text_changed)
         self._text_edit.setFixedWidth(80)
         self._text_edit.setFixedHeight(20)
         self._text_edit.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
-
-        self._dt: typing.Optional[datetime.date] = initial_value
-
-        self._is_valid = True
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)
@@ -35,14 +27,15 @@ class DtEditor(qtw.QWidget):
 
         self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
 
-    @property
-    def dt(self) -> typing.Optional[datetime.date]:
+        self._dt: datetime.date | None = None
+        self._is_valid = True
+
+    def get_value(self) -> datetime.date | None:
         return self._dt
 
-    @dt.setter
-    def dt(self, value: typing.Optional[datetime.date]) -> None:
+    def set_value(self, /, value: datetime.date | None) -> None:
         if value:
-            self._text_edit.setText(value.strftime("%m/%d/%Y"))
+            self._text_edit.setText(value.strftime(self._fmt))
         else:
             self._text_edit.setText("")
 

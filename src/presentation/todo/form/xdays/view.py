@@ -7,7 +7,7 @@ __all__ = ("XDaysFrequencyForm",)
 
 
 class XDaysFrequencyForm(qtw.QWidget):
-    def __init__(self, *, state: XDaysFrequencyFormState):
+    def __init__(self):
         super().__init__()
 
         days_lbl = qtw.QLabel("Month")
@@ -20,8 +20,6 @@ class XDaysFrequencyForm(qtw.QWidget):
         form_layout.addRow(days_lbl, self._days_sb)
 
         self.setLayout(form_layout)
-
-        self.set_state(state=state)
 
     def get_state(self) -> XDaysFrequencyFormState:
         return XDaysFrequencyFormState(days=self._days_sb.value())

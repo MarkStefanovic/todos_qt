@@ -4,10 +4,9 @@ import logging
 from src import domain
 from src.presentation.category.form.state import CategoryFormState
 from src.presentation.category.view import CategoryView
+from src.presentation.shared.widgets import popup
 
 __all__ = ("CategoryController",)
-
-from src.presentation.shared.widgets import popup
 
 logger = logging.getLogger()
 
