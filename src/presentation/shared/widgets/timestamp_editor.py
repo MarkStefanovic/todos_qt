@@ -7,7 +7,7 @@ __all__ = ("TimestampEditor",)
 
 
 class TimestampEditor(qtw.QWidget):
-    def __init__(self, *, fmt: str = "%-m/%-d/%y @ %-I:%M %p"):
+    def __init__(self, *, fmt: str = "%m/%d/%y @ %I:%M %p"):
         super().__init__()
 
         self._fmt = fmt

@@ -38,16 +38,19 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
     def get_values(self) -> list[Value]:
         return list(self._mapping.keys())
 
-    def set_value(self, *, value: Value) -> None:
-        if value in self._index_by_value:
-            if self._cbo.currentIndex() != self._index_by_value[value]:
-                self._cbo.setCurrentIndex(self._index_by_value[value])
+    def set_value(self, *, value: Value | None) -> None:
+        if value is None:
+            self._cbo.setCurrentIndex(-1)
         else:
-            warnings.warn(
-                f"The value, {value!r}, is not an option.  Available values include the "
-                f"following: {', '.join(str(v) for v in self._index_by_value.keys())}"
-            )
-            self._cbo.setCurrentIndex(0)
+            if value in self._index_by_value:
+                if self._cbo.currentIndex() != self._index_by_value[value]:
+                    self._cbo.setCurrentIndex(self._index_by_value[value])
+            else:
+                warnings.warn(
+                    f"The value, {value!r}, is not an option.  Available values include the "
+                    f"following: {', '.join(str(v) for v in self._index_by_value.keys())}"
+                )
+                self._cbo.setCurrentIndex(0)
 
     def set_values(self, *, mapping: dict[Value, str]) -> None:
         if mapping != self._mapping:
