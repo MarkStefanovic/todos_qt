@@ -11,6 +11,7 @@ class Todo(sm.SQLModel, table=True):
     todo_id: str = sm.Field(primary_key=True)
     description: str
     note: str
+    user_id: str
     category_id: str
     advance_days: int
     expire_days: int
@@ -36,6 +37,16 @@ class Category(sm.SQLModel, table=True):
     category_id: str = sm.Field(primary_key=True)
     name: str
     note: str
+    date_added: datetime.datetime
+    date_updated: datetime.datetime | None
+    date_deleted: datetime.datetime | None
+
+
+class User(sm.SQLModel, table=True):
+    user_id: str = sm.Field(primary_key=True)
+    display_name: str
+    username: str
+    is_admin: bool
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
     date_deleted: datetime.datetime | None

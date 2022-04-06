@@ -4,7 +4,6 @@ import dataclasses
 import datetime
 
 from src import domain
-from src.domain import TODO_CATEGORY
 from src.presentation.todo.form.irregular.state import IrregularFrequencyFormState
 from src.presentation.todo.form.monthly.state import MonthlyFrequencyFormState
 from src.presentation.todo.form.once.state import OnceFrequencyFormState
@@ -20,6 +19,7 @@ class TodoFormState:
     todo_id: str
     advance_days: int
     expire_days: int
+    user: domain.User
     category: domain.Category
     description: str
     frequency_name: domain.FrequencyType
@@ -27,7 +27,6 @@ class TodoFormState:
     start_date: datetime.date
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
     last_completed: datetime.date | None
     prior_completed: datetime.date | None
     irregular_frequency_form_state: IrregularFrequencyFormState
@@ -37,21 +36,26 @@ class TodoFormState:
     xdays_frequency_form_state: XDaysFrequencyFormState
     yearly_frequency_form_state: YearlyFrequencyFormState
     category_options: list[domain.Category]
+    user_options: list[domain.User]
 
     @staticmethod
-    def initial(*, category_options: list[domain.Category]) -> TodoFormState:
+    def initial(
+        *,
+        category_options: list[domain.Category],
+        user_options: list[domain.User],
+    ) -> TodoFormState:
         return TodoFormState(
             todo_id=domain.create_uuid(),
             advance_days=0,
             expire_days=1,
-            category=TODO_CATEGORY,
+            user=domain.DEFAULT_USER,
+            category=domain.TODO_CATEGORY,
             description="",
             frequency_name=domain.FrequencyType.Daily,
             note="",
             start_date=datetime.date.today(),
             date_added=datetime.datetime.now(),
             date_updated=None,
-            date_deleted=None,
             last_completed=None,
             prior_completed=None,
             irregular_frequency_form_state=IrregularFrequencyFormState.initial(),
@@ -61,6 +65,7 @@ class TodoFormState:
             xdays_frequency_form_state=XDaysFrequencyFormState.initial(),
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
             category_options=category_options,
+            user_options=user_options,
         )
 
     def to_domain(self) -> domain.Todo:
@@ -114,18 +119,23 @@ class TodoFormState:
         return domain.Todo(
             todo_id=self.todo_id,
             frequency=frequency,
+            user=self.user,
             category=self.category,
             description=self.description,
             note=self.note,
             date_added=self.date_added,
             date_updated=self.date_updated,
-            date_deleted=self.date_deleted,
             last_completed=self.last_completed,
             prior_completed=self.prior_completed,
         )
 
     @staticmethod
-    def from_domain(*, todo: domain.Todo, category_options: list[domain.Category]) -> TodoFormState:
+    def from_domain(
+        *,
+        todo: domain.Todo,
+        category_options: list[domain.Category],
+        user_options: list[domain.User],
+    ) -> TodoFormState:
         irregular_frequency_form_state = IrregularFrequencyFormState.initial()
         monthly_frequency_form_state = MonthlyFrequencyFormState.initial()
         once_frequency_form_state = OnceFrequencyFormState.initial()
@@ -148,6 +158,7 @@ class TodoFormState:
 
         return TodoFormState(
             todo_id=todo.todo_id,
+            user=todo.user,
             category=todo.category,
             description=todo.description,
             frequency_name=todo.frequency.name,
@@ -163,10 +174,10 @@ class TodoFormState:
             start_date=todo.frequency.start_date,
             date_added=todo.date_added,
             date_updated=todo.date_updated,
-            date_deleted=todo.date_deleted,
             last_completed=todo.last_completed,
             prior_completed=todo.prior_completed,
             category_options=category_options,
+            user_options=user_options,
         )
 
     def __eq__(self, other: object) -> bool:

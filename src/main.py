@@ -1,5 +1,6 @@
 import datetime
 import functools
+import os
 import pathlib
 import sys
 import types
@@ -62,13 +63,17 @@ def main() -> None:
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
 
+    username = os.environ.get("USERNAME", "unknown")
+
     category_service = service.DbCategoryService(engine=engine)
+
+    user_service = service.DbUserService(engine=engine, username=username)
 
     for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
         if not category_service.get(category_id=category.category_id):
             category_service.add(category=category)
 
-    todo_service = service.DbTodoService(engine=engine)
+    todo_service = service.DbTodoService(engine=engine, username=username)
 
     for holiday in domain.HOLIDAYS:
         if todo_service.get(todo_id=holiday.todo_id) is None:
@@ -83,12 +88,15 @@ def main() -> None:
 
     categories = category_service.all()
 
+    users = user_service.all()
+
     state = presentation.MainState(
         today=datetime.date.today(),
         active_tab="todo",
         todo_state=presentation.TodoState.initial(
             todos=todos,
             category_options=categories,
+            user_options=users,
         ),
         category_state=presentation.CategoryState(
             dash_state=presentation.CategoryDashState(
@@ -106,8 +114,8 @@ def main() -> None:
     apply_stylesheet(app, theme="dark_amber.xml")
 
     screen = app.desktop().screenGeometry()
-    if screen.width() >= 2100:
-        width = 2100
+    if screen.width() >= 2250:
+        width = 2250
     else:
         width = screen.width()
     main_view.setGeometry(0, 0, width, screen.height())
@@ -117,6 +125,7 @@ def main() -> None:
     todo_controller = presentation.TodoController(
         category_service=category_service,
         todo_service=todo_service,
+        user_service=user_service,
         view=main_view.todos,
     )
 

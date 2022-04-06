@@ -36,6 +36,14 @@ class TodoForm(qtw.QWidget):
         self._expire_days_sb.setRange(1, 364)
         self._expire_days_sb.setFixedWidth(80)
 
+        user_lbl = qtw.QLabel("User")
+        user_lbl.setFont(fonts.bold)
+        self._user_cbo: MapCBO[domain.User] = MapCBO(
+            mapping={user: user.display_name for user in state.user_options},
+            value=state.user,
+        )
+        self._user_cbo.setFixedWidth(150)
+
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
         self._category_cbo: MapCBO[domain.Category] = MapCBO(
@@ -91,6 +99,7 @@ class TodoForm(qtw.QWidget):
         form_layout.addRow(description_lbl, self._description_txt)
         form_layout.addRow(advance_days_lbl, self._advance_days_sb)
         form_layout.addRow(expire_days_lbl, self._expire_days_sb)
+        form_layout.addRow(user_lbl, self._user_cbo)
         form_layout.addRow(category_lbl, self._category_cbo)
         form_layout.addRow(note_lbl, self._note_txt)
         form_layout.addRow(frequency_lbl, self._frequency_cbo)
@@ -113,17 +122,18 @@ class TodoForm(qtw.QWidget):
         self.setLayout(main_layout)
 
         self._todo_id = state.todo_id
-        self._date_added: datetime.datetime = state.date_added
-        self._date_updated: datetime.datetime | None = state.date_updated
-        self._date_deleted: datetime.datetime | None = state.date_deleted
-        self._last_completed: datetime.date | None = state.last_completed
-        self._prior_completed: datetime.date | None = state.prior_completed
+        self._date_added = state.date_added
+        self._date_updated = state.date_updated
+        self._user = state.user
+        self._last_completed = state.last_completed
+        self._prior_completed = state.prior_completed
 
         self.set_state(state=state)
 
     def get_state(self) -> TodoFormState:
         return TodoFormState(
             todo_id=self._todo_id,
+            user=self._user,
             advance_days=self._advance_days_sb.value(),
             expire_days=self._expire_days_sb.value(),
             category=self._category_cbo.get_value(),
@@ -133,7 +143,6 @@ class TodoForm(qtw.QWidget):
             start_date=self._start_date_edit.date().toPyDate(),
             date_added=self._date_added,
             date_updated=self._date_updated,
-            date_deleted=self._date_deleted,
             last_completed=self._last_completed,
             prior_completed=self._prior_completed,
             irregular_frequency_form_state=self._irregular_frequency_form.get_state(),
@@ -143,13 +152,14 @@ class TodoForm(qtw.QWidget):
             xdays_frequency_form_state=self._xdays_frequency_form.get_state(),
             yearly_frequency_form_state=self._yearly_frequency_form.get_state(),
             category_options=self._category_cbo.get_values(),
+            user_options=self._user_cbo.get_values(),
         )
 
     def set_state(self, *, state: TodoFormState) -> None:
         self._todo_id = state.todo_id
         self._date_added = state.date_added
         self._date_updated = state.date_updated
-        self._date_deleted = state.date_deleted
+        self._user = state.user
         self._last_completed = state.last_completed
         self._prior_completed = state.prior_completed
 
@@ -158,13 +168,10 @@ class TodoForm(qtw.QWidget):
         self._expire_days_sb.setValue(state.expire_days)
         self._advance_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
         self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
-        self._category_cbo.set_values(
-            mapping={
-                category: category.name
-                for category in state.category_options
-            }
-        )
+        self._category_cbo.set_values(mapping={category: category.name for category in state.category_options})
         self._category_cbo.set_value(value=state.category)
+        self._user_cbo.set_values(mapping={user: user.display_name for user in state.user_options})
+        self._user_cbo.set_value(value=state.user)
         self._note_txt.setPlainText(state.note)
         self._start_date_edit.setDate(state.start_date)
         self._frequency_cbo.set_value(value=state.frequency_name)

@@ -13,4 +13,7 @@ from src.domain.should_display import *
 from src.domain.todo import *
 from src.domain.todo_repository import *
 from src.domain.todo_service import *
+from src.domain.user import *
+from src.domain.user_repository import *
+from src.domain.user_service import *
 from src.domain.weekday import *

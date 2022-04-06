@@ -17,10 +17,12 @@ class TodoController:
         *,
         category_service: domain.CategoryService,
         todo_service: domain.TodoService,
+        user_service: domain.UserService,
         view: TodoView,
     ):
         self._todo_service = todo_service
         self._category_service = category_service
+        self._user_service = user_service
         self._view = view
 
         self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
@@ -39,9 +41,14 @@ class TodoController:
         try:
             categories = self._category_service.all()
 
+            users = self._user_service.all()
+
             new_state = dataclasses.replace(
                 state,
-                form_state=TodoFormState.initial(category_options=categories),
+                form_state=TodoFormState.initial(
+                    category_options=categories,
+                    user_options=users,
+                ),
                 dash_active=False,
             )
         except Exception as e:
@@ -138,10 +145,16 @@ class TodoController:
         try:
             categories = self._category_service.all()
 
+            users = self._user_service.all()
+
             if todo := state.dash_state.selected_todo:
                 new_state = dataclasses.replace(
                     state,
-                    form_state=TodoFormState.from_domain(todo=todo, category_options=categories),
+                    form_state=TodoFormState.from_domain(
+                        todo=todo,
+                        category_options=categories,
+                        user_options=users,
+                    ),
                     dash_active=False,
                 )
 

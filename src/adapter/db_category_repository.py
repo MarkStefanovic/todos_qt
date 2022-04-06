@@ -1,5 +1,6 @@
 import datetime
 
+import sqlalchemy as sa
 import sqlmodel as sm
 
 from src import domain
@@ -26,6 +27,16 @@ class DbCategoryRepository(domain.CategoryRepository):
         self._session.add(category_orm)
 
     def delete(self, *, category_id: str) -> None:
+        if todo_orm := self._session.exec(
+            sm.select(db.Todo)
+            .where(db.Todo.date_deleted == None)
+            .where(db.Todo.category_id == category_id)
+            .limit(1)
+        ).one_or_none():
+            raise Exception(
+                f"Cannot delete category, as the todo, {todo_orm.description!r}, uses it."
+            )
+
         if category_orm := self._session.exec(
             sm.select(db.Category)
             .where(db.Category.category_id == category_id)

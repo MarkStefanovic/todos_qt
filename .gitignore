@@ -143,3 +143,4 @@ cython_debug/
 logs
 *scratch.py
 config.json
+NOTES.md

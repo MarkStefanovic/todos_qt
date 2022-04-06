@@ -9,6 +9,7 @@ from src.domain.due_date import due_date
 from src.domain.frequency import Frequency
 from src.domain.month import Month
 from src.domain.should_display import should_display
+from src.domain.user import DEFAULT_USER, User
 from src.domain.weekday import Weekday
 
 __all__ = ("Todo", "DEFAULT_TODO",)
@@ -17,6 +18,7 @@ __all__ = ("Todo", "DEFAULT_TODO",)
 @dataclasses.dataclass(frozen=True)
 class Todo:
     todo_id: str
+    user: User
     category: Category
     description: str
     frequency: Frequency
@@ -25,7 +27,6 @@ class Todo:
     prior_completed: datetime.date | None
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
 
     def due_date(self, *, today: datetime.date) -> datetime.date:
         return due_date(frequency=self.frequency, today=today)
@@ -47,6 +48,7 @@ class Todo:
     @staticmethod
     def daily(
         *,
+        user: User,
         category: Category,
         description: str,
         note: str,
@@ -55,11 +57,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.daily(start_date=start_date),
@@ -68,12 +70,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def irregular(
         *,
+        user: User,
         category: Category,
         description: str,
         month: Month,
@@ -87,11 +89,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.irregular(
@@ -107,12 +109,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def monthly(
         *,
+        user: User,
         category: Category,
         description: str,
         month_day: int,
@@ -124,11 +126,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.monthly(
@@ -142,12 +144,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def once(
         *,
+        user: User,
         category: Category,
         description: str,
         due_date: datetime.date,
@@ -159,11 +161,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.once(
@@ -177,12 +179,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def weekly(
         *,
+        user: User,
         category: Category,
         description: str,
         note: str,
@@ -194,11 +196,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.weekly(
@@ -212,12 +214,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def xdays(
         *,
+        user: User,
         category: Category,
         days: int,
         description: str,
@@ -229,11 +231,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.xdays(
@@ -247,12 +249,12 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
     @staticmethod
     def yearly(
         *,
+        user: User,
         category: Category,
         description: str,
         month: Month,
@@ -265,11 +267,11 @@ class Todo:
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
         date_added: datetime.datetime,
-        date_deleted: typing.Optional[datetime.datetime],
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
         return Todo(
             todo_id=todo_id,
+            user=user,
             category=category,
             description=description,
             frequency=Frequency.yearly(
@@ -284,7 +286,6 @@ class Todo:
             prior_completed=prior_completed,
             date_added=date_added,
             date_updated=date_updated,
-            date_deleted=date_deleted,
         )
 
 
@@ -295,8 +296,8 @@ DEFAULT_TODO = Todo.daily(
     note="",
     last_completed=None,
     prior_completed=None,
+    user=DEFAULT_USER,
     category=TODO_CATEGORY,
     date_added=datetime.datetime.now(),
     date_updated=None,
-    date_deleted=None,
 )

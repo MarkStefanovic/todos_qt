@@ -11,8 +11,15 @@ __all__ = ("DbTodoService",)
 
 
 class DbTodoService(domain.TodoService):
-    def __init__(self, *, engine: sa.engine.Engine, min_seconds_between_refreshes: int = 300):
+    def __init__(
+        self,
+        *,
+        engine: sa.engine.Engine,
+        username: str,
+        min_seconds_between_refreshes: int = 300,
+    ):
         self._engine = engine
+        self._username = username
         self._min_seconds_between_refreshes = min_seconds_between_refreshes
 
         self._todos: dict[str, domain.Todo] = {}

@@ -27,10 +27,16 @@ class TodoDashState:
     selected_todo: domain.Todo | None
     todos: list[domain.Todo]
     category_options: list[domain.Category]
+    user_options: list[domain.User]
     status: str
 
     @staticmethod
-    def initial(*, todos: list[domain.Todo], category_options: list[domain.Category]) -> TodoDashState:
+    def initial(
+        *,
+        todos: list[domain.Todo],
+        category_options: list[domain.Category],
+        user_options: list[domain.User],
+    ) -> TodoDashState:
         return TodoDashState(
             date_filter=datetime.date.today(),
             due_filter=True,
@@ -39,5 +45,6 @@ class TodoDashState:
             selected_todo=None,
             todos=todos,
             category_options=category_options,
+            user_options=user_options,
             status="",
         )

@@ -11,7 +11,7 @@ Value = typing.TypeVar("Value")
 class MapCBO(typing.Generic[Value], qtw.QWidget):
     value_changed = qtc.pyqtSignal(object)  # Value
 
-    def __init__(self, *, mapping: dict[Value, str], value: Value):
+    def __init__(self, *, mapping: dict[Value, str] | None = None, value: Value | None = None):
         super().__init__()
 
         self._cbo = qtw.QComboBox()
@@ -20,9 +20,11 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
 
         self._index_by_value: dict[Value, int] = {}
 
-        self.set_values(mapping=mapping)
+        if mapping is not None:
+            self.set_values(mapping=mapping)
 
-        self.set_value(value=value)
+        if value is not None:
+            self.set_value(value=value)
 
         self._cbo.currentIndexChanged.connect(self._on_current_index_changed)
 

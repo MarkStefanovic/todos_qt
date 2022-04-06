@@ -40,15 +40,19 @@ class TodoDash(qtw.QWidget):
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo: MapCBO[domain.Category] = MapCBO(
-            mapping={
-                ALL_CATEGORY: "All",
-                domain.TODO_CATEGORY: "Todo"
-            },
-            value=ALL_CATEGORY,
-        )
+        self._category_cbo: MapCBO[domain.Category] = MapCBO()
+        # self._category_cbo: MapCBO[domain.Category] = MapCBO(
+        #     mapping={ALL_CATEGORY: "All", domain.TODO_CATEGORY: "Todo"},
+        #     value=ALL_CATEGORY,
+        # )
         self._category_cbo.setMinimumWidth(150)
         self._category_cbo.value_changed.connect(self.refresh_btn.click)
+
+        user_lbl = qtw.QLabel("User")
+        user_lbl.setFont(fonts.bold)
+        self._user_cbo: MapCBO[domain.User] = MapCBO()
+        self._user_cbo.setMinimumWidth(150)
+        self._user_cbo.value_changed.connect(self.refresh_btn.click)
 
         description_lbl = qtw.QLabel("Description")
         description_lbl.setFont(fonts.bold)
@@ -63,6 +67,8 @@ class TodoDash(qtw.QWidget):
         toolbar_layout.addWidget(self._date_edit)
         toolbar_layout.addWidget(due_lbl)
         toolbar_layout.addWidget(self._due_chk)
+        toolbar_layout.addWidget(user_lbl)
+        toolbar_layout.addWidget(self._user_cbo)
         toolbar_layout.addWidget(category_lbl)
         toolbar_layout.addWidget(self._category_cbo)
         toolbar_layout.addWidget(description_lbl)
@@ -81,6 +87,13 @@ class TodoDash(qtw.QWidget):
                         attr_name="description",
                         display_name="Description",
                         column_width=300,
+                    ),
+                    table.text_col(
+                        selector=lambda todo: todo.user.display_name,
+                        display_name="User",
+                        column_width=140,
+                        hidden=False,
+                        alignment=table.ColAlignment.Center,
                     ),
                     table.text_col(
                         selector=lambda todo: todo.category.name,
@@ -174,6 +187,7 @@ class TodoDash(qtw.QWidget):
             selected_todo=self._table.selected_item,
             todos=self._table.items,
             category_options=self._category_cbo.get_values(),
+            user_options=self._user_cbo.get_values(),
             status=self._status_bar.currentMessage(),
         )
 

@@ -16,9 +16,21 @@ class TodoState:
     dash_active: bool
 
     @staticmethod
-    def initial(*, todos: list[domain.Todo], category_options: list[domain.Category]) -> TodoState:
+    def initial(
+        *,
+        todos: list[domain.Todo],
+        category_options: list[domain.Category],
+        user_options: list[domain.User],
+    ) -> TodoState:
         return TodoState(
-            dash_state=TodoDashState.initial(todos=todos, category_options=category_options),
-            form_state=TodoFormState.initial(category_options=category_options),
+            dash_state=TodoDashState.initial(
+                todos=todos,
+                category_options=category_options,
+                user_options=user_options,
+            ),
+            form_state=TodoFormState.initial(
+                category_options=category_options,
+                user_options=user_options,
+            ),
             dash_active=True,
         )
