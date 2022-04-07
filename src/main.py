@@ -40,6 +40,7 @@ def dark_palette() -> qtg.QPalette:
 @functools.lru_cache
 def root_dir() -> pathlib.Path:
     if getattr(sys, "frozen", False):
+        # path = pathlib.Path(os.path.dirname(sys.executable))
         path = pathlib.Path(getattr(sys, '_MEIPASS'))
         assert path is not None
         return path
@@ -82,6 +83,8 @@ def main() -> None:
     app = qtw.QApplication(sys.argv)
 
     app.setStyle("Fusion")
+
+    app.setStyleSheet('QWidget { font-family: "Arial"; font-size: 12px; }')
 
     app.setPalette(dark_palette())
 
