@@ -14,7 +14,7 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
     def __init__(self, *, mapping: dict[Value, str] | None = None, value: Value | None = None):
         super().__init__()
 
-        self._cbo = qtw.QComboBox()
+        self._cbo = qtw.QComboBox(parent=self)
 
         self._mapping: dict[Value, str] = {}
 

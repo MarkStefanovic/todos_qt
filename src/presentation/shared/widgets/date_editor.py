@@ -14,7 +14,7 @@ class DateEditor(qtw.QWidget):
 
         self._fmt = fmt
 
-        self._text_edit = qtw.QLineEdit("")
+        self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self._on_text_changed)
         self._text_edit.setFixedWidth(100)
 

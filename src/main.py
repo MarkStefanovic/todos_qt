@@ -82,7 +82,7 @@ def main() -> None:
 
     app = qtw.QApplication(sys.argv)
 
-    app.setStyle("Fusion")
+    app.setStyle("Fusion")  # type: ignore
 
     app.setStyleSheet('QWidget { font-family: "Arial"; font-size: 12px; }')
 

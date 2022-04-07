@@ -12,7 +12,7 @@ class TimestampEditor(qtw.QWidget):
 
         self._fmt = fmt
 
-        self._text_edit = qtw.QLineEdit("")
+        self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self.validate)
         self._text_edit.setFixedWidth(130)
         self._text_edit.setFixedHeight(20)

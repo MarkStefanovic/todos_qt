@@ -61,14 +61,14 @@ class ColSpecType(enum.Enum):
 @dataclasses.dataclass(frozen=True)
 class ColSpec(typing.Generic[Row, Value]):
     attr_name: str | None
-    selector: typing.Callable[[Row], typing.Any] | None
+    selector: typing.Callable[[Row], Value] | None
     display_name: str | None
     column_width: int | None
     hidden: bool
     type: ColSpecType
     alignment: ColAlignment
     on_click: typing.Callable[[Row], None] | None
-    display_fn: typing.Callable[[typing.Any], str]
+    display_fn: typing.Callable[[Value], str]
     enable_when: typing.Callable[[Row], bool] | None
     values: dict[Value, str] | None
     on_value_changed: typing.Callable[[Value], None] | None
@@ -162,9 +162,9 @@ def dropdown_col(
     *,
     display_name: str,
     values: dict[Value, str],
-    on_value_changed: typing.Callable[[Value], None],
+    on_value_changed: typing.Callable[[Key, Value], None],
     attr_name: str | None = None,
-    selector: typing.Callable[[Row], decimal.Decimal] | None = None,
+    selector: typing.Callable[[Row], Value] | None = None,
     column_width: int = 100,
     alignment: ColAlignment = ColAlignment.Center,
     enable_when: typing.Callable[[Row], bool] | None = None,
@@ -334,7 +334,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
             for col_spec in self._col_specs
         ]
 
-        self._table = qtw.QTableWidget()
+        self._table = qtw.QTableWidget(parent=self)
         self._table.setAlternatingRowColors(True)
         self._table.setWordWrap(True)
         self._table.setColumnCount(len(headers))

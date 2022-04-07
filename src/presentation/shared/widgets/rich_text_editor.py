@@ -13,24 +13,24 @@ class RichTextEditor(qtw.QWidget):
         super().__init__()
 
         highlight_btn_icon = qta.icon("mdi6.format-color-highlight", color=icon_color)
-        self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "")
+        self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
         self._highlight_btn.clicked.connect(self._on_highlight_btn_clicked)
         self._highlight_btn.setToolTip("Highlight")
         self._highlight_btn.setIconSize(BTN_SIZE)
 
         clear_highlight_btn_icon = qta.icon("mdi.format-color-marker-cancel", color=icon_color)
-        self._clear_highlight_btn = qtw.QPushButton(clear_highlight_btn_icon, "")
+        self._clear_highlight_btn = qtw.QPushButton(clear_highlight_btn_icon, "", parent=self)
         self._clear_highlight_btn.clicked.connect(self._on_clear_highlight_btn_clicked)
         self._clear_highlight_btn.setToolTip("Clear Highlight")
         self._clear_highlight_btn.setIconSize(BTN_SIZE)
 
         bold_btn_icon = qta.icon("mdi.format-bold", color=icon_color)
-        self._bold_btn = qtw.QPushButton(bold_btn_icon, "")
+        self._bold_btn = qtw.QPushButton(bold_btn_icon, "", parent=self)
         self._bold_btn.clicked.connect(self._bold_btn_clicked)
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
-        bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), self)
+        bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), parent=self)
         bold_shortcut.activated.connect(self._bold_btn.click)
 
         toolbar = qtw.QHBoxLayout()
