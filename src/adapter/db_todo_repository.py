@@ -155,6 +155,7 @@ class DbTodoRepository(domain.TodoRepository):
         else:
             month = todo.frequency.month.to_int()
 
+        todo_orm.user_id = todo.user.user_id
         todo_orm.expire_days = todo.frequency.expire_display_days
         todo_orm.advance_days = todo.frequency.advance_display_days
         todo_orm.category_id = todo.category.category_id

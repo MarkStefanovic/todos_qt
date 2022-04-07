@@ -32,6 +32,8 @@ class DbUserService(domain.UserService):
         with sm.Session(self._engine) as session:
             repo = adapter.DbUserRepository(session=session)
             repo.add(user=user)
+            session.commit()
+
             self._users[user.user_id] = user
 
     def all(self) -> list[User]:
@@ -67,6 +69,8 @@ class DbUserService(domain.UserService):
         with sm.Session(self._engine) as session:
             repo = adapter.DbUserRepository(session=session)
             repo.delete(user_id=user_id)
+            session.commit()
+
             del self._users[user_id]
 
     def get(self, *, user_id: str) -> User | None:
@@ -88,6 +92,7 @@ class DbUserService(domain.UserService):
         with sm.Session(self._engine) as session:
             repo = adapter.DbUserRepository(session=session)
             repo.update(user=user)
+            session.commit()
 
             self._users[user.user_id] = user
 

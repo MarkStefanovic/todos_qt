@@ -7,7 +7,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 from src import domain
 from src.presentation.shared import fonts, widgets
 from src.presentation.shared.widgets import MapCBO, table
-from src.presentation.todo.dash.state import ALL_CATEGORY, TodoDashState
+from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER, TodoDashState
 
 __all__ = ("TodoDash",)
 
@@ -43,17 +43,13 @@ class TodoDash(qtw.QWidget):
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
         self._category_cbo: MapCBO[domain.Category] = MapCBO()
-        # self._category_cbo: MapCBO[domain.Category] = MapCBO(
-        #     mapping={ALL_CATEGORY: "All", domain.TODO_CATEGORY: "Todo"},
-        #     value=ALL_CATEGORY,
-        # )
-        self._category_cbo.setMinimumWidth(150)
+        self._category_cbo.setMaximumWidth(150)
         self._category_cbo.value_changed.connect(self.refresh_btn.click)
 
         user_lbl = qtw.QLabel("User")
         user_lbl.setFont(fonts.bold)
         self._user_cbo: MapCBO[domain.User] = MapCBO()
-        self._user_cbo.setMinimumWidth(150)
+        self._user_cbo.setMaximumWidth(150)
         self._user_cbo.value_changed.connect(self.refresh_btn.click)
 
         description_lbl = qtw.QLabel("Description")
@@ -185,6 +181,7 @@ class TodoDash(qtw.QWidget):
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
             category_filter=self._category_cbo.get_value(),
+            user_filter=self._user_cbo.get_value(),
             selected_todo=self._table.selected_item,
             todos=self._table.items,
             category_options=self._category_cbo.get_values(),
@@ -193,6 +190,15 @@ class TodoDash(qtw.QWidget):
         )
 
     def set_state(self, *, state: TodoDashState) -> None:
+        self._user_cbo.set_values(
+            mapping={ALL_USER: "All"} | {
+                user: user.display_name
+                for user in state.user_options
+            }
+        )
+        if self._user_cbo.get_value() != state.user_filter:
+            self._user_cbo.set_value(value=state.user_filter)
+
         self._category_cbo.set_values(
             mapping={ALL_CATEGORY: "All"} | {
                 category: category.name
@@ -201,7 +207,8 @@ class TodoDash(qtw.QWidget):
         )
         if self._category_cbo.get_value() != state.category_filter:
             self._category_cbo.set_value(value=state.category_filter)
-        self._date_edit.set_value(state.date_filter)
+
+        # self._date_edit.set_value(state.date_filter)
         self._due_chk.setChecked(state.due_filter)
         self._description_filter_txt.setText(state.description_filter)
         self._table.set_all(state.todos)
@@ -209,15 +216,8 @@ class TodoDash(qtw.QWidget):
             self._table.clear_selection()
         else:
             self._table.select_item_by_key(key=state.selected_todo.todo_id)
-        self._set_status(message=state.status)
-
-    def _set_status(self, *, message: str) -> None:
-        if message:
-            ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
-            self._status_bar.showMessage(f"{ts_str}: {message}")
-            self.repaint()
-        else:
-            self._status_bar.clearMessage()
+        self._status_bar.showMessage(state.status)
+        self.repaint()
 
 
 def due_date_description(*, due_date: datetime.date, today: datetime.date) -> str:

@@ -28,11 +28,11 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
 
         self._cbo.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self.setMaximumHeight(self._cbo.height())
-
         layout = qtw.QStackedLayout()
         layout.addWidget(self._cbo)
         self.setLayout(layout)
+
+        self.setMaximumHeight(self._cbo.height() + 8)
 
     def get_value(self) -> Value:
         return self._cbo.currentData()

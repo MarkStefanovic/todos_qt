@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import logging
 
 from src import domain
@@ -57,7 +58,7 @@ class TodoController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
             )
 
@@ -83,7 +84,7 @@ class TodoController:
                         state.dash_state,
                         todos=todos,
                         category_options=self._category_service.all(),
-                        status=f"{todo.description} completed.",
+                        status=_add_timestamp(message=f"{todo.description} completed."),
                     ),
                 )
 
@@ -94,7 +95,7 @@ class TodoController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
             )
 
@@ -122,7 +123,7 @@ class TodoController:
                             todos=todos,
                             selected_todo=None,
                             category_options=self._category_service.all(),
-                            status=f"{todo.description} deleted.",
+                            status=_add_timestamp(message=f"{todo.description} deleted."),
                         ),
                     )
 
@@ -133,7 +134,7 @@ class TodoController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
             )
 
@@ -191,7 +192,7 @@ class TodoController:
                         state.dash_state,
                         todos=todos,
                         category_options=self._category_service.all(),
-                        status=f"{todo.description} set to incomplete.",
+                        status=_add_timestamp(message=f"{todo.description} set to incomplete."),
                     ),
                 )
 
@@ -202,7 +203,7 @@ class TodoController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
             )
 
@@ -221,13 +222,16 @@ class TodoController:
 
             categories = self._category_service.all()
 
+            users = self._user_service.all()
+
             new_state = dataclasses.replace(
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     todos=todos,
                     category_options=categories,
-                    status="Refreshed.",
+                    user_options=users,
+                    status=_add_timestamp(message="Refreshed."),
                 )
             )
         except Exception as e:
@@ -236,7 +240,7 @@ class TodoController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
             )
 
@@ -270,7 +274,7 @@ class TodoController:
                     todos=todos,
                     selected_todo=todo,
                     category_options=self._category_service.all(),
-                    status=f"{todo.description} added.",
+                    status=_add_timestamp(message=f"{todo.description} added."),
                 ),
                 dash_active=True,
             )
@@ -285,3 +289,8 @@ class TodoController:
             )
 
         self._view.set_state(state=new_state)
+
+
+def _add_timestamp(*, message: str) -> str:
+    ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
+    return f"{ts_str}: {message}"

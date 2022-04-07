@@ -84,17 +84,10 @@ class UserDash(qtw.QWidget):
         return UserDashState(
             users=self._table.items,
             current_user=self._current_user,
+            status=self._status_bar.currentMessage(),
         )
 
     def set_state(self, *, state: UserDashState) -> None:
         self._table.set_all(state.users)
         self._current_user = state.current_user
-        self._set_status(message=state.status)
-
-    def _set_status(self, *, message: str) -> None:
-        if message:
-            ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
-            self._status_bar.showMessage(f"{ts_str}: {message}")
-            self.repaint()
-        else:
-            self._status_bar.clearMessage()
+        self._status_bar.showMessage(state.status)

@@ -6,12 +6,35 @@ import types
 import typing
 
 from loguru import logger
-from PyQt5 import QtGui as qtg, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 from qt_material import apply_stylesheet
 
 from src import adapter, domain, presentation, service
 
 __all__ = ("main",)
+
+
+def dark_palette() -> qtg.QPalette:
+    palette = qtg.QPalette()
+    palette.setColor(qtg.QPalette.Window, qtg.QColor(53, 53, 53))
+    palette.setColor(qtg.QPalette.WindowText, qtc.Qt.white)
+    palette.setColor(qtg.QPalette.Base, qtg.QColor(35, 35, 35))
+    palette.setColor(qtg.QPalette.AlternateBase, qtg.QColor(53, 53, 53))
+    palette.setColor(qtg.QPalette.ToolTipBase, qtg.QColor(25, 25, 25))
+    palette.setColor(qtg.QPalette.ToolTipText, qtc.Qt.white)
+    palette.setColor(qtg.QPalette.Text, qtc.Qt.white)
+    palette.setColor(qtg.QPalette.Button, qtg.QColor(53, 53, 53))
+    palette.setColor(qtg.QPalette.ButtonText, qtc.Qt.white)
+    palette.setColor(qtg.QPalette.BrightText, qtc.Qt.red)
+    palette.setColor(qtg.QPalette.Link, qtg.QColor(42, 130, 218))
+    palette.setColor(qtg.QPalette.Highlight, qtg.QColor(42, 130, 218))
+    palette.setColor(qtg.QPalette.HighlightedText, qtg.QColor(35, 35, 35))
+    palette.setColor(qtg.QPalette.Active, qtg.QPalette.Button, qtg.QColor(53, 53, 53))
+    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.ButtonText, qtc.Qt.darkGray)
+    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.WindowText, qtc.Qt.darkGray)
+    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.Text, qtc.Qt.darkGray)
+    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.Light, qtg.QColor(53, 53, 53))
+    return palette
 
 
 @functools.lru_cache
@@ -58,6 +81,10 @@ def main() -> None:
 
     app = qtw.QApplication(sys.argv)
 
+    app.setStyle("Fusion")
+
+    app.setPalette(dark_palette())
+
     app_icon = qtg.QIcon(str((root_dir() / "assets" / "icons" / "app.png").resolve()))
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
@@ -80,7 +107,7 @@ def main() -> None:
 
     main_view = presentation.MainView(window_icon=app_icon)
 
-    apply_stylesheet(app, theme="dark_amber.xml")
+    # apply_stylesheet(app, theme="dark_amber.xml")
 
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2250:
@@ -101,6 +128,11 @@ def main() -> None:
     category_controller = presentation.CategoryController(
         category_service=category_service,
         view=main_view.categories,
+    )
+
+    user_controller = presentation.UserController(
+        user_service=user_service,
+        view=main_view.users,
     )
 
     main_view.todos.dash.refresh_btn.click()

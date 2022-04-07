@@ -19,4 +19,32 @@ class UserFormState:
 
     @staticmethod
     def initial() -> UserFormState:
-        return domain.DEFAULT_USER
+        return UserFormState(
+            user_id=domain.create_uuid(),
+            username="",
+            display_name="",
+            is_admin=False,
+            date_added=datetime.datetime.now(),
+            date_updated=None,
+        )
+
+    @staticmethod
+    def from_domain(*, user: domain.User) -> UserFormState:
+        return UserFormState(
+            user_id=user.user_id,
+            username=user.username,
+            display_name=user.display_name,
+            is_admin=user.is_admin,
+            date_added=user.date_added,
+            date_updated=user.date_updated,
+        )
+
+    def to_domain(self) -> domain.User:
+        return domain.User(
+            user_id=self.user_id,
+            username=self.username,
+            display_name=self.display_name,
+            is_admin=self.is_admin,
+            date_added=self.date_added,
+            date_updated=self.date_updated,
+        )

@@ -5,6 +5,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 from src import domain
 from src.presentation.shared import fonts, widgets
 from src.presentation.shared.widgets import MapCBO
+from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
 from src.presentation.todo.form.irregular.view import IrregularFrequencyForm
 from src.presentation.todo.form.monthly.view import MonthlyFrequencyForm
 from src.presentation.todo.form.once.view import OnceFrequencyForm
@@ -48,7 +49,7 @@ class TodoForm(qtw.QWidget):
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.setFont(fonts.bold)
-        self._note_txt = qtw.QTextEdit()
+        self._note_txt = RichTextEditor()
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
@@ -117,20 +118,19 @@ class TodoForm(qtw.QWidget):
         self._todo_id = ""
         self._date_added = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
-        self._user = domain.DEFAULT_USER
         self._last_completed: datetime.datetime | None = None
         self._prior_completed: datetime.datetime | None = None
 
     def get_state(self) -> TodoFormState:
         return TodoFormState(
             todo_id=self._todo_id,
-            user=self._user,
+            user=self._user_cbo.get_value(),
             advance_days=self._advance_days_sb.value(),
             expire_days=self._expire_days_sb.value(),
             category=self._category_cbo.get_value(),
             description=self._description_txt.text(),
             frequency_name=self._frequency_cbo.get_value(),
-            note=self._note_txt.toPlainText(),
+            note=self._note_txt.get_value(),
             start_date=self._start_date_edit.date().toPyDate(),
             date_added=self._date_added,
             date_updated=self._date_updated,
@@ -150,10 +150,10 @@ class TodoForm(qtw.QWidget):
         self._todo_id = state.todo_id
         self._date_added = state.date_added
         self._date_updated = state.date_updated
-        self._user = state.user
         self._last_completed = state.last_completed
         self._prior_completed = state.prior_completed
 
+        self._user_cbo.set_value(value=state.user)
         self._description_txt.setText(state.description)
         self._advance_days_sb.setValue(state.advance_days)
         self._expire_days_sb.setValue(state.expire_days)
@@ -163,7 +163,7 @@ class TodoForm(qtw.QWidget):
         self._category_cbo.set_value(value=state.category)
         self._user_cbo.set_values(mapping={user: user.display_name for user in state.user_options})
         self._user_cbo.set_value(value=state.user)
-        self._note_txt.setPlainText(state.note)
+        self._note_txt.set_value(state.note)
         self._start_date_edit.setDate(state.start_date)
         self._frequency_cbo.set_value(value=state.frequency_name)
 

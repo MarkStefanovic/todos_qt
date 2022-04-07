@@ -30,9 +30,21 @@ class CategoryDash(qtw.QWidget):
 
         self.table: table.Table[domain.Category, str] = table.Table(
             col_specs=[
-                table.text_col(display_name="ID", attr_name="category_id", hidden=True),
-                table.text_col(display_name="Name", attr_name="name", column_width=200),
-                table.text_col(display_name="Note", attr_name="note", column_width=400),
+                table.text_col(
+                    display_name="ID",
+                    attr_name="category_id",
+                    hidden=True,
+                ),
+                table.text_col(
+                    display_name="Name",
+                    attr_name="name",
+                    column_width=200,
+                ),
+                table.rich_text_col(
+                    display_name="Note",
+                    attr_name="note",
+                    column_width=400,
+                ),
                 table.timestamp_col(
                     attr_name="date_added",
                     display_name="Added",
@@ -84,12 +96,4 @@ class CategoryDash(qtw.QWidget):
             self.table.clear_selection()
         else:
             self.table.select_item_by_key(key=state.selected_category.category_id)
-        self._set_status(message=state.status)
-
-    def _set_status(self, *, message: str) -> None:
-        if message:
-            ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
-            self._status_bar.showMessage(f"{ts_str}: {message}")
-            self.repaint()
-        else:
-            self._status_bar.clearMessage()
+        self._status_bar.showMessage(state.status)

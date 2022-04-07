@@ -9,23 +9,21 @@ __all__ = ("DateEditor",)
 class DateEditor(qtw.QWidget):
     date_changed = qtc.pyqtSignal()
 
-    def __init__(self, *, fmt: str = "%m/%d/%y"):
+    def __init__(self, *, fmt: str = "%m/%d/%Y"):
         super().__init__()
 
         self._fmt = fmt
 
         self._text_edit = qtw.QLineEdit("")
         self._text_edit.textChanged.connect(self._on_text_changed)
-        self._text_edit.setFixedWidth(80)
-        self._text_edit.setFixedHeight(20)
-        self._text_edit.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self._text_edit.setFixedWidth(100)
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)
-
         self.setLayout(layout)
 
         self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.setFixedHeight(self._text_edit.height() + 8)
 
         self._dt: datetime.date | None = None
         self._is_valid = True

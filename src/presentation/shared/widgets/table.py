@@ -443,11 +443,10 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     value = getattr(data, col_spec.attr_name)
                 else:
                     value = col_spec.selector(data)
-                text_edit = qtw.QTextEdit()
-                # text_edit.setMaximumHeight(100)
-                text_edit.setHtml(value)
-                text_edit.setReadOnly(True)
-                self._table.setCellWidget(row_num, col_num, text_edit)
+                lbl = qtw.QLabel()
+                lbl.setTextFormat(qtc.Qt.RichText)
+                lbl.setText(value)
+                self._table.setCellWidget(row_num, col_num, lbl)
             elif col_spec.type == ColSpecType.Button:
                 if col_spec.on_click is None:
                     raise Exception("[on_click] is required for a Button column.")

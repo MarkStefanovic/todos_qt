@@ -9,22 +9,22 @@ BTN_SIZE = qtc.QSize(20, 20)
 
 
 class RichTextEditor(qtw.QWidget):
-    def __init__(self):  # type: ignore
+    def __init__(self, icon_color: str = "white"):
         super().__init__()
 
-        highlight_btn_icon = qta.icon("mdi6.format-color-highlight")
+        highlight_btn_icon = qta.icon("mdi6.format-color-highlight", color=icon_color)
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "")
         self._highlight_btn.clicked.connect(self._on_highlight_btn_clicked)
         self._highlight_btn.setToolTip("Highlight")
         self._highlight_btn.setIconSize(BTN_SIZE)
 
-        clear_highlight_btn_icon = qta.icon("mdi.format-color-marker-cancel")
+        clear_highlight_btn_icon = qta.icon("mdi.format-color-marker-cancel", color=icon_color)
         self._clear_highlight_btn = qtw.QPushButton(clear_highlight_btn_icon, "")
         self._clear_highlight_btn.clicked.connect(self._on_clear_highlight_btn_clicked)
         self._clear_highlight_btn.setToolTip("Clear Highlight")
         self._clear_highlight_btn.setIconSize(BTN_SIZE)
 
-        bold_btn_icon = qta.icon("mdi.format-bold")
+        bold_btn_icon = qta.icon("mdi.format-bold", color=icon_color)
         self._bold_btn = qtw.QPushButton(bold_btn_icon, "")
         self._bold_btn.clicked.connect(self._bold_btn_clicked)
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
@@ -73,14 +73,14 @@ class RichTextEditor(qtw.QWidget):
     def _on_clear_highlight_btn_clicked(self) -> None:
         fmt = qtg.QTextCharFormat()
         fmt.clearBackground()
-
+        fmt.setForeground(self.parent().palette().text().color())
         cursor = self._text_edit.textCursor()
         cursor.setCharFormat(fmt)
 
     def _on_highlight_btn_clicked(self) -> None:
         fmt = qtg.QTextCharFormat()
+        fmt.setForeground(qtc.Qt.black)
         fmt.setBackground(qtc.Qt.yellow)
-
         cursor = self._text_edit.textCursor()
         cursor.setCharFormat(fmt)
 

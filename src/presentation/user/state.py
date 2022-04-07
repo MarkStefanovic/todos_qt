@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import dataclasses
 
+from src.presentation.user.dash.state import UserDashState
+from src.presentation.user.form.state import UserFormState
+
 __all__ = ("UserState",)
 
 

@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import logging
 
 from src import domain
@@ -55,7 +56,7 @@ class CategoryController:
                         dash_state=dataclasses.replace(
                             state.dash_state,
                             categories=categories,
-                            status="Refreshed.",
+                            status=_add_timestamp(message=f"Deleted {category.name}."),
                         )
                     )
 
@@ -66,7 +67,7 @@ class CategoryController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 )
             )
 
@@ -95,7 +96,7 @@ class CategoryController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     categories=categories,
-                    status="Refreshed.",
+                    status=_add_timestamp(message="Refreshed."),
                 ),
             )
         except Exception as e:
@@ -104,7 +105,7 @@ class CategoryController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 )
             )
 
@@ -137,7 +138,7 @@ class CategoryController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     categories=categories,
-                    status=status,
+                    status=_add_timestamp(message=status),
                 ),
                 dash_active=True,
             )
@@ -147,9 +148,14 @@ class CategoryController:
                 state,
                 dash_state=dataclasses.replace(
                     state.dash_state,
-                    status=str(e),
+                    status=_add_timestamp(message=str(e)),
                 ),
                 dash_active=True,
             )
 
         self._view.set_state(state=new_state)
+
+
+def _add_timestamp(*, message: str) -> str:
+    ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
+    return f"{ts_str}: {message}"
