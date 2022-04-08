@@ -30,7 +30,7 @@ class RichTextEditor(qtw.QWidget):
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
-        bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), parent=self)
+        bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), self)
         bold_shortcut.activated.connect(self._bold_btn.click)
 
         toolbar = qtw.QHBoxLayout()

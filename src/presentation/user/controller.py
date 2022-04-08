@@ -4,6 +4,7 @@ import datetime
 from loguru import logger
 
 from src import domain
+from src.presentation.shared.widgets import popup
 from src.presentation.user.form.state import UserFormState
 from src.presentation.user.view import UserView
 
@@ -16,6 +17,8 @@ class UserController:
         self._view = view
 
         self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
+        self._view.dash.delete_btn_clicked.connect(self._on_dash_delete_btn_clicked)
+        self._view.dash.edit_btn_clicked.connect(self._on_dash_edit_btn_clicked)
         self._view.dash.refresh_btn.clicked.connect(self._on_dash_refresh_btn_clicked)
         self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
         self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
@@ -28,6 +31,75 @@ class UserController:
             form_state=UserFormState.initial(),
             dash_active=False,
         )
+
+        self._view.set_state(state=new_state)
+
+    def _on_dash_delete_btn_clicked(self) -> None:
+        state = self._view.get_state()
+
+        try:
+            if user := state.dash_state.selected_user:
+                if popup.confirm(
+                    question=f"Are you sure you want to delete {user.display_name}?",
+                    title="Confirm Delete",
+                ):
+                    self._user_service.delete(user_id=user.user_id)
+
+                    users = self._user_service.all()
+
+                    new_state = dataclasses.replace(
+                        state,
+                        dash_state=dataclasses.replace(
+                            state.dash_state,
+                            users=users,
+                            status=_add_timestamp(message=f"Deleted {user.display_name}."),
+                        )
+                    )
+                else:
+                    new_state = dataclasses.replace(
+                        state,
+                        dash_state=dataclasses.replace(
+                            state.dash_state,
+                            status=_add_timestamp(message="Delete cancelled."),
+                        )
+                    )
+            else:
+                new_state = dataclasses.replace(
+                    state,
+                    dash_state=dataclasses.replace(
+                        state.dash_state,
+                        status=_add_timestamp(message="No user was selected."),
+                    )
+                )
+        except Exception as e:
+            logger.exception(e)
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    status=_add_timestamp(message=str(e)),
+                )
+            )
+
+        self._view.set_state(state=new_state)
+
+    def _on_dash_edit_btn_clicked(self) -> None:
+        state = self._view.get_state()
+
+        if user := state.dash_state.selected_user:
+            new_state = dataclasses.replace(
+                state,
+                form_state=UserFormState.from_domain(user=user),
+                dash_active=False,
+            )
+        else:
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    status=_add_timestamp(message="Please select a user first."),
+                )
+            )
 
         self._view.set_state(state=new_state)
 

@@ -12,14 +12,13 @@ dependencies:
 - hypothesis
 - mypy
 - pytest
-- pytest-qt
+#- pytest-qt
 - sqlalchemy
 - psycopg2-binary
 - pyinstaller
 - python-dateutil
-- qtawesome
+#- qtawesome
 - pip:
   # the following dependencies have to be installed via pip
   - PyQt5-stubs
-  - qt-material
   - types-python-dateutil

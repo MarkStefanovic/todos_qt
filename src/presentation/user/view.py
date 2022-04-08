@@ -8,8 +8,8 @@ __all__ = ("UserView",)
 
 
 class UserView(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self.dash = UserDash()
         self.form = UserForm()

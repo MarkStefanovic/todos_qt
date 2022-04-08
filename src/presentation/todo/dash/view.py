@@ -18,8 +18,8 @@ class TodoDash(qtw.QWidget):
     complete_btn_clicked = qtc.pyqtSignal()
     incomplete_btn_clicked = qtc.pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setMinimumWidth(100)
@@ -42,13 +42,13 @@ class TodoDash(qtw.QWidget):
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo: MapCBO[domain.Category] = MapCBO()
+        self._category_cbo: MapCBO[domain.Category] = MapCBO(mapping={ALL_CATEGORY: "All"}, value=ALL_CATEGORY)
         self._category_cbo.setMaximumWidth(150)
         self._category_cbo.value_changed.connect(self.refresh_btn.click)
 
         user_lbl = qtw.QLabel("User")
         user_lbl.setFont(fonts.bold)
-        self._user_cbo: MapCBO[domain.User] = MapCBO()
+        self._user_cbo: MapCBO[domain.User] = MapCBO(mapping={ALL_USER: "All"}, value=ALL_USER)
         self._user_cbo.setMaximumWidth(150)
         self._user_cbo.value_changed.connect(self.refresh_btn.click)
 
@@ -112,13 +112,15 @@ class TodoDash(qtw.QWidget):
                     column_width=500,
                 ),
                 table.date_col(
-                    selector=lambda todo: todo.due_date(today=self._date_edit.get_value()),
+                    selector=lambda todo: todo.due_date(
+                        today=self._date_edit.get_value() or datetime.date.today()
+                    ),
                     display_name="Due Date",
                     alignment=table.ColAlignment.Center,
                     column_width=120,
                     display_fn=lambda due_date: due_date_description(
                         due_date=due_date,
-                        today=self._date_edit.get_value(),
+                        today=self._date_edit.get_value() or datetime.date.today(),
                     ),
                 ),
                 table.date_col(
@@ -143,23 +145,23 @@ class TodoDash(qtw.QWidget):
                 ),
                 table.button_col(
                     button_text="Edit",
-                    on_click=self.edit_btn_clicked.emit,
+                    on_click=lambda _: self.edit_btn_clicked.emit(),
                     column_width=100,
                     enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter,
                 ),
                 table.button_col(
                     button_text="Delete",
-                    on_click=self.delete_btn_clicked.emit,
+                    on_click=lambda _: self.delete_btn_clicked.emit(),
                     column_width=100,
                 ),
                 table.button_col(
                     button_text="Complete",
-                    on_click=self.complete_btn_clicked.emit,
+                    on_click=lambda _: self.complete_btn_clicked.emit(),
                     column_width=110,
                 ),
                 table.button_col(
                     button_text="Incomplete",
-                    on_click=self.incomplete_btn_clicked.emit,
+                    on_click=lambda _: self.incomplete_btn_clicked.emit(),
                     column_width=120,
                     enable_when=lambda todo: todo.last_completed is not None,
                 ),
@@ -177,7 +179,7 @@ class TodoDash(qtw.QWidget):
 
     def get_state(self) -> TodoDashState:
         return TodoDashState(
-            date_filter=self._date_edit.get_value(),
+            date_filter=self._date_edit.get_value() or datetime.date.today(),
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
             category_filter=self._category_cbo.get_value(),

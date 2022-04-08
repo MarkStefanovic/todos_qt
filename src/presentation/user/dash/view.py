@@ -1,21 +1,18 @@
-import datetime
-
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared.widgets import table
+from src.presentation.user.dash.state import UserDashState
 
 __all__ = ("UserDash",)
 
-from src.presentation.user.dash.state import UserDashState
-
 
 class UserDash(qtw.QWidget):
-    delete_btn_clicked = qtc.pyqtSignal(domain.User)
-    edit_btn_clicked = qtc.pyqtSignal(domain.User)
+    delete_btn_clicked = qtc.pyqtSignal()
+    edit_btn_clicked = qtc.pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setFixedWidth(100)
@@ -55,13 +52,13 @@ class UserDash(qtw.QWidget):
                 ),
                 table.button_col(
                     button_text="Edit",
-                    on_click=self.edit_btn_clicked.emit,
+                    on_click=lambda _: self.edit_btn_clicked.emit(),
                     column_width=100,
                     enable_when=lambda user: user.is_admin,
                 ),
                 table.button_col(
                     button_text="Delete",
-                    on_click=self.delete_btn_clicked.emit,
+                    on_click=lambda _: self.delete_btn_clicked.emit(),
                     column_width=100,
                     enable_when=lambda user: user.is_admin,
                 ),
@@ -84,10 +81,13 @@ class UserDash(qtw.QWidget):
         return UserDashState(
             users=self._table.items,
             current_user=self._current_user,
+            selected_user=self._table.selected_item,
             status=self._status_bar.currentMessage(),
         )
 
     def set_state(self, *, state: UserDashState) -> None:
         self._table.set_all(state.users)
+        if user := state.selected_user:
+            self._table.select_item_by_key(key=user.user_id)
         self._current_user = state.current_user
         self._status_bar.showMessage(state.status)

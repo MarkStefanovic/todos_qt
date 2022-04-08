@@ -8,8 +8,8 @@ __all__ = ("WeeklyFrequencyForm",)
 
 
 class WeeklyFrequencyForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         weekday_lbl = qtw.QLabel("Weekday")
         weekday_lbl.setFont(fonts.bold)

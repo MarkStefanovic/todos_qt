@@ -1,15 +1,13 @@
-import functools
 import os
-import pathlib
 import sys
 import types
 import typing
 
 from loguru import logger
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
-from qt_material import apply_stylesheet
 
 from src import adapter, domain, presentation, service
+from src.adapter import fs
 
 __all__ = ("main",)
 
@@ -37,24 +35,11 @@ def dark_palette() -> qtg.QPalette:
     return palette
 
 
-@functools.lru_cache
-def root_dir() -> pathlib.Path:
-    if getattr(sys, "frozen", False):
-        # path = pathlib.Path(os.path.dirname(sys.executable))
-        path = pathlib.Path(getattr(sys, '_MEIPASS'))
-        assert path is not None
-        return path
-    else:
-        path = pathlib.Path(sys.argv[0]).parent.parent
-        assert path.name == "todos-qt", f"Expected the parent folder to be named todos-qt, but the path was {path.resolve()!s}."
-        return path
-
-
 @logger.catch
 def main() -> None:
-    config = adapter.json_config.load(path=root_dir() / "assets" / "config.json")
+    config = adapter.config()
 
-    log_folder = root_dir() / "logs"
+    log_folder = fs.root_dir() / "logs"
     log_folder.mkdir(exist_ok=True)
 
     logger.add(
@@ -88,7 +73,7 @@ def main() -> None:
 
     app.setPalette(dark_palette())
 
-    app_icon = qtg.QIcon(str((root_dir() / "assets" / "icons" / "app.png").resolve()))
+    app_icon = qtg.QIcon(str((fs.assets_folder() / "icons" / "app.png").resolve()))
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
 
@@ -98,19 +83,21 @@ def main() -> None:
 
     user_service = service.DbUserService(engine=engine, username=username)
 
-    for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
-        if not category_service.get(category_id=category.category_id):
-            category_service.add(category=category)
-
     todo_service = service.DbTodoService(engine=engine, username=username)
 
-    for holiday in domain.HOLIDAYS:
-        if todo_service.get(todo_id=holiday.todo_id) is None:
-            todo_service.upsert(todo=holiday)
+    # for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
+    if not category_service.get(category_id=domain.TODO_CATEGORY.category_id):
+        category_service.add(category=domain.TODO_CATEGORY)
+
+    # for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
+    #     if not category_service.get(category_id=category.category_id):
+    #         category_service.add(category=category)
+    #
+    # for holiday in domain.HOLIDAYS:
+    #     if todo_service.get(todo_id=holiday.todo_id) is None:
+    #         todo_service.upsert(todo=holiday)
 
     main_view = presentation.MainView(window_icon=app_icon)
-
-    # apply_stylesheet(app, theme="dark_amber.xml")
 
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2250:

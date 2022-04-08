@@ -13,8 +13,8 @@ class CategoryDash(qtw.QWidget):
     delete_btn_clicked = qtc.pyqtSignal()
     edit_btn_clicked = qtc.pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setMinimumWidth(100)
@@ -61,13 +61,13 @@ class CategoryDash(qtw.QWidget):
                 ),
                 table.button_col(
                     button_text="Edit",
-                    on_click=self.edit_btn_clicked.emit,
+                    on_click=lambda _: self.edit_btn_clicked.emit(),
                     column_width=100,
                     enable_when=lambda category: category.name not in ("Holiday", "Todo"),
                 ),
                 table.button_col(
                     button_text="Delete",
-                    on_click=self.delete_btn_clicked.emit,
+                    on_click=lambda _: self.delete_btn_clicked.emit(),
                     column_width=100,
                     enable_when=lambda category: category.name not in ("Holiday", "Todo"),
                 ),

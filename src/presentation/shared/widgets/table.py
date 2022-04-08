@@ -8,6 +8,8 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
+from src.presentation.shared import fonts
+
 __all__ = (
     "ColAlignment",
     "ColSpec",
@@ -22,8 +24,6 @@ __all__ = (
     "text_col",
     "timestamp_col",
 )
-
-from src.presentation.shared import fonts
 
 Key = typing.TypeVar("Key")
 Row = typing.TypeVar("Row")
@@ -59,7 +59,7 @@ class ColSpecType(enum.Enum):
 
 
 @dataclasses.dataclass(frozen=True)
-class ColSpec(typing.Generic[Row, Value]):
+class ColSpec(typing.Generic[Key, Row, Value]):
     attr_name: str | None
     selector: typing.Callable[[Row], Value] | None
     display_name: str | None
@@ -71,7 +71,7 @@ class ColSpec(typing.Generic[Row, Value]):
     display_fn: typing.Callable[[Value], str]
     enable_when: typing.Callable[[Row], bool] | None
     values: dict[Value, str] | None
-    on_value_changed: typing.Callable[[Value], None] | None
+    on_value_changed: typing.Callable[[Key, Value], None] | None
 
     def __post_init__(self) -> None:
         if self.type != ColSpecType.Button:
@@ -85,7 +85,7 @@ def button_col(
     alignment: ColAlignment = ColAlignment.Center,
     enable_when: typing.Callable[[Row], bool] | None = None,
     on_click: typing.Callable[[Row], None],
-) -> ColSpec[Row, str]:
+) -> ColSpec[Key, Row, str]:
     return ColSpec(
         attr_name=None,
         selector=None,
@@ -112,7 +112,7 @@ def date_col(
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
     display_fn: typing.Callable[[datetime.date], str] | None = None,
-) -> ColSpec[Row, datetime.date]:
+) -> ColSpec[Key, Row, datetime.date]:
     if display_fn is None:
         display_fn = lambda dt: "" if dt is None or dt == datetime.date(1900, 1, 1) else dt.strftime(display_format)
 
@@ -141,7 +141,7 @@ def decimal_col(
     column_width: int | None = 100,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
-) -> ColSpec[Row, decimal.Decimal]:
+) -> ColSpec[Key, Row, decimal.Decimal]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -168,7 +168,7 @@ def dropdown_col(
     column_width: int = 100,
     alignment: ColAlignment = ColAlignment.Center,
     enable_when: typing.Callable[[Row], bool] | None = None,
-) -> ColSpec[Row, Value]:
+) -> ColSpec[Key, Row, Value]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -194,7 +194,7 @@ def float_col(
     column_width: int | None = 100,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
-) -> ColSpec[Row, float]:
+) -> ColSpec[Key, Row, float]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -220,7 +220,7 @@ def int_col(
     column_width: int | None = 100,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
-) -> ColSpec[Row, int]:
+) -> ColSpec[Key, Row, int]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -245,7 +245,7 @@ def rich_text_col(
     column_width: int | None = None,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Left,
-) -> ColSpec[Row, str]:
+) -> ColSpec[Key, Row, str]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -270,7 +270,7 @@ def text_col(
     column_width: int | None = None,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Left,
-) -> ColSpec[Row, str]:
+) -> ColSpec[Key, Row, str]:
     return ColSpec(
         attr_name=attr_name,
         selector=selector,
@@ -297,7 +297,7 @@ def timestamp_col(
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
     display_fn: typing.Callable[[datetime.date], str] | None = None,
-) -> ColSpec[Row, datetime.datetime]:
+) -> ColSpec[Key, Row, datetime.datetime]:
     if display_fn is None:
         display_fn = lambda ts: "" if ts is None or ts == datetime.datetime(1900, 1, 1) else ts.strftime(display_format)
 
@@ -318,7 +318,12 @@ def timestamp_col(
 
 
 class Table(typing.Generic[Row, Key], qtw.QWidget):
-    def __init__(self, *, col_specs: list[ColSpec[Row, typing.Any]], key_attr: str):
+    def __init__(
+        self,
+        *,
+        col_specs: list[ColSpec[Key, Row, typing.Any]],
+        key_attr: str,
+    ):
         super().__init__()
 
         self._col_specs = col_specs
@@ -453,7 +458,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
                     btn.setFont(fonts.bold)
-                    btn.setStyleSheet("color: blue; background-color: none; border: none")
+                    btn.setStyleSheet("background-color: none; border: none")
                     assert col_spec.column_width is not None
                     btn.setFixedWidth(col_spec.column_width)
                     btn.clicked.connect(col_spec.on_click)
@@ -522,7 +527,7 @@ class DropdownCell(qtw.QComboBox):
     def get_value(self) -> Value:
         return self.currentData()
 
-    def set_value(self, /, value: Value):
+    def set_value(self, /, value: Value) -> None:
         ix = next(
             (
                 i

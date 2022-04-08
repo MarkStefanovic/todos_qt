@@ -4,6 +4,7 @@ import logging
 
 from src import domain
 from src.presentation.shared.widgets import popup
+from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER
 from src.presentation.todo.form.state import TodoFormState
 from src.presentation.todo.view import TodoView
 
@@ -12,6 +13,7 @@ __all__ = ("TodoController",)
 logger = logging.getLogger()
 
 
+# noinspection DuplicatedCode
 class TodoController:
     def __init__(
         self,
@@ -71,11 +73,22 @@ class TodoController:
             if todo := state.dash_state.selected_todo:
                 self._todo_service.mark_complete(todo_id=todo.todo_id)
 
-                todos = self._todo_service.get_where(
+                if state.dash_state.category_filter == ALL_CATEGORY:
+                    category_id_filter = None
+                else:
+                    category_id_filter = state.dash_state.category_filter.category_id
+
+                if state.dash_state.user_filter == ALL_USER:
+                    user_id_filter = None
+                else:
+                    user_id_filter = state.dash_state.user_filter.user_id
+
+                todos = self._todo_service.where(
                     description_like=state.dash_state.description_filter,
                     date_filter=state.dash_state.date_filter,
                     due_filter=state.dash_state.due_filter,
-                    category_filter=state.dash_state.category_filter,
+                    category_id_filter=category_id_filter,
+                    user_id_filter=user_id_filter,
                 )
 
                 new_state = dataclasses.replace(
@@ -109,11 +122,22 @@ class TodoController:
                 if popup.confirm(question=f"Are you sure you want to delete {todo.description}?"):
                     self._todo_service.delete(todo_id=todo.todo_id)
 
-                    todos = self._todo_service.get_where(
+                    if state.dash_state.category_filter == ALL_CATEGORY:
+                        category_id_filter = None
+                    else:
+                        category_id_filter = state.dash_state.category_filter.category_id
+
+                    if state.dash_state.user_filter == ALL_USER:
+                        user_id_filter = None
+                    else:
+                        user_id_filter = state.dash_state.user_filter.user_id
+
+                    todos = self._todo_service.where(
                         description_like=state.dash_state.description_filter,
                         date_filter=state.dash_state.date_filter,
                         due_filter=state.dash_state.due_filter,
-                        category_filter=state.dash_state.category_filter,
+                        category_id_filter=category_id_filter,
+                        user_id_filter=user_id_filter,
                     )
 
                     new_state = dataclasses.replace(
@@ -179,11 +203,22 @@ class TodoController:
             if todo := state.dash_state.selected_todo:
                 self._todo_service.mark_incomplete(todo_id=todo.todo_id)
 
-                todos = self._todo_service.get_where(
+                if state.dash_state.category_filter == ALL_CATEGORY:
+                    category_id_filter = None
+                else:
+                    category_id_filter = state.dash_state.category_filter.category_id
+
+                if state.dash_state.user_filter == ALL_USER:
+                    user_id_filter = None
+                else:
+                    user_id_filter = state.dash_state.user_filter.user_id
+
+                todos = self._todo_service.where(
                     description_like=state.dash_state.description_filter,
                     date_filter=state.dash_state.date_filter,
                     due_filter=state.dash_state.due_filter,
-                    category_filter=state.dash_state.category_filter,
+                    category_id_filter=category_id_filter,
+                    user_id_filter=user_id_filter,
                 )
 
                 new_state = dataclasses.replace(
@@ -213,11 +248,22 @@ class TodoController:
         state = self._view.get_state()
 
         try:
-            todos = self._todo_service.get_where(
+            if state.dash_state.category_filter == ALL_CATEGORY:
+                category_id_filter = None
+            else:
+                category_id_filter = state.dash_state.category_filter.category_id
+
+            if state.dash_state.user_filter == ALL_USER:
+                user_id_filter = None
+            else:
+                user_id_filter = state.dash_state.user_filter.user_id
+
+            todos = self._todo_service.where(
                 description_like=state.dash_state.description_filter,
                 date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
-                category_filter=state.dash_state.category_filter,
+                category_id_filter=category_id_filter,
+                user_id_filter=user_id_filter,
             )
 
             categories = self._category_service.all()
@@ -260,11 +306,22 @@ class TodoController:
 
             self._todo_service.upsert(todo=todo)
 
-            todos = self._todo_service.get_where(
+            if state.dash_state.category_filter == ALL_CATEGORY:
+                category_id_filter = None
+            else:
+                category_id_filter = state.dash_state.category_filter.category_id
+
+            if state.dash_state.user_filter == ALL_USER:
+                user_id_filter = None
+            else:
+                user_id_filter = state.dash_state.user_filter.user_id
+
+            todos = self._todo_service.where(
                 description_like=state.dash_state.description_filter,
                 date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
-                category_filter=state.dash_state.category_filter,
+                category_id_filter=category_id_filter,
+                user_id_filter=user_id_filter,
             )
 
             new_state = dataclasses.replace(

@@ -2,7 +2,6 @@ import abc
 import datetime
 
 from src.domain.todo import Todo
-from src.domain.category import Category
 
 __all__ = ("TodoService",)
 
@@ -13,17 +12,14 @@ class TodoService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_all(self) -> list[Todo]:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_where(
+    def where(
         self,
         *,
         date_filter: datetime.date,
         due_filter: bool,
         description_like: str,
-        category_filter: Category | None,
+        category_id_filter: str | None,
+        user_id_filter: str | None,
     ) -> list[Todo]:
         raise NotImplementedError
 

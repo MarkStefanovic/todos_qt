@@ -11,6 +11,7 @@ __all__ = ("UserDashState",)
 class UserDashState:
     users: list[domain.User]
     current_user: domain.User
+    selected_user: domain.User | None
     status: str
 
     @staticmethod
@@ -18,5 +19,6 @@ class UserDashState:
         return UserDashState(
             users=[],
             current_user=domain.DEFAULT_USER,
+            selected_user=None,
             status="",
         )

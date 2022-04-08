@@ -1,11 +1,11 @@
 import dataclasses
 import datetime
 
-from src import adapter, domain
-from src.domain import Todo
-
 import sqlalchemy as sa
 import sqlmodel as sm
+
+from src import adapter, domain
+from src.domain import Todo
 
 __all__ = ("DbTodoService",)
 
@@ -41,37 +41,39 @@ class DbTodoService(domain.TodoService):
 
         return self._todos.get(todo_id)
 
-    def get_all(self) -> list[Todo]:
-        self._refresh()
-
-        return list(self._todos.values())
-
-    def get_where(
+    def where(
         self,
         *,
         date_filter: datetime.date,
         due_filter: bool,
         description_like: str,
-        category_filter: domain.Category | None,
+        category_id_filter: str | None,
+        user_id_filter: str | None,
     ) -> list[Todo]:
         self._refresh()
 
-        if due_filter:
-            todos = [
-                todo for todo in self._todos.values()
-                if description_like.strip().lower() in todo.description.lower()
-                and todo.should_display(today=date_filter)
-            ]
+        if description := description_like.strip().lower():
+            todos = (
+                todo for todo in self._todos.values() if
+                description in todo.description.lower()
+            )
         else:
-            todos = [
+            todos = (todo for todo in self._todos.values())
+
+        if due_filter:
+            todos = (
                 todo for todo in self._todos.values()
-                if description_like.strip().lower() in todo.description.lower()
-            ]
+                if todo.should_display(today=date_filter)
+            )
 
-        if category_filter is None or category_filter.name == "All":
-            return todos
+        if user_id_filter:
+            assert not isinstance(user_id_filter, domain.User)
+            todos = (todo for todo in todos if todo.user.user_id == user_id_filter)
 
-        return [todo for todo in todos if todo.category == category_filter]
+        if category_id_filter:
+            todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
+
+        return sorted(todos, key=lambda todo: todo.due_date(today=date_filter))
 
     def mark_complete(self, *, todo_id: str) -> None:
         with sm.Session(self._engine) as session:

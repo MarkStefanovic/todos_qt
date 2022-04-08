@@ -8,8 +8,8 @@ __all__ = ("IrregularFrequencyForm",)
 
 
 class IrregularFrequencyForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
         month_lbl.setFont(fonts.bold)

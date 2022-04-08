@@ -7,8 +7,8 @@ __all__ = ("XDaysFrequencyForm",)
 
 
 class XDaysFrequencyForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         days_lbl = qtw.QLabel("Month")
         days_lbl.setFont(fonts.bold)

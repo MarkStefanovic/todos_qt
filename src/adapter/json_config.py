@@ -1,14 +1,14 @@
 import functools
 import json
-import pathlib
 
 from src import domain
+from src.adapter.fs import config_path
 
-__all__ = ("load",)
+__all__ = ("config",)
 
 
 @functools.lru_cache(1)
-def load(*, path: pathlib.Path) -> domain.Config:
-    with path.open("r") as fh:
+def config() -> domain.Config:
+    with config_path().open("r") as fh:
         data = json.load(fh)
         return domain.Config(**data)

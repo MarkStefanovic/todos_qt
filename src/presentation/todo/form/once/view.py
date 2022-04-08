@@ -1,3 +1,5 @@
+import datetime
+
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts, widgets
@@ -7,8 +9,8 @@ __all__ = ("OnceFrequencyForm",)
 
 
 class OnceFrequencyForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         due_date_lbl = qtw.QLabel("Due Date")
         due_date_lbl.setFont(fonts.bold)
@@ -21,7 +23,7 @@ class OnceFrequencyForm(qtw.QWidget):
         self.setLayout(form_layout)
 
     def get_state(self) -> OnceFrequencyFormState:
-        return OnceFrequencyFormState(due_date=self._due_date_edit.get_value())
+        return OnceFrequencyFormState(due_date=self._due_date_edit.get_value() or datetime.date.today())
 
     def set_state(self, *, state: OnceFrequencyFormState) -> None:
         self._due_date_edit.set_value(state.due_date)

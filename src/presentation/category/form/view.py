@@ -9,8 +9,8 @@ __all__ = ("CategoryForm",)
 
 
 class CategoryForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self.back_btn = qtw.QPushButton("Back")
         self.back_btn.setFont(fonts.bold)

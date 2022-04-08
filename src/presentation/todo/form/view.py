@@ -18,8 +18,8 @@ __all__ = ("TodoForm",)
 
 
 class TodoForm(qtw.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         description_lbl = qtw.QLabel("Description")
         description_lbl.setFont(fonts.bold)
@@ -118,8 +118,8 @@ class TodoForm(qtw.QWidget):
         self._todo_id = ""
         self._date_added = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
-        self._last_completed: datetime.datetime | None = None
-        self._prior_completed: datetime.datetime | None = None
+        self._last_completed: datetime.date | None = None
+        self._prior_completed: datetime.date | None = None
 
     def get_state(self) -> TodoFormState:
         return TodoFormState(
