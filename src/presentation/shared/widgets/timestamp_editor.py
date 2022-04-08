@@ -1,22 +1,21 @@
 import datetime
 
 from dateutil.parser import parse, ParserError
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = ("TimestampEditor",)
 
 
 class TimestampEditor(qtw.QWidget):
-    def __init__(self, *, fmt: str = "%m/%d/%y @ %I:%M %p"):
-        super().__init__()
+    def __init__(self, *, fmt: str = "%m/%d/%y @ %I:%M %p", parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self._fmt = fmt
 
         self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self.validate)
         self._text_edit.setFixedWidth(130)
-        self._text_edit.setFixedHeight(20)
-        self._text_edit.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self._text_edit.setAlignment(qtc.Qt.AlignCenter)
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)

@@ -100,13 +100,11 @@ def main() -> None:
     main_view = presentation.MainView(window_icon=app_icon)
 
     screen = app.desktop().screenGeometry()
-    if screen.width() >= 2250:
-        width = 2250
+    if screen.width() >= 2050:
+        width = 2050
     else:
         width = screen.width()
     main_view.setGeometry(0, 0, width, screen.height())
-
-    main_view.show()
 
     todo_controller = presentation.TodoController(
         category_service=category_service,
@@ -125,7 +123,13 @@ def main() -> None:
         view=main_view.users,
     )
 
-    main_view.todos.dash.refresh_btn.click()
+    if user := user_service.current_user():
+        main_view.todos.dash.user_cbo.set_values(mapping={user: user.display_name for user in user_service.all()})
+        main_view.todos.dash.user_cbo.set_value(value=user)
+    else:
+        main_view.todos.dash.refresh_btn.click()
+
+    main_view.show()
 
     sys.exit(app.exec())
 

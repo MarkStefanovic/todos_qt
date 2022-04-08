@@ -48,7 +48,7 @@ class DbUserService(domain.UserService):
         if self._last_current_user_scan is None:
             time_to_scan = True
         else:
-            if (datetime.datetime.now() - self._last_current_user_scan).seconds > 300:
+            if (datetime.datetime.now() - self._last_current_user_scan).seconds > self._min_seconds_between_refreshes:
                 time_to_scan = True
             else:
                 time_to_scan = False

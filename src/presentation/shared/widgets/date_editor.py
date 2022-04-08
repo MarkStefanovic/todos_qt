@@ -9,14 +9,15 @@ __all__ = ("DateEditor",)
 class DateEditor(qtw.QWidget):
     date_changed = qtc.pyqtSignal()
 
-    def __init__(self, *, fmt: str = "%m/%d/%Y"):
-        super().__init__()
+    def __init__(self, *, fmt: str = "%m/%d/%Y", parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
         self._fmt = fmt
 
         self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self._on_text_changed)
-        self._text_edit.setFixedWidth(100)
+        self._text_edit.setFixedWidth(80)
+        self._text_edit.setAlignment(qtc.Qt.AlignCenter)
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)

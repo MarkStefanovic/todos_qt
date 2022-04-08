@@ -48,9 +48,9 @@ class TodoDash(qtw.QWidget):
 
         user_lbl = qtw.QLabel("User")
         user_lbl.setFont(fonts.bold)
-        self._user_cbo: MapCBO[domain.User] = MapCBO(mapping={ALL_USER: "All"}, value=ALL_USER)
-        self._user_cbo.setMaximumWidth(150)
-        self._user_cbo.value_changed.connect(self.refresh_btn.click)
+        self.user_cbo: MapCBO[domain.User] = MapCBO(mapping={ALL_USER: "All"}, value=ALL_USER)
+        self.user_cbo.setMaximumWidth(150)
+        self.user_cbo.value_changed.connect(self.refresh_btn.click)
 
         description_lbl = qtw.QLabel("Description")
         description_lbl.setFont(fonts.bold)
@@ -66,7 +66,7 @@ class TodoDash(qtw.QWidget):
         toolbar_layout.addWidget(due_lbl)
         toolbar_layout.addWidget(self._due_chk)
         toolbar_layout.addWidget(user_lbl)
-        toolbar_layout.addWidget(self._user_cbo)
+        toolbar_layout.addWidget(self.user_cbo)
         toolbar_layout.addWidget(category_lbl)
         toolbar_layout.addWidget(self._category_cbo)
         toolbar_layout.addWidget(description_lbl)
@@ -109,7 +109,7 @@ class TodoDash(qtw.QWidget):
                 table.rich_text_col(
                     attr_name="note",
                     display_name="Note",
-                    column_width=500,
+                    column_width=400,
                 ),
                 table.date_col(
                     selector=lambda todo: todo.due_date(
@@ -127,21 +127,21 @@ class TodoDash(qtw.QWidget):
                     attr_name="last_completed",
                     display_name="Last Completed",
                     alignment=table.ColAlignment.Center,
-                    column_width=160,
+                    column_width=120,
                 ),
                 table.timestamp_col(
                     attr_name="date_added",
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=110,
+                    column_width=80,
                 ),
                 table.timestamp_col(
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=110,
+                    column_width=80,
                 ),
                 table.button_col(
                     button_text="Edit",
@@ -183,23 +183,23 @@ class TodoDash(qtw.QWidget):
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
             category_filter=self._category_cbo.get_value(),
-            user_filter=self._user_cbo.get_value(),
+            user_filter=self.user_cbo.get_value(),
             selected_todo=self._table.selected_item,
             todos=self._table.items,
             category_options=self._category_cbo.get_values(),
-            user_options=self._user_cbo.get_values(),
+            user_options=self.user_cbo.get_values(),
             status=self._status_bar.currentMessage(),
         )
 
     def set_state(self, *, state: TodoDashState) -> None:
-        self._user_cbo.set_values(
+        self.user_cbo.set_values(
             mapping={ALL_USER: "All"} | {
                 user: user.display_name
                 for user in state.user_options
             }
         )
-        if self._user_cbo.get_value() != state.user_filter:
-            self._user_cbo.set_value(value=state.user_filter)
+        if self.user_cbo.get_value() != state.user_filter:
+            self.user_cbo.set_value(value=state.user_filter)
 
         self._category_cbo.set_values(
             mapping={ALL_CATEGORY: "All"} | {
