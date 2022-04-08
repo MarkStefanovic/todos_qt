@@ -3,6 +3,7 @@ from __future__ import annotations
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src.presentation.category.view import CategoryView
+from src.presentation.shared import fonts
 from src.presentation.todo.view import TodoView
 from src.presentation.user.view import UserView
 
@@ -30,6 +31,7 @@ class MainView(qtw.QDialog):
         self.users = UserView()
 
         self._tabs = qtw.QTabWidget()
+        self._tabs.setFont(fonts.bold)
         self._tabs.addTab(self.todos, "Todo")
         self._tabs.addTab(self.categories, "Category")
         self._tabs.addTab(self.users, "Users")
