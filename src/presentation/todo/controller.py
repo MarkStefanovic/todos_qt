@@ -278,6 +278,7 @@ class TodoController:
                     category_options=categories,
                     user_options=users,
                     status=_add_timestamp(message="Refreshed."),
+                    current_user=self._user_service.current_user(),
                 )
             )
         except Exception as e:

@@ -14,6 +14,8 @@ class UserDash(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
+        self._current_user = domain.DEFAULT_USER
+
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setFixedWidth(100)
 
@@ -45,26 +47,31 @@ class UserDash(qtw.QWidget):
                 table.timestamp_col(
                     display_name="Added",
                     attr_name="date_added",
+                    column_width=80,
+                    alignment=table.ColAlignment.Center,
                 ),
                 table.timestamp_col(
                     display_name="Updated",
                     attr_name="date_updated",
+                    column_width=80,
+                    alignment=table.ColAlignment.Center,
                 ),
                 table.button_col(
                     button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),
-                    column_width=100,
-                    enable_when=lambda user: user.is_admin,
+                    on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
+                    column_width=60,
+                    enable_when=lambda user: self._current_user.is_admin,
                 ),
                 table.button_col(
                     button_text="Delete",
-                    on_click=lambda _: self.delete_btn_clicked.emit(),
-                    column_width=100,
-                    enable_when=lambda user: user.is_admin,
+                    on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
+                    column_width=60,
+                    enable_when=lambda user: self._current_user.is_admin,
                 ),
             ],
             key_attr="user_id",
         )
+        self._table.double_click.connect(lambda: self._current_user.is_admin and self.edit_btn_clicked.emit())
 
         self._status_bar = qtw.QStatusBar()
 
@@ -75,8 +82,6 @@ class UserDash(qtw.QWidget):
 
         self.setLayout(layout)
 
-        self._current_user = domain.DEFAULT_USER
-
     def get_state(self) -> UserDashState:
         return UserDashState(
             users=self._table.items,
@@ -86,8 +91,8 @@ class UserDash(qtw.QWidget):
         )
 
     def set_state(self, *, state: UserDashState) -> None:
+        self._current_user = state.current_user
         self._table.set_all(state.users)
         if user := state.selected_user:
             self._table.select_item_by_key(key=user.user_id)
-        self._current_user = state.current_user
         self._status_bar.showMessage(state.status)

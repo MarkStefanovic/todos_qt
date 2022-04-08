@@ -115,6 +115,7 @@ def main() -> None:
 
     category_controller = presentation.CategoryController(
         category_service=category_service,
+        user_service=user_service,
         view=main_view.categories,
     )
 
@@ -129,7 +130,7 @@ def main() -> None:
     else:
         main_view.todos.dash.refresh_btn.click()
 
-    main_view.show()
+    main_view.showMaximized()
 
     sys.exit(app.exec())
 

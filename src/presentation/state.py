@@ -28,6 +28,7 @@ class MainState:
         todos: list[domain.Todo],
         category_options: list[domain.Category],
         user_options: list[domain.User],
+        current_user: domain.User,
     ) -> MainState:
         return MainState(
             today=datetime.date.today(),
@@ -36,6 +37,9 @@ class MainState:
                 todos=todos,
                 category_options=category_options,
                 user_options=user_options,
+                current_user=current_user,
             ),
-            category_state=CategoryState.initial(),
+            category_state=CategoryState.initial(
+                current_user=current_user,
+            ),
         )

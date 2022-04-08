@@ -39,6 +39,7 @@ class TodoDashState:
     category_options: list[domain.Category]
     user_options: list[domain.User]
     status: str
+    current_user: domain.User
 
     @staticmethod
     def initial(
@@ -46,6 +47,7 @@ class TodoDashState:
         todos: list[domain.Todo],
         category_options: list[domain.Category],
         user_options: list[domain.User],
+        current_user: domain.User,
     ) -> TodoDashState:
         return TodoDashState(
             date_filter=datetime.date.today(),
@@ -58,4 +60,5 @@ class TodoDashState:
             category_options=category_options,
             user_options=user_options,
             status="",
+            current_user=current_user,
         )

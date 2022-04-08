@@ -16,6 +16,8 @@ class CategoryDash(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
+        self._current_user = domain.DEFAULT_USER
+
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setMinimumWidth(100)
         self.refresh_btn.setDefault(True)
@@ -50,30 +52,31 @@ class CategoryDash(qtw.QWidget):
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=110,
+                    column_width=80,
                 ),
                 table.timestamp_col(
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=110,
+                    column_width=80,
                 ),
                 table.button_col(
                     button_text="Edit",
                     on_click=lambda _: self.edit_btn_clicked.emit(),
-                    column_width=100,
-                    enable_when=lambda category: category.name not in ("Holiday", "Todo"),
+                    column_width=60,
+                    enable_when=lambda category: category.name not in ("Holiday", "Todo") and self._current_user.is_admin,
                 ),
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),
-                    column_width=100,
-                    enable_when=lambda category: category.name not in ("Holiday", "Todo"),
+                    column_width=60,
+                    enable_when=lambda category: category.name not in ("Holiday", "Todo") and self._current_user.is_admin,
                 ),
             ],
             key_attr="category_id",
         )
+        self.table.double_click.connect(lambda: self._current_user.is_admin and self.edit_btn_clicked.emit())
 
         self._status_bar = qtw.QStatusBar()
 
@@ -88,9 +91,11 @@ class CategoryDash(qtw.QWidget):
             categories=self.table.items,
             selected_category=self.table.selected_item,
             status=self._status_bar.currentMessage(),
+            current_user=self._current_user,
         )
 
     def set_state(self, *, state: CategoryDashState) -> None:
+        self._current_user = state.current_user
         self.table.set_all(state.categories)
         if state.selected_category is None:
             self.table.clear_selection()

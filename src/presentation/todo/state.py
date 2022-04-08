@@ -21,12 +21,14 @@ class TodoState:
         todos: list[domain.Todo],
         category_options: list[domain.Category],
         user_options: list[domain.User],
+        current_user: domain.User,
     ) -> TodoState:
         return TodoState(
             dash_state=TodoDashState.initial(
                 todos=todos,
                 category_options=category_options,
                 user_options=user_options,
+                current_user=current_user,
             ),
             form_state=TodoFormState.initial(
                 category_options=category_options,

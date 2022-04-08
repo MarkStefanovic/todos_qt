@@ -17,9 +17,11 @@ class CategoryController:
         self,
         *,
         category_service: domain.CategoryService,
+        user_service: domain.UserService,
         view: CategoryView,
     ):
         self._category_service = category_service
+        self._user_service = user_service
         self._view = view
 
         self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
@@ -96,6 +98,7 @@ class CategoryController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     categories=categories,
+                    current_user=self._user_service.current_user(),
                     status=_add_timestamp(message="Refreshed."),
                 ),
             )

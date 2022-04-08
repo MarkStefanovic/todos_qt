@@ -318,6 +318,8 @@ def timestamp_col(
 
 
 class Table(typing.Generic[Row, Key], qtw.QWidget):
+    double_click = qtc.pyqtSignal()
+
     def __init__(
         self,
         *,
@@ -346,6 +348,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.setHorizontalHeaderLabels(headers)
         self._table.horizontalHeader().setFont(fonts.bold)
         self._table.setSortingEnabled(True)
+        self._table.doubleClicked.connect(self.double_click)
 
         for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.hidden:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 
+from src import domain
 from src.presentation.category.dash.state import CategoryDashState
 from src.presentation.category.form.state import CategoryFormState
 
@@ -15,9 +16,9 @@ class CategoryState:
     dash_active: bool
 
     @staticmethod
-    def initial() -> CategoryState:
+    def initial(*, current_user: domain.User) -> CategoryState:
         return CategoryState(
-            dash_state=CategoryDashState.initial(),
+            dash_state=CategoryDashState.initial(current_user=current_user),
             form_state=CategoryFormState.initial(),
             dash_active=True,
         )

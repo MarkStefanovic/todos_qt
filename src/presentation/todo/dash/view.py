@@ -21,6 +21,8 @@ class TodoDash(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
+        self._current_user = domain.DEFAULT_USER
+
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setMinimumWidth(100)
         self.refresh_btn.setDefault(True)
@@ -144,30 +146,32 @@ class TodoDash(qtw.QWidget):
                     column_width=80,
                 ),
                 table.button_col(
-                    button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),
-                    column_width=100,
-                    enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter,
-                ),
-                table.button_col(
-                    button_text="Delete",
-                    on_click=lambda _: self.delete_btn_clicked.emit(),
-                    column_width=100,
-                ),
-                table.button_col(
                     button_text="Complete",
                     on_click=lambda _: self.complete_btn_clicked.emit(),
-                    column_width=110,
+                    # column_width=110,
                 ),
                 table.button_col(
                     button_text="Incomplete",
                     on_click=lambda _: self.incomplete_btn_clicked.emit(),
-                    column_width=120,
+                    # column_width=120,
                     enable_when=lambda todo: todo.last_completed is not None,
+                ),
+                table.button_col(
+                    button_text="Edit",
+                    on_click=lambda _: self.edit_btn_clicked.emit(),
+                    column_width=60,
+                    enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter and self._current_user.is_admin,
+                ),
+                table.button_col(
+                    button_text="Delete",
+                    on_click=lambda _: self.delete_btn_clicked.emit(),
+                    column_width=60,
+                    enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter and self._current_user.is_admin,
                 ),
             ],
             key_attr="todo_id",
         )
+        self._table.double_click.connect(lambda: self._current_user.is_admin and self.edit_btn_clicked.emit())
 
         self._status_bar = qtw.QStatusBar()
 
@@ -189,9 +193,12 @@ class TodoDash(qtw.QWidget):
             category_options=self._category_cbo.get_values(),
             user_options=self.user_cbo.get_values(),
             status=self._status_bar.currentMessage(),
+            current_user=self._current_user,
         )
 
     def set_state(self, *, state: TodoDashState) -> None:
+        self._current_user = state.current_user
+
         self.user_cbo.set_values(
             mapping={ALL_USER: "All"} | {
                 user: user.display_name
