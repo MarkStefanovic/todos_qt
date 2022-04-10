@@ -24,10 +24,12 @@ class TodoDash(qtw.QWidget):
         self._current_user = domain.DEFAULT_USER
 
         self.refresh_btn = qtw.QPushButton("Refresh")
+        self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMinimumWidth(100)
         self.refresh_btn.setDefault(True)
 
         self.add_btn = qtw.QPushButton("Add")
+        self.add_btn.setFont(fonts.bold)
         self.add_btn.setMinimumWidth(100)
 
         date_lbl = qtw.QLabel("Today")

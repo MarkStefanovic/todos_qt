@@ -461,7 +461,12 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 else:
                     btn = qtw.QPushButton(col_spec.display_name)
                     btn.setFont(fonts.bold)
-                    btn.setStyleSheet("background-color: none; border: none")
+                    btn_css = """
+                        QPushButton { background-color: none; border: none; }
+                        QPushButton:enabled { color: cyan; }
+                        QPushButton:disabled { color: none; }
+                    """
+                    btn.setStyleSheet(btn_css)
                     assert col_spec.column_width is not None
                     btn.setFixedWidth(col_spec.column_width)
                     btn.clicked.connect(col_spec.on_click)

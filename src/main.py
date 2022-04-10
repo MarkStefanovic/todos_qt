@@ -12,26 +12,40 @@ from src.adapter import fs
 __all__ = ("main",)
 
 
-def dark_palette() -> qtg.QPalette:
+def cobalt() -> qtg.QPalette:
+    # base_color = qtg.QColor(35, 35, 35)
+    # alternate_color = qtg.QColor(53, 53, 53)
+    base_color = qtg.QColor(15, 15, 25)
+    alternate_color = qtg.QColor(35, 35, 50)
+    tooltip_background_color = qtg.QColor(25, 25, 25)
+    link_color = qtg.QColor(42, 130, 218)
+    highlight_background_color = qtg.QColor(42, 130, 218)
+
+    color_lkp = {
+        (qtg.QPalette.Window,): alternate_color,
+        (qtg.QPalette.WindowText,): qtc.Qt.white,
+        (qtg.QPalette.Base,): base_color,
+        (qtg.QPalette.AlternateBase,): alternate_color,
+        (qtg.QPalette.ToolTipBase,): tooltip_background_color,
+        (qtg.QPalette.ToolTipText,): qtc.Qt.white,
+        (qtg.QPalette.Text,): qtc.Qt.white,
+        (qtg.QPalette.Button,): alternate_color,
+        (qtg.QPalette.ButtonText,): qtc.Qt.white,
+        (qtg.QPalette.BrightText,): qtc.Qt.red,
+        (qtg.QPalette.Link,): link_color,
+        (qtg.QPalette.Highlight,): highlight_background_color,
+        (qtg.QPalette.HighlightedText,): base_color,
+        (qtg.QPalette.Active, qtg.QPalette.Button): alternate_color,
+        (qtg.QPalette.Disabled, qtg.QPalette.ButtonText): qtc.Qt.darkGray,
+        (qtg.QPalette.Disabled, qtg.QPalette.WindowText): qtc.Qt.darkGray,
+        (qtg.QPalette.Disabled, qtg.QPalette.Text): qtc.Qt.darkGray,
+        (qtg.QPalette.Disabled, qtg.QPalette.Light): alternate_color,
+    }
+
     palette = qtg.QPalette()
-    palette.setColor(qtg.QPalette.Window, qtg.QColor(53, 53, 53))
-    palette.setColor(qtg.QPalette.WindowText, qtc.Qt.white)
-    palette.setColor(qtg.QPalette.Base, qtg.QColor(35, 35, 35))
-    palette.setColor(qtg.QPalette.AlternateBase, qtg.QColor(53, 53, 53))
-    palette.setColor(qtg.QPalette.ToolTipBase, qtg.QColor(25, 25, 25))
-    palette.setColor(qtg.QPalette.ToolTipText, qtc.Qt.white)
-    palette.setColor(qtg.QPalette.Text, qtc.Qt.white)
-    palette.setColor(qtg.QPalette.Button, qtg.QColor(53, 53, 53))
-    palette.setColor(qtg.QPalette.ButtonText, qtc.Qt.white)
-    palette.setColor(qtg.QPalette.BrightText, qtc.Qt.red)
-    palette.setColor(qtg.QPalette.Link, qtg.QColor(42, 130, 218))
-    palette.setColor(qtg.QPalette.Highlight, qtg.QColor(42, 130, 218))
-    palette.setColor(qtg.QPalette.HighlightedText, qtg.QColor(35, 35, 35))
-    palette.setColor(qtg.QPalette.Active, qtg.QPalette.Button, qtg.QColor(53, 53, 53))
-    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.ButtonText, qtc.Qt.darkGray)
-    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.WindowText, qtc.Qt.darkGray)
-    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.Text, qtc.Qt.darkGray)
-    palette.setColor(qtg.QPalette.Disabled, qtg.QPalette.Light, qtg.QColor(53, 53, 53))
+    for selector, color in color_lkp.items():
+        palette.setColor(*selector, color)
+
     return palette
 
 
@@ -71,7 +85,7 @@ def main() -> None:
 
     app.setStyleSheet('QWidget { font-family: "Arial"; font-size: 12px; }')
 
-    app.setPalette(dark_palette())
+    app.setPalette(cobalt())
 
     app_icon = qtg.QIcon(str((fs.assets_folder() / "icons" / "app.png").resolve()))
 
