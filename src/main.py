@@ -99,13 +99,6 @@ def main() -> None:
 
     main_view = presentation.MainView(window_icon=app_icon)
 
-    screen = app.desktop().screenGeometry()
-    if screen.width() >= 2050:
-        width = 2050
-    else:
-        width = screen.width()
-    main_view.setGeometry(0, 0, width, screen.height())
-
     todo_controller = presentation.TodoController(
         category_service=category_service,
         todo_service=todo_service,
@@ -124,13 +117,18 @@ def main() -> None:
         view=main_view.users,
     )
 
-    if user := user_service.current_user():
-        main_view.todos.dash.user_cbo.set_values(mapping={user: user.display_name for user in user_service.all()})
-        main_view.todos.dash.user_cbo.set_value(value=user)
+    if user_service.current_user():
+        todo_controller.show_current_user_todos()
     else:
-        main_view.todos.dash.refresh_btn.click()
+        todo_controller.show_current_todos()
 
-    main_view.showMaximized()
+    screen = app.desktop().screenGeometry()
+    if screen.width() >= 2050:
+        width = 2050
+        main_view.setGeometry(0, 0, width, screen.height())
+        main_view.show()
+    else:
+        main_view.showMaximized()
 
     sys.exit(app.exec())
 

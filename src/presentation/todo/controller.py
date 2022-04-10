@@ -38,6 +38,105 @@ class TodoController:
         self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
         self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
 
+    def show_current_todos(self) -> None:
+        state = self._view.get_state()
+
+        try:
+            categories = self._category_service.all()
+
+            users = self._user_service.all()
+
+            today = datetime.date.today()
+
+            todos = self._todo_service.where(
+                date_filter=today,
+                due_filter=True,
+                description_like="",
+                category_id_filter=None,
+                user_id_filter=None,
+            )
+
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    todos=todos,
+                    category_options=categories,
+                    category_filter=ALL_CATEGORY,
+                    description_filter="",
+                    user_options=users,
+                    date_filter=today,
+                    user_filter=ALL_USER,
+                    due_filter=True,
+                    status=f"Showing ToDos due today.",
+                ),
+                dash_active=True,
+            )
+        except Exception as e:
+            logger.exception(e)
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    status=_add_timestamp(message=str(e)),
+                ),
+                dash_active=True,
+            )
+
+        self._view.set_state(state=new_state)
+
+    def show_current_user_todos(self) -> None:
+        state = self._view.get_state()
+
+        try:
+            categories = self._category_service.all()
+
+            users = self._user_service.all()
+
+            today = datetime.date.today()
+
+            if current_user := self._user_service.current_user():
+                user_id_filter = current_user.user_id
+            else:
+                user_id_filter = None
+
+            todos = self._todo_service.where(
+                date_filter=today,
+                due_filter=True,
+                description_like="",
+                category_id_filter=None,
+                user_id_filter=user_id_filter,
+            )
+
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    todos=todos,
+                    date_filter=today,
+                    category_options=categories,
+                    category_filter=ALL_CATEGORY,
+                    user_options=users,
+                    user_filter=current_user or ALL_USER,
+                    description_filter="",
+                    due_filter=True,
+                    status=f"Showing ToDos for {current_user.display_name}.",
+                ),
+                dash_active=True,
+            )
+        except Exception as e:
+            logger.exception(e)
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    status=_add_timestamp(message=str(e)),
+                ),
+                dash_active=True,
+            )
+
+        self._view.set_state(state=new_state)
+
     def _on_dash_add_btn_clicked(self) -> None:
         state = self._view.get_state()
 
