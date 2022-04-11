@@ -99,17 +99,17 @@ def main() -> None:
 
     todo_service = service.DbTodoService(engine=engine, username=username)
 
-    # for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
-    if not category_service.get(category_id=domain.TODO_CATEGORY.category_id):
-        category_service.add(category=domain.TODO_CATEGORY)
+    if config.add_holidays:
+        for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
+            if category_service.get(category_id=category.category_id) is None:
+                category_service.add(category=category)
 
-    # for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
-    #     if not category_service.get(category_id=category.category_id):
-    #         category_service.add(category=category)
-    #
-    # for holiday in domain.HOLIDAYS:
-    #     if todo_service.get(todo_id=holiday.todo_id) is None:
-    #         todo_service.upsert(todo=holiday)
+        for holiday in domain.HOLIDAYS:
+            if todo_service.get(todo_id=holiday.todo_id) is None:
+                todo_service.upsert(todo=holiday)
+    else:
+        if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:
+            category_service.add(category=domain.TODO_CATEGORY)
 
     main_view = presentation.MainView(window_icon=app_icon)
 

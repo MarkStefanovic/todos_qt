@@ -60,13 +60,13 @@ class UserDash(qtw.QWidget):
                     button_text="Edit",
                     on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
                     column_width=60,
-                    enable_when=lambda user: self._current_user.is_admin,
+                    enable_when=lambda user: self._current_user is not None and self._current_user.is_admin,
                 ),
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
                     column_width=60,
-                    enable_when=lambda user: self._current_user.is_admin,
+                    enable_when=lambda user: self._current_user is not None and self._current_user.is_admin,
                 ),
             ],
             key_attr="user_id",
