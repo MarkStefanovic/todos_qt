@@ -4,7 +4,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, widgets
-from src.presentation.shared.widgets import MapCBO
+from src.presentation.shared.widgets import DateEditor, MapCBO
 from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
 from src.presentation.todo.form.irregular.view import IrregularFrequencyForm
 from src.presentation.todo.form.monthly.view import MonthlyFrequencyForm
@@ -53,8 +53,7 @@ class TodoForm(qtw.QWidget):
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
-        self._start_date_edit = qtw.QDateEdit()
-        self._start_date_edit.setMinimumDate(datetime.date(1900, 1, 1))
+        self._start_date_edit = DateEditor()
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.bold)
@@ -91,6 +90,7 @@ class TodoForm(qtw.QWidget):
 
         form_layout = qtw.QFormLayout()
         form_layout.addRow(description_lbl, self._description_txt)
+        form_layout.addRow(start_date_lbl, self._start_date_edit)
         form_layout.addRow(advance_days_lbl, self._advance_days_sb)
         form_layout.addRow(expire_days_lbl, self._expire_days_sb)
         form_layout.addRow(user_lbl, self._user_cbo)
@@ -105,6 +105,7 @@ class TodoForm(qtw.QWidget):
         self.save_btn = qtw.QPushButton("Save")
         self.save_btn.setFont(fonts.bold)
         self.save_btn.setFixedWidth(100)
+        self.save_btn.setDefault(True)
 
         main_layout = qtw.QVBoxLayout()
         main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)
@@ -131,7 +132,7 @@ class TodoForm(qtw.QWidget):
             description=self._description_txt.text(),
             frequency_name=self._frequency_cbo.get_value(),
             note=self._note_txt.get_value(),
-            start_date=self._start_date_edit.date().toPyDate(),
+            start_date=self._start_date_edit.get_value(),
             date_added=self._date_added,
             date_updated=self._date_updated,
             last_completed=self._last_completed,
@@ -164,7 +165,7 @@ class TodoForm(qtw.QWidget):
         self._user_cbo.set_values(mapping={user: user.display_name for user in state.user_options})
         self._user_cbo.set_value(value=state.user)
         self._note_txt.set_value(state.note)
-        self._start_date_edit.setDate(state.start_date)
+        self._start_date_edit.set_value(state.start_date)
         self._frequency_cbo.set_value(value=state.frequency_name)
 
         self._irregular_frequency_form.set_state(state=state.irregular_frequency_form_state)

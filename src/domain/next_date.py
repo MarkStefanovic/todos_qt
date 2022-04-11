@@ -20,7 +20,7 @@ def next_date(
         return today + datetime.timedelta(days=1)
     elif frequency.name == FrequencyType.Easter:
         cy = calculate_easter(today.year)
-        if cy < today:
+        if cy > today:
             return cy
         return calculate_easter(today.year + 1)
     elif frequency.name == FrequencyType.Irregular:
@@ -33,7 +33,7 @@ def next_date(
             week_num=frequency.week_number,
             week_day=frequency.week_day,
         )
-        if cy < today:
+        if cy > today:
             return cy
         return x_weekday_of_month(
             year=today.year + 1,
@@ -77,7 +77,7 @@ def next_date(
 
         prior_date = today - datetime.timedelta(days=days_since_last)
         current_date = prior_date + datetime.timedelta(days=frequency.days)
-        if current_date < today:
+        if current_date > today:
             return current_date
         return current_date + datetime.timedelta(days=frequency.days)
     elif frequency.name == FrequencyType.Yearly:
@@ -85,7 +85,7 @@ def next_date(
         assert frequency.month_day is not None, f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
 
         cy = datetime.date(today.year, month=frequency.month.value, day=frequency.month_day)
-        if cy < today:
+        if cy > today:
             return cy
         return datetime.date(today.year + 1, month=frequency.month.value, day=frequency.month_day)
     else:
