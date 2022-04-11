@@ -349,6 +349,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.horizontalHeader().setFont(fonts.bold)
         self._table.setSortingEnabled(True)
         self._table.doubleClicked.connect(self.double_click)
+        self._table.setStyleSheet("QHeaderView { font-weight: bold; }")
 
         for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.hidden:
@@ -465,6 +466,8 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                         QPushButton { background-color: none; border: none; }
                         QPushButton:enabled { color: cyan; }
                         QPushButton:disabled { color: none; }
+                        QPushButton:hover:!pressed { background-color: rgb(80, 80, 160); }
+                        QPushButton:!hover { background-color: none; }
                     """
                     btn.setStyleSheet(btn_css)
                     assert col_spec.column_width is not None
