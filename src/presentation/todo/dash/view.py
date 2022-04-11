@@ -162,18 +162,20 @@ class TodoDash(qtw.QWidget):
                     button_text="Edit",
                     on_click=lambda _: self.edit_btn_clicked.emit(),
                     column_width=60,
-                    enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter and self._current_user is not None and self._current_user.is_admin,
+                    enable_when=lambda todo: _can_edit(current_user=self._current_user, todo=todo),
                 ),
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),
                     column_width=60,
-                    enable_when=lambda todo: todo.frequency.name != domain.FrequencyType.Easter and self._current_user is not None and self._current_user.is_admin,
+                    enable_when=lambda todo: _can_edit(current_user=self._current_user, todo=todo),
                 ),
             ],
             key_attr="todo_id",
         )
-        self._table.double_click.connect(lambda: self._table.selected_item.frequency.name != domain.FrequencyType.Easter and self._current_user.is_admin and self.edit_btn_clicked.emit())
+        self._table.double_click.connect(
+            lambda: _can_edit(current_user=self._current_user, todo=self._table.selected_item)
+        )
 
         self._status_bar = qtw.QStatusBar()
 
@@ -234,3 +236,19 @@ class TodoDash(qtw.QWidget):
 def due_date_description(*, due_date: datetime.date, today: datetime.date) -> str:
     days_until = (due_date - today).days
     return f"{due_date:%m/%d/%y}\n{days_until} days"
+
+
+def _can_edit(*, current_user: domain.User | None, todo: domain.Todo | None) -> bool:
+    if todo is None:
+        return False
+
+    if todo.frequency.name == domain.FrequencyType.Easter:
+        return False
+
+    if current_user is None:
+        return False
+
+    if current_user.is_admin:
+        return True
+
+    return False

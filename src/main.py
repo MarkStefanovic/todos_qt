@@ -83,6 +83,15 @@ def main() -> None:
 
     app.setStyle("Fusion")  # type: ignore
 
+    # css = """
+    #     QWidget { font-family: "Arial"; font-size: 12px; }
+    #     QPushButton { background-color: none; border: none; }
+    #     QPushButton:enabled { color: cyan; }
+    #     QPushButton:disabled { color: none; }
+    #     QPushButton:hover:!pressed { background-color: rgb(80, 80, 160); }
+    #     QPushButton:!hover { background-color: none; }
+    # """
+
     app.setStyleSheet('QWidget { font-family: "Arial"; font-size: 12px; }')
 
     app.setPalette(cobalt())

@@ -19,7 +19,7 @@ HOLIDAY_CATEGORY = Category(
     date_deleted=None,
 )
 
-
+# TODO add Veteran's day & Memorial Day
 HOLIDAYS = [
     Todo.irregular(
         todo_id="f89904629ba24d5c8ed4b2525a8253d9",
