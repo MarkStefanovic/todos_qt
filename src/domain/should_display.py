@@ -3,10 +3,9 @@ import functools
 
 from src.domain.frequency import Frequency
 from src.domain.next_date import next_date
+from src.domain.prior_date import prior_date
 
 __all__ = ("should_display",)
-
-from src.domain.prior_date import prior_date
 
 
 @functools.lru_cache(maxsize=10000)

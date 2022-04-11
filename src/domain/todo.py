@@ -4,6 +4,8 @@ import dataclasses
 import datetime
 import typing
 
+from loguru import logger
+
 from src.domain.category import Category, TODO_CATEGORY
 from src.domain.due_date import due_date
 from src.domain.frequency import Frequency
@@ -29,21 +31,29 @@ class Todo:
     date_updated: datetime.datetime | None
 
     def due_date(self, *, today: datetime.date) -> datetime.date:
-        return due_date(frequency=self.frequency, today=today)
+        try:
+            return due_date(frequency=self.frequency, today=today)
+        except Exception as e:
+            logger.exception(f"Failed to calculate due_date({today=}) for todo, {self.description}\n{e}")
+            raise e
 
     def should_display(self, *, today: datetime.date) -> bool:
-        if self.last_completed:
-            latest: datetime.date | None = self.last_completed
-        elif self.prior_completed:
-            latest = self.prior_completed
-        else:
-            latest = None
+        try:
+            if self.last_completed:
+                latest: datetime.date | None = self.last_completed
+            elif self.prior_completed:
+                latest = self.prior_completed
+            else:
+                latest = None
 
-        return should_display(
-            frequency=self.frequency,
-            today=today,
-            last_completed=latest,
-        )
+            return should_display(
+                frequency=self.frequency,
+                today=today,
+                last_completed=latest,
+            )
+        except Exception as e:
+            logger.exception(f"Failed to calculate should_display({today=}) for todo, {self.description}\n{e}")
+            raise e
 
     @staticmethod
     def daily(

@@ -73,7 +73,7 @@ def prior_date(
             7: {1: -6, 2: -5, 3: -4, 4: -3, 5: -2, 6: -1, 7: -7},
         }[Weekday.from_date(today).value][frequency.week_day.value]
 
-        return today - datetime.timedelta(days=day_offset)
+        return today + datetime.timedelta(days=day_offset)
 
     elif frequency.name == FrequencyType.XDays:
         assert frequency.days is not None, f"The frequency was 'xdays' but [days] was {frequency.days!r}."
