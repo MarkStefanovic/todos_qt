@@ -167,12 +167,12 @@ class TodoForm(qtw.QWidget):
         self._start_date_edit.setDate(state.start_date)
         self._frequency_cbo.set_value(value=state.frequency_name)
 
-        self._irregular_frequency_form = IrregularFrequencyForm()
-        self._monthly_frequency_form = MonthlyFrequencyForm()
-        self._one_off_frequency_form = OnceFrequencyForm()
-        self._weekly_frequency_form = WeeklyFrequencyForm()
-        self._xdays_frequency_form = XDaysFrequencyForm()
-        self._yearly_frequency_form = YearlyFrequencyForm()
+        self._irregular_frequency_form.set_state(state=state.irregular_frequency_form_state)
+        self._monthly_frequency_form.set_state(state=state.monthly_frequency_form_state)
+        self._one_off_frequency_form.set_state(state=state.once_frequency_form_state)
+        self._weekly_frequency_form.set_state(state=state.weekly_frequency_form_state)
+        self._xdays_frequency_form.set_state(state=state.xdays_frequency_form_state)
+        self._yearly_frequency_form.set_state(state=state.yearly_frequency_form_state)
 
     def _frequency_changed(self) -> None:
         frequency = self._frequency_cbo.get_value()
