@@ -174,7 +174,7 @@ class TodoDash(qtw.QWidget):
             key_attr="todo_id",
         )
         self._table.double_click.connect(
-            lambda: _can_edit(current_user=self._current_user, todo=self._table.selected_item)
+            lambda: self.edit_btn_clicked.emit() if _can_edit(current_user=self._current_user, todo=self._table.selected_item) else None
         )
 
         self._status_bar = qtw.QStatusBar()
