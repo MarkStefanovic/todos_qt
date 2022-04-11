@@ -145,14 +145,13 @@ def main() -> None:
     else:
         todo_controller.show_current_todos()
 
-    main_view.showMinimized()
-    main_view.windowHandle().setScreen(app.screens()[1])
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2050:
         width = 2050
         main_view.setGeometry(0, 0, width, screen.height())
         main_view.show()
     else:
+        main_view.showFullScreen()
         main_view.showMaximized()
 
     sys.exit(app.exec())
