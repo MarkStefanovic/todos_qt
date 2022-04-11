@@ -10,7 +10,7 @@ class XDaysFrequencyForm(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        days_lbl = qtw.QLabel("Month")
+        days_lbl = qtw.QLabel("Days Between")
         days_lbl.setFont(fonts.bold)
         self._days_sb = qtw.QSpinBox()
         self._days_sb.setRange(1, 364)
