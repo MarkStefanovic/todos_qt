@@ -173,7 +173,7 @@ class TodoDash(qtw.QWidget):
             ],
             key_attr="todo_id",
         )
-        self._table.double_click.connect(lambda: self._current_user.is_admin and self.edit_btn_clicked.emit())
+        self._table.double_click.connect(lambda: self._table.selected_item.frequency.name != domain.FrequencyType.Easter and self._current_user.is_admin and self.edit_btn_clicked.emit())
 
         self._status_bar = qtw.QStatusBar()
 
