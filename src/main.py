@@ -13,8 +13,6 @@ __all__ = ("main",)
 
 
 def cobalt() -> qtg.QPalette:
-    # base_color = qtg.QColor(35, 35, 35)
-    # alternate_color = qtg.QColor(53, 53, 53)
     base_color = qtg.QColor(15, 15, 25)
     alternate_color = qtg.QColor(35, 35, 50)
     tooltip_background_color = qtg.QColor(25, 25, 25)
@@ -83,16 +81,14 @@ def main() -> None:
 
     app.setStyle("Fusion")  # type: ignore
 
-    # css = """
-    #     QWidget { font-family: "Arial"; font-size: 12px; }
-    #     QPushButton { background-color: none; border: none; }
-    #     QPushButton:enabled { color: cyan; }
-    #     QPushButton:disabled { color: none; }
-    #     QPushButton:hover:!pressed { background-color: rgb(80, 80, 160); }
-    #     QPushButton:!hover { background-color: none; }
-    # """
-
-    app.setStyleSheet('QWidget { font-family: "Arial"; font-size: 12px; }')
+    app.setStyleSheet("""
+        QWidget { font-family: "Arial"; font-size: 11pt; }
+        QPushButton { font-weight: "bold"; }
+        QPushButton:hover:!pressed { background-color: rgb(80, 80, 160); }
+        QPushButton:!hover { background-color: none; }
+        QTabBar::tab:selected { background: rgb(80, 80, 120); }
+        QTabBar::tab:hover { background: rgb(100, 100, 160); }
+    """)
 
     app.setPalette(cobalt())
 

@@ -1,6 +1,7 @@
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
+from src.presentation.shared import fonts
 from src.presentation.shared.widgets import table
 from src.presentation.user.dash.state import UserDashState
 
@@ -17,10 +18,12 @@ class UserDash(qtw.QWidget):
         self._current_user = domain.DEFAULT_USER
 
         self.refresh_btn = qtw.QPushButton("Refresh")
-        self.refresh_btn.setFixedWidth(100)
+        self.refresh_btn.setFont(fonts.bold)
+        self.refresh_btn.setMaximumWidth(100)
 
         self.add_btn = qtw.QPushButton("Add")
-        self.add_btn.setFixedWidth(100)
+        self.add_btn.setFont(fonts.bold)
+        self.add_btn.setMaximumWidth(100)
 
         toolbar = qtw.QHBoxLayout()
         toolbar.addWidget(self.refresh_btn)
@@ -47,31 +50,42 @@ class UserDash(qtw.QWidget):
                 table.timestamp_col(
                     display_name="Added",
                     attr_name="date_added",
-                    column_width=80,
+                    column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
                 table.timestamp_col(
                     display_name="Updated",
                     attr_name="date_updated",
-                    column_width=80,
+                    column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
                 table.button_col(
                     button_text="Edit",
                     on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
                     column_width=60,
-                    enable_when=lambda user: self._current_user is not None and self._current_user.is_admin,
+                    enable_when=lambda user: domain.permissions.user_can_edit_user(
+                        current_user=self._current_user,
+                        user=user,
+                    ),
                 ),
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
                     column_width=60,
-                    enable_when=lambda user: self._current_user is not None and self._current_user.is_admin,
+                    enable_when=lambda user: domain.permissions.user_can_edit_user(
+                        current_user=self._current_user,
+                        user=user,
+                    ),
                 ),
             ],
             key_attr="user_id",
         )
-        self._table.double_click.connect(lambda: self._current_user.is_admin and self.edit_btn_clicked.emit())
+        self._table.double_click.connect(
+            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_user(
+                current_user=self._current_user,
+                user=self._table.selected_item,
+            ) else None
+        )
 
         self._status_bar = qtw.QStatusBar()
 

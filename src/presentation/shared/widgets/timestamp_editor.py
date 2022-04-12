@@ -52,7 +52,7 @@ class TimestampEditor(qtw.QWidget):
                 print(pe)
                 self._ts = None
                 self._is_valid = False
-                self._text_edit.setStyleSheet("""border: 1px solid red; font-family: "Arial"; font-size: 12px;""")
+                self._text_edit.setStyleSheet("""border: 1px solid red;""")
         else:
             self._ts = None
             self._is_valid = True

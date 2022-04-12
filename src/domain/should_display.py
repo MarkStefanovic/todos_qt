@@ -48,33 +48,3 @@ def should_display(
             return True
 
     return False
-
-# @functools.lru_cache(maxsize=10000)
-# def should_display(
-#     *,
-#     start_date: datetime.date,
-#     today: datetime.date,
-#     last_completed: datetime.date | None,
-#     next_due_date: datetime.date,
-#     current_due_date: datetime.date,
-#     prior_due_date: datetime.date,
-#     advance_display_days: int,
-#     expire_display_days: int,
-# ) -> bool:
-#     display_windows: list[tuple[datetime.date, datetime.date]] = []
-#     for dt in (prior_due_date, current_due_date, next_due_date):
-#         if dt >= start_date:
-#             display_windows.append(
-#                 (dt - datetime.timedelta(days=advance_display_days), prior_due_date + datetime.timedelta(days=expire_display_days))
-#             )
-#
-#     applicable_display_windows = [w for w in display_windows if w[0] <= today <= w[1]]
-#     if applicable_display_windows:
-#         if last_completed is None:
-#             return True
-#
-#     for (start_display, _) in applicable_display_windows:
-#         if last_completed < start_display:
-#             return True
-#
-#     return False
