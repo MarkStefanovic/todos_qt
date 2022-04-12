@@ -2,6 +2,7 @@ import datetime
 import functools
 
 from src.domain.frequency import Frequency
+from src.domain.frequency_type import FrequencyType
 from src.domain.next_date import next_date
 from src.domain.prior_date import prior_date
 
@@ -15,6 +16,9 @@ def should_display(
     today: datetime.date,
     last_completed: datetime.date | None,
 ) -> bool:
+    if frequency.name == FrequencyType.Once:
+        return (frequency.due_date - datetime.timedelta(days=frequency.advance_display_days)) <= today <= (frequency.due_date + datetime.timedelta(days=frequency.expire_display_days))
+
     due_dates: list[datetime.date] = []
     prior_due_date = prior_date(frequency=frequency, today=today)
     if prior_due_date:
