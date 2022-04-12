@@ -83,11 +83,17 @@ def main() -> None:
 
     app.setStyleSheet("""
         QWidget { font-family: "Arial"; font-size: 11pt; }
+        QHeaderView { font-weight: bold; }
         QPushButton { font-weight: "bold"; }
         QPushButton:hover:!pressed { background-color: rgb(80, 80, 160); }
-        QPushButton:!hover { background-color: none; }
+        QPushButton:!hover { background-color: rgb(60, 60, 80); }
         QTabBar::tab:selected { background: rgb(80, 80, 120); }
         QTabBar::tab:hover { background: rgb(100, 100, 160); }
+        QPushButton#table_btn { background-color: none; border: none; }
+        QPushButton#table_btn:enabled { color: cyan; }
+        QPushButton#table_btn:disabled { color: none; }
+        QPushButton#table_btn:hover:!pressed { background-color: rgb(80, 80, 160); }
+        QPushButton#table_btn:!hover { background-color: none; }
     """)
 
     app.setPalette(cobalt())
