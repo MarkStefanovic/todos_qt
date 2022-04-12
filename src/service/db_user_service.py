@@ -77,6 +77,15 @@ class DbUserService(domain.UserService):
         self._refresh()
         return self._users.get(user_id)
 
+    def get_by_username(self, *, username: str) -> User | None:
+        return next(
+            (
+                user for user in self._users.values()
+                if user.username.lower() == username.lower()
+            ),
+            None
+        )
+
     def refresh(self) -> None:
         with sm.Session(self._engine) as session:
             repo = adapter.DbUserRepository(session=session)

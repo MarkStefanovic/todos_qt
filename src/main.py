@@ -1,3 +1,5 @@
+import dataclasses
+import datetime
 import os
 import sys
 import types
@@ -108,6 +110,18 @@ def main() -> None:
 
     todo_service = service.DbTodoService(engine=engine, username=username)
 
+    if config.admin_username:
+        if user_service.get_by_username(username=username) is None:
+            admin_user = domain.User(
+                user_id=domain.create_uuid(),
+                username=username,
+                display_name=username,
+                is_admin=True,
+                date_added=datetime.datetime.now(),
+                date_updated=None,
+            )
+            user_service.add(user=admin_user)
+
     if config.add_holidays:
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
             if category_service.get(category_id=category.category_id) is None:
@@ -115,6 +129,8 @@ def main() -> None:
 
         for holiday in domain.HOLIDAYS:
             if todo_service.get(todo_id=holiday.todo_id) is None:
+                if user := user_service.get_by_username(username=username):
+                    holiday = dataclasses.replace(holiday, user=user)
                 todo_service.upsert(todo=holiday)
     else:
         if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:

@@ -2,5 +2,6 @@
   "instructions": "rename this file to config.json",
   "sqlalchemy_url": "postgresql+psycopg2://test:mypassword@localhost/testdb",
   "schema_name": "test",
-  "add_holidays": false
+  "add_holidays": false,
+  "admin_username": "mark"
 }
