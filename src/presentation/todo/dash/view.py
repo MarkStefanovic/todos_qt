@@ -25,12 +25,12 @@ class TodoDash(qtw.QWidget):
 
         self.refresh_btn = qtw.QPushButton("Refresh")
         self.refresh_btn.setFont(fonts.bold)
-        self.refresh_btn.setMinimumWidth(100)
+        self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
         self.add_btn = qtw.QPushButton("Add")
         self.add_btn.setFont(fonts.bold)
-        self.add_btn.setMinimumWidth(100)
+        self.add_btn.setMaximumWidth(100)
 
         date_lbl = qtw.QLabel("Today")
         date_lbl.setFont(fonts.bold)
@@ -138,14 +138,14 @@ class TodoDash(qtw.QWidget):
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=80,
+                    column_width=100,
                 ),
                 table.timestamp_col(
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
                     display_format="%m/%d/%Y %I:%M %p",
-                    column_width=80,
+                    column_width=100,
                 ),
                 table.button_col(
                     button_text="Complete",
@@ -162,19 +162,22 @@ class TodoDash(qtw.QWidget):
                     button_text="Edit",
                     on_click=lambda _: self.edit_btn_clicked.emit(),
                     column_width=60,
-                    enable_when=lambda todo: _can_edit(current_user=self._current_user, todo=todo),
+                    enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),
                     column_width=60,
-                    enable_when=lambda todo: _can_edit(current_user=self._current_user, todo=todo),
+                    enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
             ],
             key_attr="todo_id",
         )
         self._table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if _can_edit(current_user=self._current_user, todo=self._table.selected_item) else None
+            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_todo(
+                user=self._current_user,
+                todo=self._table.selected_item,
+            ) else None
         )
 
         self._status_bar = qtw.QStatusBar()
@@ -237,18 +240,3 @@ def due_date_description(*, due_date: datetime.date, today: datetime.date) -> st
     days_until = (due_date - today).days
     return f"{due_date:%m/%d/%y}\n{days_until} days"
 
-
-def _can_edit(*, current_user: domain.User | None, todo: domain.Todo | None) -> bool:
-    if todo is None:
-        return False
-
-    if todo.frequency.name == domain.FrequencyType.Easter:
-        return False
-
-    if current_user is None:
-        return False
-
-    if current_user.is_admin:
-        return True
-
-    return False

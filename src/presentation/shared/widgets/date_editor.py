@@ -16,7 +16,7 @@ class DateEditor(qtw.QWidget):
 
         self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self._on_text_changed)
-        self._text_edit.setFixedWidth(80)
+        self._text_edit.setFixedWidth(100)
         self._text_edit.setAlignment(qtc.Qt.AlignCenter)
 
         layout = qtw.QStackedLayout()
@@ -54,7 +54,7 @@ class DateEditor(qtw.QWidget):
                 self._dt = None
                 self._is_valid = False
                 # self._text_edit.setStyleSheet("border: 1px solid red")
-                self._text_edit.setStyleSheet("""border: 1px solid red; font-family: "Arial"; font-size: 12px;""")
+                self._text_edit.setStyleSheet("""border: 1px solid red;""")
         else:
             self._dt = None
             self._is_valid = True

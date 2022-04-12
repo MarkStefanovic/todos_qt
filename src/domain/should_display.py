@@ -2,6 +2,7 @@ import datetime
 import functools
 
 from src.domain.frequency import Frequency
+from src.domain.frequency_type import FrequencyType
 from src.domain.next_date import next_date
 from src.domain.prior_date import prior_date
 
@@ -15,6 +16,9 @@ def should_display(
     today: datetime.date,
     last_completed: datetime.date | None,
 ) -> bool:
+    if frequency.name == FrequencyType.Once:
+        return (frequency.due_date - datetime.timedelta(days=frequency.advance_display_days)) <= today <= (frequency.due_date + datetime.timedelta(days=frequency.expire_display_days))
+
     due_dates: list[datetime.date] = []
     prior_due_date = prior_date(frequency=frequency, today=today)
     if prior_due_date:
@@ -48,33 +52,3 @@ def should_display(
             return True
 
     return False
-
-# @functools.lru_cache(maxsize=10000)
-# def should_display(
-#     *,
-#     start_date: datetime.date,
-#     today: datetime.date,
-#     last_completed: datetime.date | None,
-#     next_due_date: datetime.date,
-#     current_due_date: datetime.date,
-#     prior_due_date: datetime.date,
-#     advance_display_days: int,
-#     expire_display_days: int,
-# ) -> bool:
-#     display_windows: list[tuple[datetime.date, datetime.date]] = []
-#     for dt in (prior_due_date, current_due_date, next_due_date):
-#         if dt >= start_date:
-#             display_windows.append(
-#                 (dt - datetime.timedelta(days=advance_display_days), prior_due_date + datetime.timedelta(days=expire_display_days))
-#             )
-#
-#     applicable_display_windows = [w for w in display_windows if w[0] <= today <= w[1]]
-#     if applicable_display_windows:
-#         if last_completed is None:
-#             return True
-#
-#     for (start_display, _) in applicable_display_windows:
-#         if last_completed < start_display:
-#             return True
-#
-#     return False
