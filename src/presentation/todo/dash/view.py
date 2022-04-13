@@ -150,12 +150,10 @@ class TodoDash(qtw.QWidget):
                 table.button_col(
                     button_text="Complete",
                     on_click=lambda _: self.complete_btn_clicked.emit(),
-                    # column_width=110,
                 ),
                 table.button_col(
                     button_text="Incomplete",
                     on_click=lambda _: self.incomplete_btn_clicked.emit(),
-                    # column_width=120,
                     enable_when=lambda todo: todo.last_completed is not None,
                 ),
                 table.button_col(

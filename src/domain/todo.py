@@ -32,7 +32,11 @@ class Todo:
 
     def due_date(self, *, today: datetime.date) -> datetime.date:
         try:
-            return due_date(frequency=self.frequency, today=today)
+            return due_date(
+                frequency=self.frequency,
+                today=today,
+                last_completed=self.last_completed,
+            )
         except Exception as e:
             logger.exception(f"Failed to calculate due_date({today=}) for todo, {self.description}\n{e}")
             raise e
