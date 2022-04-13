@@ -10,7 +10,7 @@ __all__ = ("due_date",)
 
 
 @functools.lru_cache(10000)
-def due_date(*, frequency: Frequency, today: datetime.date) -> datetime.date:
+def due_date(*, frequency: Frequency, today: datetime.date, last_completed: datetime.date | None) -> datetime.date:
     if frequency.name == FrequencyType.Once:
         assert frequency.due_date is not None, "Frequency was Once, but [due_date] was None."
         return frequency.due_date
@@ -25,4 +25,5 @@ def due_date(*, frequency: Frequency, today: datetime.date) -> datetime.date:
         return min(  # type: ignore
             dt for dt in (prior_due_date, current_due_date, next_due_date)
             if today <= dt + datetime.timedelta(days=frequency.expire_display_days)  # type: ignore
+            and (last_completed is None or dt > last_completed)
         )
