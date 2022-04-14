@@ -75,9 +75,12 @@ class DbUserService(domain.UserService):
 
     def get(self, *, user_id: str) -> User | None:
         self._refresh()
+
         return self._users.get(user_id)
 
     def get_by_username(self, *, username: str) -> User | None:
+        self._refresh()
+
         return next(
             (
                 user for user in self._users.values()
