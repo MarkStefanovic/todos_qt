@@ -117,6 +117,7 @@ class TodoForm(qtw.QWidget):
         self.setLayout(main_layout)
 
         self._todo_id = ""
+        self._template_todo_id: str | None = None
         self._date_added = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
         self._last_completed: datetime.date | None = None
@@ -125,6 +126,7 @@ class TodoForm(qtw.QWidget):
     def get_state(self) -> TodoFormState:
         return TodoFormState(
             todo_id=self._todo_id,
+            template_todo_id=self._template_todo_id,
             user=self._user_cbo.get_value(),
             advance_days=self._advance_days_sb.value(),
             expire_days=self._expire_days_sb.value(),
@@ -132,7 +134,7 @@ class TodoForm(qtw.QWidget):
             description=self._description_txt.text(),
             frequency_name=self._frequency_cbo.get_value(),
             note=self._note_txt.get_value(),
-            start_date=self._start_date_edit.get_value(),
+            start_date=self._start_date_edit.get_value() or datetime.date(1900, 1, 1),
             date_added=self._date_added,
             date_updated=self._date_updated,
             last_completed=self._last_completed,
@@ -149,6 +151,7 @@ class TodoForm(qtw.QWidget):
 
     def set_state(self, *, state: TodoFormState) -> None:
         self._todo_id = state.todo_id
+        self._template_todo_id = state.template_todo_id
         self._date_added = state.date_added
         self._date_updated = state.date_updated
         self._last_completed = state.last_completed

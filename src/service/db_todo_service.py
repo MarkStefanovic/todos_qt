@@ -41,6 +41,18 @@ class DbTodoService(domain.TodoService):
 
         return self._todos.get(todo_id)
 
+    def get_by_template_id_and_user_id(self, *, template_id: str, user_id: str) -> domain.Todo | None:
+        self._refresh()
+
+        return next(
+            (
+                todo for todo in self._todos.values()
+                if todo.template_todo_id == template_id
+                and todo.user.user_id == user_id
+            ),
+            None
+        )
+
     def where(
         self,
         *,

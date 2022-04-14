@@ -19,10 +19,11 @@ HOLIDAY_CATEGORY = Category(
     date_deleted=None,
 )
 
-# TODO add Veteran's day & Memorial Day
+# TODO add Veteran's day
 HOLIDAYS = [
     Todo.irregular(
         todo_id="f89904629ba24d5c8ed4b2525a8253d9",
+        template_todo_id="f89904629ba24d5c8ed4b2525a8253d9",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -40,6 +41,7 @@ HOLIDAYS = [
     ),
     Todo.yearly(
         todo_id="73e68c07f0cf4b2e804f17be617b9623",
+        template_todo_id="73e68c07f0cf4b2e804f17be617b9623",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -56,6 +58,7 @@ HOLIDAYS = [
     ),
     Todo.irregular(
         todo_id="5e08036c15934b50a22b750453bc5511",
+        template_todo_id="5e08036c15934b50a22b750453bc5511",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -73,6 +76,7 @@ HOLIDAYS = [
     ),
     Todo.irregular(
         todo_id="4c83c2b0d66e44a899305f47994e31fc",
+        template_todo_id="4c83c2b0d66e44a899305f47994e31fc",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -90,6 +94,7 @@ HOLIDAYS = [
     ),
     Todo.irregular(
         todo_id="8eff18d02d014435ab5d24ade713e9f3",
+        template_todo_id="8eff18d02d014435ab5d24ade713e9f3",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -107,6 +112,7 @@ HOLIDAYS = [
     ),
     Todo.irregular(
         todo_id="e8bf37dc16014b55a139d2b5a8331b2b",
+        template_todo_id="e8bf37dc16014b55a139d2b5a8331b2b",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -124,6 +130,7 @@ HOLIDAYS = [
     ),
     Todo.yearly(
         todo_id="a16d843d8a1f4544aa647f69920f9c3a",
+        template_todo_id="a16d843d8a1f4544aa647f69920f9c3a",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -140,6 +147,7 @@ HOLIDAYS = [
     ),
     Todo.irregular(
         todo_id="9942876cd4fa433fbd780f2e5d6fac8d",
+        template_todo_id="9942876cd4fa433fbd780f2e5d6fac8d",
         advance_display_days=30,
         expire_display_days=30,
         user=DEFAULT_USER,
@@ -157,11 +165,48 @@ HOLIDAYS = [
     ),
     Todo(
         todo_id="374bf962521c411f830259fc6a2096c3",
+        template_todo_id="374bf962521c411f830259fc6a2096c3",
         description="Easter",
         note="",
         user=DEFAULT_USER,
         category=HOLIDAY_CATEGORY,
         frequency=Frequency.easter(
+            advance_display_days=30,
+            expire_display_days=30,
+            start_date=datetime.date(1900, 1, 1),
+        ),
+        last_completed=None,
+        prior_completed=None,
+        date_added=datetime.datetime(1900, 1, 1),
+        date_updated=None,
+    ),
+    Todo(
+        todo_id="68216e9666094d17ad194cf3f9986556",
+        template_todo_id="68216e9666094d17ad194cf3f9986556",
+        description="Memorial Day",
+        note="",
+        user=DEFAULT_USER,
+        category=HOLIDAY_CATEGORY,
+        frequency=Frequency.memorial_day(
+            advance_display_days=30,
+            expire_display_days=30,
+            start_date=datetime.date(1900, 1, 1),
+        ),
+        last_completed=None,
+        prior_completed=None,
+        date_added=datetime.datetime(1900, 1, 1),
+        date_updated=None,
+    ),
+    Todo(
+        todo_id="72ac7442456e45b0a9feb2fe0877fa35",
+        template_todo_id="72ac7442456e45b0a9feb2fe0877fa35",
+        description="Independence Day",
+        note="",
+        user=DEFAULT_USER,
+        category=HOLIDAY_CATEGORY,
+        frequency=Frequency.yearly(
+            month=Month.July,
+            month_day=4,
             advance_display_days=30,
             expire_display_days=30,
             start_date=datetime.date(1900, 1, 1),

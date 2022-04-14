@@ -34,7 +34,7 @@ def user_can_edit_todo(*, user: User | None, todo: Todo | None) -> bool:
     if todo is None:
         return False
 
-    if todo.frequency.name == FrequencyType.Easter:
+    if todo.frequency.name in {FrequencyType.Easter, FrequencyType.MemorialDay}:
         return False
 
     if user.is_admin:

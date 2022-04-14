@@ -50,12 +50,14 @@ class UserDash(qtw.QWidget):
                 table.timestamp_col(
                     display_name="Added",
                     attr_name="date_added",
+                    display_format="%m/%d/%Y",
                     column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
                 table.timestamp_col(
                     display_name="Updated",
                     attr_name="date_updated",
+                    display_format="%m/%d/%Y",
                     column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
@@ -71,7 +73,7 @@ class UserDash(qtw.QWidget):
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
-                    column_width=60,
+                    column_width=80,
                     enable_when=lambda user: domain.permissions.user_can_edit_user(
                         current_user=self._current_user,
                         user=user,

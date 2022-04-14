@@ -35,13 +35,23 @@ class ColAlignment(enum.Enum):
     Left = enum.auto()
     Right = enum.auto()
 
+    # @property
+    # def qt_alignment(self) -> int:
+    #     return int(
+    #         {
+    #             ColAlignment.Center: qtc.Qt.AlignHCenter | qtc.Qt.AlignTop,
+    #             ColAlignment.Left: qtc.Qt.AlignLeft | qtc.Qt.AlignTop,
+    #             ColAlignment.Right: qtc.Qt.AlignRight | qtc.Qt.AlignTop,
+    #         }[self]
+    #     )
+
     @property
     def qt_alignment(self) -> int:
         return int(
             {
-                ColAlignment.Center: qtc.Qt.AlignHCenter | qtc.Qt.AlignTop,
-                ColAlignment.Left: qtc.Qt.AlignLeft | qtc.Qt.AlignTop,
-                ColAlignment.Right: qtc.Qt.AlignRight | qtc.Qt.AlignTop,
+                ColAlignment.Center: qtc.Qt.AlignHCenter | qtc.Qt.AlignVCenter,
+                ColAlignment.Left: qtc.Qt.AlignLeft | qtc.Qt.AlignVCenter,
+                ColAlignment.Right: qtc.Qt.AlignRight | qtc.Qt.AlignVCenter,
             }[self]
         )
 
@@ -463,7 +473,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     btn.setFont(fonts.bold)
                     btn.setObjectName("table_btn")
                     assert col_spec.column_width is not None
-                    btn.setFixedWidth(col_spec.column_width)
+                    btn.setMaximumWidth(col_spec.column_width)
                     btn.clicked.connect(col_spec.on_click)
                     self._table.setCellWidget(row_num, col_num, btn)
 

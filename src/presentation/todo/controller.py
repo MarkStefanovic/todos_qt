@@ -108,6 +108,11 @@ class TodoController:
                 user_id_filter=user_id_filter,
             )
 
+            if current_user is None:
+                status = "Showing ToDos for all users."
+            else:
+                status = f"Showing ToDos for {current_user.display_name}."
+
             new_state = dataclasses.replace(
                 state,
                 dash_state=dataclasses.replace(
@@ -120,7 +125,7 @@ class TodoController:
                     user_filter=current_user or ALL_USER,
                     description_filter="",
                     due_filter=True,
-                    status=f"Showing ToDos for {current_user.display_name}.",
+                    status=status,
                 ),
                 dash_active=True,
             )
