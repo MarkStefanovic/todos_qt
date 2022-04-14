@@ -14,6 +14,7 @@ FREQUENCY_LKP = {
     "daily": domain.FrequencyType.Daily,
     "easter": domain.FrequencyType.Easter,
     "irregular": domain.FrequencyType.Irregular,
+    "memorial_day": domain.FrequencyType.MemorialDay,
     "monthly": domain.FrequencyType.Monthly,
     "once": domain.FrequencyType.Once,
     "weekly": domain.FrequencyType.Weekly,
@@ -25,6 +26,7 @@ FREQUENCY_NAME_LKP = {
     domain.FrequencyType.Daily: "daily",
     domain.FrequencyType.Easter: "easter",
     domain.FrequencyType.Irregular: "irregular",
+    domain.FrequencyType.MemorialDay: "memorial_day",
     domain.FrequencyType.Monthly: "monthly",
     domain.FrequencyType.Once: "once",
     domain.FrequencyType.Weekly: "weekly",
@@ -100,6 +102,7 @@ class DbTodoRepository(domain.TodoRepository):
         return [
             domain.Todo(
                 todo_id=todo_orm.todo_id,
+                template_todo_id=todo_orm.template_todo_id,
                 category=category_lkp[todo_orm.category_id],
                 user=user_lkp.get(todo_orm.user_id, domain.DEFAULT_USER),
                 description=todo_orm.description,
@@ -236,6 +239,12 @@ def _parse_frequency(
             expire_display_days=expire_display_days,
             start_date=start_date,
         )
+    elif row.frequency == "memorial_day":
+        return domain.Frequency.memorial_day(
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
     elif row.frequency == "monthly":
         assert row.month_day is not None, "[month_day] is required if the frequency is 'monthly'."
 
@@ -287,9 +296,15 @@ def _parse_frequency(
         raise ValueError(f"Unrecognized frequency, {row.frequency!r}.")
 
 
-def _orm_to_domain(*, todo_orm: db.Todo, category: domain.Category, user: domain.User) -> domain.Todo:
+def _orm_to_domain(
+    *,
+    todo_orm: db.Todo,
+    category: domain.Category,
+    user: domain.User,
+) -> domain.Todo:
     return domain.Todo(
         todo_id=todo_orm.todo_id,
+        template_todo_id=todo_orm.template_todo_id,
         user=user,
         category=category,
         description=todo_orm.description,

@@ -45,6 +45,8 @@ class DbUserService(domain.UserService):
         if self._current_user:
             return self._current_user
 
+        self._refresh()
+
         if self._last_current_user_scan is None:
             time_to_scan = True
         else:
@@ -54,8 +56,6 @@ class DbUserService(domain.UserService):
                 time_to_scan = False
 
         if time_to_scan:
-            self._refresh()
-
             for user in self._users.values():
                 if user.username.lower().strip() == self._username:
                     self._current_user = user
@@ -75,7 +75,19 @@ class DbUserService(domain.UserService):
 
     def get(self, *, user_id: str) -> User | None:
         self._refresh()
+
         return self._users.get(user_id)
+
+    def get_user_by_username(self, *, username: str) -> User | None:
+        self._refresh()
+
+        return next(
+            (
+                user for user in self._users.values()
+                if user.username.lower() == username.lower()
+            ),
+            None
+        )
 
     def refresh(self) -> None:
         with sm.Session(self._engine) as session:

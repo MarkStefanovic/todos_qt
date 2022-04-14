@@ -84,10 +84,30 @@ class TodoDash(qtw.QWidget):
                     display_name="ID",
                     hidden=True,
                 ),
+                table.button_col(
+                    button_text="Complete",
+                    on_click=lambda _: self.complete_btn_clicked.emit(),
+                    alignment=table.ColAlignment.Center,
+                ),
                 table.text_col(
                     attr_name="description",
                     display_name="Description",
                     column_width=300,
+                ),
+                table.date_col(
+                    selector=lambda todo: todo.due_date(today=self._date_edit.get_value()),
+                    display_name="Due Date",
+                    alignment=table.ColAlignment.Center,
+                    column_width=120,
+                ),
+                table.rich_text_col(
+                    selector=lambda todo: render_days(
+                        due_date=todo.due_date(today=self._date_edit.get_value()),
+                        today=self._date_edit.get_value(),
+                    ),
+                    display_name="Days",
+                    alignment=table.ColAlignment.Center,
+                    column_width=60,
                 ),
                 table.text_col(
                     selector=lambda todo: todo.user.display_name,
@@ -104,7 +124,7 @@ class TodoDash(qtw.QWidget):
                     alignment=table.ColAlignment.Center,
                 ),
                 table.text_col(
-                    selector=lambda todo: todo.frequency.name.value,
+                    selector=lambda todo: render_frequency(frequency=todo.frequency),
                     display_name="Frequency",
                     column_width=140,
                     hidden=False,
@@ -116,18 +136,6 @@ class TodoDash(qtw.QWidget):
                     column_width=400,
                 ),
                 table.date_col(
-                    selector=lambda todo: todo.due_date(
-                        today=self._date_edit.get_value() or datetime.date.today()
-                    ),
-                    display_name="Due Date",
-                    alignment=table.ColAlignment.Center,
-                    column_width=120,
-                    display_fn=lambda due_date: due_date_description(
-                        due_date=due_date,
-                        today=self._date_edit.get_value() or datetime.date.today(),
-                    ),
-                ),
-                table.date_col(
                     attr_name="last_completed",
                     display_name="Last Completed",
                     alignment=table.ColAlignment.Center,
@@ -137,19 +145,17 @@ class TodoDash(qtw.QWidget):
                     attr_name="date_added",
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y %I:%M %p",
+                    display_format="%m/%d/%Y",
+                    # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
                 ),
                 table.timestamp_col(
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y %I:%M %p",
+                    display_format="%m/%d/%Y",
+                    # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
-                ),
-                table.button_col(
-                    button_text="Complete",
-                    on_click=lambda _: self.complete_btn_clicked.emit(),
                 ),
                 table.button_col(
                     button_text="Incomplete",
@@ -165,7 +171,7 @@ class TodoDash(qtw.QWidget):
                 table.button_col(
                     button_text="Delete",
                     on_click=lambda _: self.delete_btn_clicked.emit(),
-                    column_width=60,
+                    column_width=80,
                     enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
             ],
@@ -234,7 +240,27 @@ class TodoDash(qtw.QWidget):
         self.repaint()
 
 
-def due_date_description(*, due_date: datetime.date, today: datetime.date) -> str:
-    days_until = (due_date - today).days
-    return f"{due_date:%m/%d/%y}\n{days_until} days"
+def render_days(*, due_date: datetime.date, today: datetime.date) -> str:
+    days = (due_date - today).days
 
+    if days < 0:
+        return f'<center><font color="red">{days}</font></center>'
+
+    if days == 0:
+        return f'<center><font color="yellow">{days}</font></center>'
+
+    return f"<center>{days}</center>"
+
+
+def render_frequency(*, frequency: domain.Frequency) -> str:
+    return {
+        domain.FrequencyType.Daily: "Daily",
+        domain.FrequencyType.Easter: "Easter",
+        domain.FrequencyType.MemorialDay: "Memorial Day",
+        domain.FrequencyType.Irregular: "Irregular",
+        domain.FrequencyType.Monthly: "Monthly",
+        domain.FrequencyType.Once: "Once",
+        domain.FrequencyType.Weekly: "Weekly",
+        domain.FrequencyType.XDays: "XDays",
+        domain.FrequencyType.Yearly: "Yearly",
+    }.get(frequency.name, "")

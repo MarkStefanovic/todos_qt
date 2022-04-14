@@ -5,7 +5,7 @@ from src.domain.easter import calculate_easter
 from src.domain.frequency import Frequency
 from src.domain.frequency_type import FrequencyType
 from src.domain.irregular import x_weekday_of_month
-from src.domain.month import Month
+from src.domain.memorial_day import calculate_memorial_day
 from src.domain.weekday import Weekday
 
 __all__ = ("next_date",)
@@ -41,6 +41,11 @@ def next_date(
             week_num=frequency.week_number,
             week_day=frequency.week_day,
         )
+    elif frequency.name == FrequencyType.MemorialDay:
+        cy = calculate_memorial_day(year=today.year)
+        if cy > today:
+            return cy
+        return calculate_memorial_day(year=today.year + 1)
     elif frequency.name == FrequencyType.Monthly:
         assert frequency.month_day is not None, f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
 

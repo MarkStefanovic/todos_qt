@@ -17,7 +17,11 @@ def should_display(
     last_completed: datetime.date | None,
 ) -> bool:
     if frequency.name == FrequencyType.Once:
-        return (frequency.due_date - datetime.timedelta(days=frequency.advance_display_days)) <= today <= (frequency.due_date + datetime.timedelta(days=frequency.expire_display_days))
+        assert frequency.due_date is not None, "If the frequency is Once, then [due_date] is required."
+
+        start_date = frequency.due_date - datetime.timedelta(days=frequency.advance_display_days)
+        end_date = frequency.due_date + datetime.timedelta(days=frequency.expire_display_days)
+        return start_date <= today <= end_date
 
     due_dates: list[datetime.date] = []
     prior_due_date = prior_date(frequency=frequency, today=today)

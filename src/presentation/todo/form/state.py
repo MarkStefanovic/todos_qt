@@ -17,6 +17,7 @@ __all__ = ("TodoFormState",)
 @dataclasses.dataclass(frozen=True)
 class TodoFormState:
     todo_id: str
+    template_todo_id: str | None
     advance_days: int
     expire_days: int
     user: domain.User
@@ -46,6 +47,7 @@ class TodoFormState:
     ) -> TodoFormState:
         return TodoFormState(
             todo_id=domain.create_uuid(),
+            template_todo_id=None,
             advance_days=0,
             expire_days=1,
             user=domain.DEFAULT_USER,
@@ -118,6 +120,7 @@ class TodoFormState:
 
         return domain.Todo(
             todo_id=self.todo_id,
+            template_todo_id=self.template_todo_id,
             frequency=frequency,
             user=self.user,
             category=self.category,
@@ -158,6 +161,7 @@ class TodoFormState:
 
         return TodoFormState(
             todo_id=todo.todo_id,
+            template_todo_id=todo.template_todo_id,
             user=todo.user,
             category=todo.category,
             description=todo.description,

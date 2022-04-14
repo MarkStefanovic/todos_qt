@@ -82,6 +82,26 @@ class Frequency:
         )
 
     @staticmethod
+    def memorial_day(
+        *,
+        advance_display_days: int,
+        expire_display_days: int,
+        start_date: datetime.date,
+    ) -> Frequency:
+        return Frequency(
+            name=FrequencyType.MemorialDay,
+            month=None,
+            week_day=None,
+            week_number=None,
+            month_day=None,
+            days=None,
+            due_date=None,
+            advance_display_days=advance_display_days,
+            expire_display_days=expire_display_days,
+            start_date=start_date,
+        )
+
+    @staticmethod
     def monthly(
         *,
         month_day: int,

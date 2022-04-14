@@ -1,3 +1,5 @@
+import dataclasses
+import datetime
 import os
 import sys
 import types
@@ -42,7 +44,7 @@ def cobalt() -> qtg.QPalette:
 
     palette = qtg.QPalette()
     for selector, color in color_lkp.items():
-        palette.setColor(*selector, color)
+        palette.setColor(*selector, color)  # type: ignore
 
     return palette
 
@@ -87,6 +89,7 @@ def main() -> None:
         QPushButton { font-weight: "bold"; }
         QPushButton:hover:!pressed { background-color: rgb(80, 80, 140); }
         QPushButton:!hover { background-color: rgb(60, 60, 80); }
+        QTableWidget::item { padding: 2ex }
         QTabBar::tab:selected { 
             background: rgb(80, 80, 100);
             border: 1px solid rgb(140, 140, 180); 
@@ -133,17 +136,38 @@ def main() -> None:
 
     todo_service = service.DbTodoService(engine=engine, username=username)
 
+    users: list[domain.User] = []
+    for username in config.admin_usernames:
+        if user_service.get_user_by_username(username=username) is None:
+            user = domain.User(
+                user_id=domain.create_uuid(),
+                username=username,
+                display_name=username,
+                is_admin=True,
+                date_added=datetime.datetime.now(),
+                date_updated=None,
+            )
+            user_service.add(user=user)
+            users.append(user)
+
     if config.add_holidays:
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
             if category_service.get(category_id=category.category_id) is None:
                 category_service.add(category=category)
-
-        for holiday in domain.HOLIDAYS:
-            if todo_service.get(todo_id=holiday.todo_id) is None:
-                todo_service.upsert(todo=holiday)
     else:
         if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:
             category_service.add(category=domain.TODO_CATEGORY)
+
+    if config.add_holidays:
+        for user in user_service.all():
+            for holiday in domain.HOLIDAYS:
+                new_holiday = dataclasses.replace(
+                    holiday,
+                    user=user,
+                    template_todo_id=holiday.todo_id,
+                )
+                if todo_service.get(todo_id=new_holiday.todo_id) is None:
+                    todo_service.upsert(todo=new_holiday)
 
     main_view = presentation.MainView(window_icon=app_icon)
 

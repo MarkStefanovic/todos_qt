@@ -22,6 +22,7 @@ class Todo(sm.SQLModel, table=True):
     start_date: datetime.date
     last_completed: datetime.date | None
     prior_completed: datetime.date | None
+    template_todo_id: str | None
 
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
