@@ -463,6 +463,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     value = col_spec.selector(data)
                 lbl = qtw.QLabel()
                 lbl.setTextFormat(qtc.Qt.RichText)
+                lbl.setWordWrap(True)
                 lbl.setText(value)
                 self._table.setCellWidget(row_num, col_num, lbl)
             elif col_spec.type == ColSpecType.Button:

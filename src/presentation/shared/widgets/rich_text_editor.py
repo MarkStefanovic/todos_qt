@@ -59,7 +59,9 @@ class RichTextEditor(qtw.QWidget):
 
         fmt = qtg.QTextCharFormat()
 
-        font = qtg.QFont()
+        font = cursor.charFormat().font()
+
+        background = cursor.charFormat().background()
 
         if cursor.charFormat().fontWeight() == qtg.QFont.Bold:
             font.setBold(False)
@@ -68,6 +70,13 @@ class RichTextEditor(qtw.QWidget):
 
         fmt.setFont(font)
 
+        fmt.setBackground(background)
+
+        if background == qtc.Qt.yellow:
+            fmt.setForeground(qtc.Qt.black)
+        else:
+            fmt.setForeground(self.parent().palette().text().color())
+
         cursor.setCharFormat(fmt)
 
     def _on_clear_highlight_btn_clicked(self) -> None:
@@ -75,6 +84,8 @@ class RichTextEditor(qtw.QWidget):
         fmt.clearBackground()
         fmt.setForeground(self.parent().palette().text().color())
         cursor = self._text_edit.textCursor()
+        font = cursor.charFormat().font()
+        fmt.setFont(font)
         cursor.setCharFormat(fmt)
 
     def _on_highlight_btn_clicked(self) -> None:
@@ -82,6 +93,8 @@ class RichTextEditor(qtw.QWidget):
         fmt.setForeground(qtc.Qt.black)
         fmt.setBackground(qtc.Qt.yellow)
         cursor = self._text_edit.textCursor()
+        font = cursor.charFormat().font()
+        fmt.setFont(font)
         cursor.setCharFormat(fmt)
 
 
