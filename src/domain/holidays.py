@@ -19,7 +19,7 @@ HOLIDAY_CATEGORY = Category(
     date_deleted=None,
 )
 
-# TODO add Veteran's day & Memorial Day
+# TODO add Veteran's day
 HOLIDAYS = [
     Todo.irregular(
         todo_id="f89904629ba24d5c8ed4b2525a8253d9",
@@ -188,6 +188,25 @@ HOLIDAYS = [
         user=DEFAULT_USER,
         category=HOLIDAY_CATEGORY,
         frequency=Frequency.memorial_day(
+            advance_display_days=30,
+            expire_display_days=30,
+            start_date=datetime.date(1900, 1, 1),
+        ),
+        last_completed=None,
+        prior_completed=None,
+        date_added=datetime.datetime(1900, 1, 1),
+        date_updated=None,
+    ),
+    Todo(
+        todo_id="72ac7442456e45b0a9feb2fe0877fa35",
+        template_todo_id="72ac7442456e45b0a9feb2fe0877fa35",
+        description="Independence Day",
+        note="",
+        user=DEFAULT_USER,
+        category=HOLIDAY_CATEGORY,
+        frequency=Frequency.yearly(
+            month=Month.July,
+            month_day=4,
             advance_display_days=30,
             expire_display_days=30,
             start_date=datetime.date(1900, 1, 1),
