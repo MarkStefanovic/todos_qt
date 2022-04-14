@@ -95,15 +95,15 @@ class TodoDash(qtw.QWidget):
                     column_width=300,
                 ),
                 table.date_col(
-                    selector=lambda todo: todo.due_date(today=self._date_edit.get_value()),
+                    selector=lambda todo: todo.due_date(today=self._date_edit.get_value() or datetime.date.today()),
                     display_name="Due Date",
                     alignment=table.ColAlignment.Center,
                     column_width=120,
                 ),
                 table.rich_text_col(
                     selector=lambda todo: render_days(
-                        due_date=todo.due_date(today=self._date_edit.get_value()),
-                        today=self._date_edit.get_value(),
+                        due_date=todo.due_date(today=self._date_edit.get_value() or datetime.date.today()),
+                        today=self._date_edit.get_value() or datetime.date.today(),
                     ),
                     display_name="Days",
                     alignment=table.ColAlignment.Center,

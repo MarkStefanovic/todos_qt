@@ -96,7 +96,7 @@ def main() -> None:
             border-bottom-color: none; 
             border-top-left-radius: 1px;
             border-top-right-radius: 1px;
-            min-width: 10ex;
+            min-width: 20ex;
             padding: 4px;
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
@@ -161,12 +161,16 @@ def main() -> None:
     if config.add_holidays:
         for user in user_service.all():
             for holiday in domain.HOLIDAYS:
-                new_holiday = dataclasses.replace(
-                    holiday,
-                    user=user,
-                    template_todo_id=holiday.todo_id,
-                )
-                if todo_service.get(todo_id=new_holiday.todo_id) is None:
+                if todo_service.get_by_template_id_and_user_id(
+                    template_id=holiday.todo_id,
+                    user_id=user.user_id,
+                ) is None:
+                    new_holiday = dataclasses.replace(
+                        holiday,
+                        todo_id=domain.create_uuid(),
+                        template_todo_id=holiday.todo_id,
+                        user=user,
+                    )
                     todo_service.upsert(todo=new_holiday)
 
     main_view = presentation.MainView(window_icon=app_icon)

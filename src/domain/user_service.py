@@ -27,10 +27,6 @@ class UserService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_username(self, *, username: str) -> User | None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def refresh(self) -> None:
         raise NotImplementedError
 

@@ -56,6 +56,7 @@ class DbTodoRepository(domain.TodoRepository):
 
         todo_orm = db.Todo(
             todo_id=todo.todo_id,
+            template_todo_id=todo.template_todo_id,
             expire_days=todo.frequency.expire_display_days,
             advance_days=todo.frequency.advance_display_days,
             user_id=todo.user.user_id,
@@ -158,6 +159,7 @@ class DbTodoRepository(domain.TodoRepository):
         else:
             month = todo.frequency.month.to_int()
 
+        todo_orm.template_todo_id = todo.template_todo_id
         todo_orm.user_id = todo.user.user_id
         todo_orm.expire_days = todo.frequency.expire_display_days
         todo_orm.advance_days = todo.frequency.advance_display_days
