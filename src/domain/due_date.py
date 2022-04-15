@@ -14,8 +14,7 @@ def due_date(
     *,
     frequency: Frequency,
     today: datetime.date,
-    last_completed: datetime.date | None,
-) -> datetime.date:
+) -> datetime.date | None:
     if frequency.name == FrequencyType.Once:
         assert frequency.due_date is not None, "Frequency was Once, but [due_date] was None."
         return frequency.due_date
@@ -30,8 +29,17 @@ def due_date(
         next_due_date = next_date(frequency=frequency, today=current_due_date)
         assert next_due_date is not None, f"If the frequency is not Once, then next_due_date should not be None."
         # assert next_due_date > today
-        return min(
-            dt for dt in (prior_due_date, current_due_date, next_due_date)
-            if today <= dt + datetime.timedelta(days=frequency.expire_display_days)
-            and (last_completed is None or dt > last_completed)
+        # return next(
+        #     (
+        #         dt for dt in (prior_due_date, current_due_date, next_due_date) if
+        #         today <= dt + datetime.timedelta(days=frequency.expire_display_days)
+        #     ),
+        #     None
+        # )
+        return next(
+            (
+                dt for dt in (next_due_date, current_due_date, prior_due_date)
+                if today >= dt - datetime.timedelta(days=frequency.advance_display_days)
+            ),
+            None
         )

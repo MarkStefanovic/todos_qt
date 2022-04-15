@@ -89,7 +89,6 @@ def main() -> None:
         QPushButton { font-weight: "bold"; }
         QPushButton:hover:!pressed { background-color: rgb(80, 80, 140); }
         QPushButton:!hover { background-color: rgb(60, 60, 80); }
-        QTableWidget::item { padding: 2ex }
         QTabBar::tab:selected { 
             background: rgb(80, 80, 100);
             border: 1px solid rgb(140, 140, 180); 
@@ -106,21 +105,6 @@ def main() -> None:
         QPushButton#table_btn:hover:!pressed { background-color: rgb(80, 80, 140); }
         QPushButton#table_btn:!hover { background-color: none; }
     """)
-
-    # app.setStyleSheet("""
-    #     QWidget { font-family: "Arial"; font-size: 11pt; }
-    #     QHeaderView { font-weight: bold; }
-    #     QPushButton { font-weight: "bold"; }
-    #     QPushButton:hover:!pressed { background-color: rgb(80, 80, 140); }
-    #     QPushButton:!hover { background-color: rgb(60, 60, 80); }
-    #     QTabBar::tab:selected { background: rgb(80, 80, 120); border: white solid 4px; }
-    #     QTabBar::tab:hover { background: rgb(100, 100, 140); }
-    #     QPushButton#table_btn { background-color: none; border: none; }
-    #     QPushButton#table_btn:enabled { color: cyan; }
-    #     QPushButton#table_btn:disabled { color: none; }
-    #     QPushButton#table_btn:hover:!pressed { background-color: rgb(80, 80, 140); }
-    #     QPushButton#table_btn:!hover { background-color: none; }
-    # """)
 
     app.setPalette(cobalt())
 

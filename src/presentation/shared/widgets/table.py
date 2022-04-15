@@ -352,6 +352,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         ]
 
         self._table = qtw.QTableWidget(parent=self)
+        self._table.verticalHeader().setMinimumSectionSize(40)
         self._table.setAlternatingRowColors(True)
         self._table.setWordWrap(True)
         self._table.setColumnCount(len(headers))
@@ -477,7 +478,6 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     btn.setMaximumWidth(col_spec.column_width)
                     btn.clicked.connect(col_spec.on_click)
                     self._table.setCellWidget(row_num, col_num, btn)
-
                 if col_spec.enable_when is not None:
                     btn.setEnabled(col_spec.enable_when(data))
             elif col_spec.type == ColSpecType.Dropdown:
