@@ -9,10 +9,7 @@ __all__ = ("assets_folder", "config_path", "root_dir",)
 @functools.lru_cache
 def root_dir() -> pathlib.Path:
     if getattr(sys, "frozen", False):
-        if hasattr(sys, "_MEIPASS"):
-            path = pathlib.Path(getattr(sys, '_MEIPASS'))
-        else:
-            path = pathlib.Path(os.path.dirname(sys.executable))
+        path = pathlib.Path(os.path.dirname(sys.executable))
         assert path is not None
         return path
     else:
