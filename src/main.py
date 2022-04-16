@@ -95,7 +95,7 @@ def main() -> None:
             border-bottom-color: none; 
             border-top-left-radius: 1px;
             border-top-right-radius: 1px;
-            min-width: 20ex;
+            min-width: 60px;
             padding: 4px;
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
