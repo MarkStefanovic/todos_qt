@@ -409,7 +409,12 @@ class TodoController:
         try:
             todo = state.form_state.to_domain()
 
-            self._todo_service.upsert(todo=todo)
+            if self._todo_service.get(todo_id=todo.todo_id):
+                self._todo_service.update(todo=todo)
+                status = f"{todo.description} updated."
+            else:
+                self._todo_service.add(todo=todo)
+                status = f"{todo.description} added."
 
             if state.dash_state.category_filter == ALL_CATEGORY:
                 category_id_filter = None
@@ -436,7 +441,7 @@ class TodoController:
                     todos=todos,
                     selected_todo=todo,
                     category_options=self._category_service.all(),
-                    status=_add_timestamp(message=f"{todo.description} added."),
+                    status=_add_timestamp(message=status),
                 ),
                 dash_active=True,
             )

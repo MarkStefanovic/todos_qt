@@ -155,7 +155,7 @@ def main() -> None:
                         template_todo_id=holiday.todo_id,
                         user=user,
                     )
-                    todo_service.upsert(todo=new_holiday)
+                    todo_service.add(todo=new_holiday)
 
     main_view = presentation.MainView(window_icon=app_icon)
 

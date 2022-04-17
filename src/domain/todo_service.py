@@ -8,7 +8,15 @@ __all__ = ("TodoService",)
 
 class TodoService(abc.ABC):
     @abc.abstractmethod
+    def add(self, *, todo: Todo) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def delete(self, *, todo_id: str) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, *, todo_id: str) -> Todo | None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -36,5 +44,5 @@ class TodoService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def upsert(self, *, todo: Todo) -> None:
+    def update(self, *, todo: Todo) -> None:
         raise NotImplementedError

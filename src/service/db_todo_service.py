@@ -25,6 +25,14 @@ class DbTodoService(domain.TodoService):
         self._todos: dict[str, domain.Todo] = {}
         self._last_refresh: datetime.datetime | None = None
 
+    def add(self, *, todo: Todo) -> None:
+        with sm.Session(self._engine) as session:
+            repo = adapter.DbTodoRepository(session=session)
+            repo.add(todo=todo)
+            if self._todos is not None:
+                self._todos[todo.todo_id] = todo
+            session.commit()
+
     def delete(self, *, todo_id: str) -> None:
         self._refresh()
 
@@ -143,20 +151,13 @@ class DbTodoService(domain.TodoService):
             }
             self._last_refresh = datetime.datetime.now()
 
-    def upsert(self, *, todo: Todo) -> None:
+    def update(self, *, todo: Todo) -> None:
         with sm.Session(self._engine) as session:
             repo = adapter.DbTodoRepository(session=session)
-
-            if repo.get(todo_id=todo.todo_id) is not None:
-                updated_todo = dataclasses.replace(todo, date_updated=datetime.datetime.now())
-                repo.update(todo=updated_todo)
-                if self._todos is not None:
-                    self._todos[todo.todo_id] = updated_todo
-            else:
-                repo.add(todo=todo)
-                if self._todos is not None:
-                    self._todos[todo.todo_id] = todo
-
+            updated_todo = dataclasses.replace(todo, date_updated=datetime.datetime.now())
+            repo.update(todo=updated_todo)
+            if self._todos is not None:
+                self._todos[todo.todo_id] = updated_todo
             session.commit()
 
     def _refresh(self) -> None:
