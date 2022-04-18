@@ -10,7 +10,7 @@ from src.presentation.user.view import UserView
 __all__ = ("MainView",)
 
 
-class MainView(qtw.QDialog):
+class MainView(qtw.QMainWindow):
     def __init__(self, *, window_icon: qtg.QIcon):
         super().__init__()
 
@@ -37,10 +37,7 @@ class MainView(qtw.QDialog):
         self._tabs.addTab(self.users, "Users")
         self._tabs.currentChanged.connect(self._on_tab_changed)
 
-        layout = qtw.QVBoxLayout()
-        layout.addWidget(self._tabs)
-
-        self.setLayout(layout)
+        self.setCentralWidget(self._tabs)
 
         self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
         self.enter_key_shortcut.activated.connect(self.todos.dash.refresh_btn.click)
