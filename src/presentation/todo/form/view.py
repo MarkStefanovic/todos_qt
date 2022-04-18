@@ -28,13 +28,13 @@ class TodoForm(qtw.QWidget):
         advance_days_lbl = qtw.QLabel("Advance Days")
         advance_days_lbl.setFont(fonts.bold)
         self._advance_days_sb = qtw.QSpinBox()
-        self._advance_days_sb.setRange(0, 364)
+        self._advance_days_sb.setRange(0, 999)
         self._advance_days_sb.setFixedWidth(80)
 
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.setFont(fonts.bold)
         self._expire_days_sb = qtw.QSpinBox()
-        self._expire_days_sb.setRange(1, 364)
+        self._expire_days_sb.setRange(1, 999)
         self._expire_days_sb.setFixedWidth(80)
 
         user_lbl = qtw.QLabel("User")
@@ -183,22 +183,48 @@ class TodoForm(qtw.QWidget):
 
         self._advance_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
         self._expire_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
+        self._advance_days_sb.setMaximum(999)
+        self._expire_days_sb.setMaximum(999)
 
         if frequency == domain.FrequencyType.Daily:
+            self._advance_days_sb.setValue(0)
+            self._expire_days_sb.setValue(1)
+            self._advance_days_sb.setMaximum(0)
+            self._expire_days_sb.setMaximum(1)
             self._frequency_subform_layout.setCurrentIndex(0)
         elif frequency == domain.FrequencyType.Easter:
             raise ValueError("Easter is not meant to be created by the user.")
         elif frequency == domain.FrequencyType.Irregular:
+            self._advance_days_sb.setValue(30)
+            self._expire_days_sb.setValue(90)
+            self._advance_days_sb.setMaximum(363)
+            self._expire_days_sb.setMaximum(363)
             self._frequency_subform_layout.setCurrentIndex(1)
         elif frequency == domain.FrequencyType.Monthly:
+            self._advance_days_sb.setValue(0)
+            self._expire_days_sb.setValue(27)
+            self._advance_days_sb.setMaximum(27)
+            self._expire_days_sb.setMaximum(27)
             self._frequency_subform_layout.setCurrentIndex(2)
         elif frequency == domain.FrequencyType.Once:
+            self._advance_days_sb.setValue(0)
+            self._expire_days_sb.setValue(99)
             self._frequency_subform_layout.setCurrentIndex(3)
         elif frequency == domain.FrequencyType.Weekly:
+            self._advance_days_sb.setValue(0)
+            self._expire_days_sb.setValue(5)
+            self._advance_days_sb.setMaximum(6)
+            self._expire_days_sb.setMaximum(6)
             self._frequency_subform_layout.setCurrentIndex(4)
         elif frequency == domain.FrequencyType.XDays:
+            self._advance_days_sb.setValue(0)
+            self._expire_days_sb.setValue(9)
             self._frequency_subform_layout.setCurrentIndex(5)
         elif frequency == domain.FrequencyType.Yearly:
+            self._advance_days_sb.setValue(30)
+            self._expire_days_sb.setValue(90)
+            self._advance_days_sb.setMaximum(363)
+            self._expire_days_sb.setMaximum(363)
             self._frequency_subform_layout.setCurrentIndex(6)
         else:
             raise ValueError(f"Unrecognized frequency: {frequency!r}.")

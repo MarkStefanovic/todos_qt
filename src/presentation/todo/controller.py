@@ -409,44 +409,80 @@ class TodoController:
         try:
             todo = state.form_state.to_domain()
 
-            if self._todo_service.get(todo_id=todo.todo_id):
-                self._todo_service.update(todo=todo)
-                status = f"{todo.description} updated."
+            error_messages: list[str] = []
+            if todo.frequency.name == domain.FrequencyType.Daily:
+                if todo.frequency.advance_display_days > 0:
+                    error_messages.append(f"Advance display days must be 0.")
+                if todo.frequency.expire_display_days > 1:
+                    error_messages.append(f"Expire days must be less than 1.")
+            elif todo.frequency.name == domain.FrequencyType.Irregular:
+                if todo.frequency.advance_display_days > 363:
+                    error_messages.append(f"Advance display days must be less than 364.")
+                if todo.frequency.expire_display_days > 363:
+                    error_messages.append(f"Expire days must be less than 364.")
+            elif todo.frequency.name == domain.FrequencyType.Monthly:
+                if todo.frequency.advance_display_days > 27:
+                    error_messages.append(f"Advance display days must be less than 28.")
+                if todo.frequency.expire_display_days > 27:
+                    error_messages.append(f"Expire days must be less than 28.")
+            elif todo.frequency.name == domain.FrequencyType.XDays:
+                if todo.frequency.advance_display_days > todo.frequency.days:
+                    error_messages.append(f"Advance display days must be less than the number of days between.")
+                if todo.frequency.expire_display_days > todo.frequency.days:
+                    error_messages.append(f"Expire days must be less than the days between.")
+            elif todo.frequency.name == domain.FrequencyType.Yearly:
+                if todo.frequency.advance_display_days > 363:
+                    error_messages.append(f"Advance display days must be less than 364.")
+                if todo.frequency.expire_display_days > 363:
+                    error_messages.append(f"Expire days must be less than 364.")
+
+            if error_messages:
+                popup.error_message(
+                    message="\n".join(error_messages),
+                    title="Invalid Entry",
+                )
             else:
-                self._todo_service.add(todo=todo)
-                status = f"{todo.description} added."
+                if self._todo_service.get(todo_id=todo.todo_id):
+                    self._todo_service.update(todo=todo)
+                    status = f"{todo.description} updated."
+                else:
+                    self._todo_service.add(todo=todo)
+                    status = f"{todo.description} added."
 
-            if state.dash_state.category_filter == ALL_CATEGORY:
-                category_id_filter = None
-            else:
-                category_id_filter = state.dash_state.category_filter.category_id
+                if state.dash_state.category_filter == ALL_CATEGORY:
+                    category_id_filter = None
+                else:
+                    category_id_filter = state.dash_state.category_filter.category_id
 
-            if state.dash_state.user_filter == ALL_USER:
-                user_id_filter = None
-            else:
-                user_id_filter = state.dash_state.user_filter.user_id
+                if state.dash_state.user_filter == ALL_USER:
+                    user_id_filter = None
+                else:
+                    user_id_filter = state.dash_state.user_filter.user_id
 
-            todos = self._todo_service.where(
-                description_like=state.dash_state.description_filter,
-                date_filter=state.dash_state.date_filter,
-                due_filter=state.dash_state.due_filter,
-                category_id_filter=category_id_filter,
-                user_id_filter=user_id_filter,
-            )
+                todos = self._todo_service.where(
+                    description_like=state.dash_state.description_filter,
+                    date_filter=state.dash_state.date_filter,
+                    due_filter=state.dash_state.due_filter,
+                    category_id_filter=category_id_filter,
+                    user_id_filter=user_id_filter,
+                )
 
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    todos=todos,
-                    selected_todo=todo,
-                    category_options=self._category_service.all(),
-                    status=_add_timestamp(message=status),
-                ),
-                dash_active=True,
-            )
+                new_state = dataclasses.replace(
+                    state,
+                    dash_state=dataclasses.replace(
+                        state.dash_state,
+                        todos=todos,
+                        selected_todo=todo,
+                        category_options=self._category_service.all(),
+                        status=_add_timestamp(message=status),
+                    ),
+                    dash_active=True,
+                )
+
+                self._view.set_state(state=new_state)
         except Exception as e:
             logger.exception(e)
+
             new_state = dataclasses.replace(
                 state,
                 dash_state=dataclasses.replace(
@@ -455,7 +491,7 @@ class TodoController:
                 ),
             )
 
-        self._view.set_state(state=new_state)
+            self._view.set_state(state=new_state)
 
 
 def _add_timestamp(*, message: str) -> str:
