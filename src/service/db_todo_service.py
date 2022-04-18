@@ -72,17 +72,17 @@ class DbTodoService(domain.TodoService):
     ) -> list[Todo]:
         self._refresh()
 
+        todos = (todo for todo in self._todos.values())
+
         if description := description_like.strip().lower():
             todos = (
                 todo for todo in self._todos.values() if
                 description in todo.description.lower()
             )
-        else:
-            todos = (todo for todo in self._todos.values())
 
         if due_filter:
             todos = (
-                todo for todo in self._todos.values()
+                todo for todo in todos
                 if todo.should_display(today=date_filter)
             )
 
