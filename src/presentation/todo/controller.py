@@ -426,6 +426,7 @@ class TodoController:
                 if todo.frequency.expire_display_days > 27:
                     error_messages.append(f"Expire days must be less than 28.")
             elif todo.frequency.name == domain.FrequencyType.XDays:
+                assert todo.frequency.days is not None
                 if todo.frequency.advance_display_days > todo.frequency.days:
                     error_messages.append(f"Advance display days must be less than the number of days between.")
                 if todo.frequency.expire_display_days > todo.frequency.days:

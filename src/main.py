@@ -9,7 +9,7 @@ from loguru import logger
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src import adapter, domain, presentation, service
-from src.adapter import fs
+from src.config import config
 
 __all__ = ("main",)
 
@@ -51,9 +51,7 @@ def cobalt() -> qtg.QPalette:
 
 @logger.catch
 def main() -> None:
-    config = adapter.config()
-
-    log_folder = fs.root_dir() / "logs"
+    log_folder = adapter.fs.root_dir() / "logs"
     log_folder.mkdir(exist_ok=True)
 
     logger.add(
@@ -108,7 +106,7 @@ def main() -> None:
 
     app.setPalette(cobalt())
 
-    app_icon = qtg.QIcon(str((fs.assets_folder() / "icons" / "app.png").resolve()))
+    app_icon = qtg.QIcon(str((adapter.fs.assets_folder() / "icons" / "app.png").resolve()))
 
     engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
 

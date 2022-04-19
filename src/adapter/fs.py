@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 
-__all__ = ("assets_folder", "config_path", "root_dir",)
+__all__ = ("assets_folder", "root_dir",)
 
 
 @functools.lru_cache
@@ -23,10 +23,3 @@ def assets_folder() -> pathlib.Path:
     folder = root_dir() / "assets"
     assert folder.exists(), f"{folder.resolve()!s} does not exist."
     return folder
-
-
-@functools.lru_cache
-def config_path() -> pathlib.Path:
-    path = assets_folder() / "config.json"
-    assert path.exists(), f"{path.resolve()!s} does not exist."
-    return path

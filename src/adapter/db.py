@@ -4,13 +4,13 @@ import functools
 import sqlalchemy as sa
 import sqlmodel as sm
 
-from src.adapter.json_config import config
+from src.config import config
 
 __all__ = ("get_engine", "Todo")
 
 
 class Todo(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config().schema_name}
+    __table_args__ = {"schema": config.schema_name}
 
     todo_id: str = sm.Field(primary_key=True)
     description: str
@@ -39,7 +39,7 @@ class Todo(sm.SQLModel, table=True):
 
 
 class Category(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config().schema_name}
+    __table_args__ = {"schema": config.schema_name}
 
     category_id: str = sm.Field(primary_key=True)
     name: str
@@ -50,7 +50,7 @@ class Category(sm.SQLModel, table=True):
 
 
 class User(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config().schema_name}
+    __table_args__ = {"schema": config.schema_name}
 
     user_id: str = sm.Field(primary_key=True)
     display_name: str
