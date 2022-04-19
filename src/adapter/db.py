@@ -4,7 +4,7 @@ import functools
 import sqlalchemy as sa
 import sqlmodel as sm
 
-from src.config import config
+from src.adapter.config import config
 
 __all__ = ("get_engine", "Todo")
 

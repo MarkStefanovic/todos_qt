@@ -9,7 +9,6 @@ from loguru import logger
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src import adapter, domain, presentation, service
-from src.config import config
 
 __all__ = ("main",)
 
@@ -108,7 +107,7 @@ def main() -> None:
 
     app_icon = qtg.QIcon(str((adapter.fs.assets_folder() / "icons" / "app.png").resolve()))
 
-    engine = adapter.db.get_engine(url=config.sqlalchemy_url, echo=True)
+    engine = adapter.db.get_engine(url=adapter.config.sqlalchemy_url, echo=True)
 
     username = os.environ.get("USERNAME", "unknown").lower()
 
@@ -119,7 +118,7 @@ def main() -> None:
     todo_service = service.DbTodoService(engine=engine, username=username)
 
     users: list[domain.User] = []
-    for username in config.admin_usernames:
+    for username in adapter.config.admin_usernames:
         if user_service.get_user_by_username(username=username) is None:
             user = domain.User(
                 user_id=domain.create_uuid(),
@@ -132,7 +131,7 @@ def main() -> None:
             user_service.add(user=user)
             users.append(user)
 
-    if config.add_holidays:
+    if adapter.config.add_holidays:
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
             if category_service.get(category_id=category.category_id) is None:
                 category_service.add(category=category)
@@ -140,7 +139,7 @@ def main() -> None:
         if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:
             category_service.add(category=domain.TODO_CATEGORY)
 
-    if config.add_holidays:
+    if adapter.config.add_holidays:
         for user in user_service.all():
             for holiday in domain.HOLIDAYS:
                 if todo_service.get_by_template_id_and_user_id(
