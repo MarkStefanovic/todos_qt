@@ -1,4 +1,5 @@
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
+import qtawesome as qta
 
 from src import domain
 from src.presentation.shared import fonts
@@ -17,11 +18,13 @@ class UserDash(qtw.QWidget):
 
         self._current_user = domain.DEFAULT_USER
 
-        self.refresh_btn = qtw.QPushButton("Refresh")
+        refresh_btn_icon = qta.icon("fa.refresh")
+        self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMaximumWidth(100)
 
-        self.add_btn = qtw.QPushButton("Add")
+        add_btn_icon = qta.icon("ri.add-line", scale_factor=1.3)
+        self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)
 

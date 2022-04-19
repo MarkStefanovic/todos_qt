@@ -1,6 +1,7 @@
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
+import qtawesome as qta
 
 from src import domain
 from src.presentation.shared import fonts, widgets
@@ -49,7 +50,7 @@ class TodoForm(qtw.QWidget):
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.setFont(fonts.bold)
-        self._note_txt = RichTextEditor()
+        self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(fonts.bold)
@@ -98,13 +99,15 @@ class TodoForm(qtw.QWidget):
         form_layout.addRow(note_lbl, self._note_txt)
         form_layout.addRow(frequency_lbl, self._frequency_cbo)
 
-        self.back_btn = qtw.QPushButton("Back")
+        back_btn_icon = qta.icon("ei.arrow-left")
+        self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
         self.back_btn.setFont(fonts.bold)
-        self.back_btn.setFixedWidth(100)
+        self.back_btn.setMaximumWidth(100)
 
-        self.save_btn = qtw.QPushButton("Save")
+        save_btn_icon = qta.icon("fa5.save")
+        self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         self.save_btn.setFont(fonts.bold)
-        self.save_btn.setFixedWidth(100)
+        self.save_btn.setMaximumWidth(100)
         self.save_btn.setDefault(True)
 
         main_layout = qtw.QVBoxLayout()
