@@ -9,8 +9,10 @@ BTN_SIZE = qtc.QSize(20, 20)
 
 
 class RichTextEditor(qtw.QWidget):
-    def __init__(self, icon_color: str = "white"):
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
+
+        icon_color = self.parent().palette().text().color()
 
         highlight_btn_icon = qta.icon("mdi6.format-color-highlight", color=icon_color)
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
@@ -30,6 +32,12 @@ class RichTextEditor(qtw.QWidget):
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
+        clear_bold_btn_icon = qta.icon("ph.text-bolder-thin", color=icon_color)
+        self._clear_bold_btn = qtw.QPushButton(clear_bold_btn_icon, "", parent=self)
+        self._clear_bold_btn.clicked.connect(self._on_clear_bold_btn_clicked)
+        self._clear_bold_btn.setToolTip("Clear Bold")
+        self._clear_bold_btn.setIconSize(BTN_SIZE)
+
         bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), self)
         bold_shortcut.activated.connect(self._bold_btn.click)
 
@@ -37,6 +45,7 @@ class RichTextEditor(qtw.QWidget):
         toolbar.addWidget(self._highlight_btn)
         toolbar.addWidget(self._clear_highlight_btn)
         toolbar.addWidget(self._bold_btn)
+        toolbar.addWidget(self._clear_bold_btn)
         toolbar.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
 
         self._text_edit = qtw.QTextEdit()
@@ -54,48 +63,31 @@ class RichTextEditor(qtw.QWidget):
     def set_value(self, /, value: str) -> None:
         self._text_edit.setHtml(value)
 
+    def _on_clear_bold_btn_clicked(self) -> None:
+        cursor = self._text_edit.textCursor()
+        fmt = cursor.charFormat()
+        fmt.setFontWeight(qtg.QFont.Normal)
+        cursor.mergeCharFormat(fmt)
+
     def _bold_btn_clicked(self) -> None:
         cursor = self._text_edit.textCursor()
-
-        fmt = qtg.QTextCharFormat()
-
-        font = cursor.charFormat().font()
-
-        background = cursor.charFormat().background()
-
-        if cursor.charFormat().fontWeight() == qtg.QFont.Bold:
-            font.setBold(False)
-        else:
-            font.setBold(True)
-
-        fmt.setFont(font)
-
-        fmt.setBackground(background)
-
-        if background == qtc.Qt.yellow:
-            fmt.setForeground(qtc.Qt.black)
-        else:
-            fmt.setForeground(self.parent().palette().text().color())
-
-        cursor.setCharFormat(fmt)
+        fmt = cursor.charFormat()
+        fmt.setFontWeight(qtg.QFont.Bold)
+        cursor.mergeCharFormat(fmt)
 
     def _on_clear_highlight_btn_clicked(self) -> None:
-        fmt = qtg.QTextCharFormat()
-        fmt.clearBackground()
-        fmt.setForeground(self.parent().palette().text().color())
         cursor = self._text_edit.textCursor()
-        font = cursor.charFormat().font()
-        fmt.setFont(font)
-        cursor.setCharFormat(fmt)
+        fmt = cursor.charFormat()
+        fmt.setForeground(self.parent().palette().text().color())
+        fmt.setBackground(self.parent().palette().base().color())
+        cursor.mergeCharFormat(fmt)
 
     def _on_highlight_btn_clicked(self) -> None:
-        fmt = qtg.QTextCharFormat()
-        fmt.setForeground(qtc.Qt.black)
-        fmt.setBackground(qtc.Qt.yellow)
         cursor = self._text_edit.textCursor()
-        font = cursor.charFormat().font()
-        fmt.setFont(font)
-        cursor.setCharFormat(fmt)
+        fmt = cursor.charFormat()
+        fmt.setBackground(qtc.Qt.yellow)
+        fmt.setForeground(qtc.Qt.black)
+        cursor.mergeCharFormat(fmt)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
+import qtawesome as qta
 
 from src.presentation.category.form.state import CategoryFormState
 from src.presentation.shared import fonts
@@ -12,9 +13,10 @@ class CategoryForm(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.back_btn = qtw.QPushButton("Back")
+        back_btn_icon = qta.icon("ei.arrow-left")
+        self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
         self.back_btn.setFont(fonts.bold)
-        self.back_btn.setFixedWidth(100)
+        self.back_btn.setMaximumWidth(100)
 
         name_lbl = qtw.QLabel("Name")
         name_lbl.setFont(fonts.bold)
@@ -33,7 +35,8 @@ class CategoryForm(qtw.QWidget):
         self._date_added: datetime.datetime = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
 
-        self.save_btn = qtw.QPushButton("Save")
+        save_btn_icon = qta.icon("fa5.save")
+        self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         self.save_btn.setFont(fonts.bold)
         self.save_btn.setFixedWidth(100)
 
