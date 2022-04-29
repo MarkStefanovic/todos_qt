@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import functools
 
@@ -21,7 +23,9 @@ class Todo(sm.SQLModel, table=True):
     expire_days: int
     start_date: datetime.date
     last_completed: datetime.date | None
+    last_completed_by: str | None
     prior_completed: datetime.date | None
+    prior_completed_by: str | None
     template_todo_id: str | None
 
     date_added: datetime.datetime

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import datetime
 
-import sqlalchemy as sa
 import sqlmodel as sm
 
 from src import domain

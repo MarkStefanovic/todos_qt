@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts

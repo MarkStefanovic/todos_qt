@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from src.domain.category import Category, TODO_CATEGORY
 from src.domain.holidays import HOLIDAY_CATEGORY
 from src.domain.frequency_type import FrequencyType

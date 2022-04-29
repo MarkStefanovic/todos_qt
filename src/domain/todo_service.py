@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import abc
 import datetime
 
+from src.domain.user import User
 from src.domain.todo import Todo
 
 __all__ = ("TodoService",)
@@ -32,7 +35,7 @@ class TodoService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mark_complete(self, *, todo_id: str) -> None:
+    def mark_complete(self, *, todo_id: str, user: User | None) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

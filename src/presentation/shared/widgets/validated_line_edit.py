@@ -35,7 +35,7 @@ class ValidatedLineEdit(qtw.QLineEdit):
         if validation_errors:
             self.setStyleSheet("border: 1px solid red;")
 
-            self.validation_error_occurred.emit(validation_errors)
+            self.validation_error_occurred.emit(validation_errors)  # noqa
         else:
             self.setStyleSheet(self._original_stylesheet)
 

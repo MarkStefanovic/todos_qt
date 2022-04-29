@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
@@ -125,6 +127,8 @@ class TodoForm(qtw.QWidget):
         self._date_updated: datetime.datetime | None = None
         self._last_completed: datetime.date | None = None
         self._prior_completed: datetime.date | None = None
+        self._last_completed_by: domain.User | None = None
+        self._prior_completed_by: domain.User | None = None
 
     def get_state(self) -> TodoFormState:
         return TodoFormState(
@@ -142,6 +146,8 @@ class TodoForm(qtw.QWidget):
             date_updated=self._date_updated,
             last_completed=self._last_completed,
             prior_completed=self._prior_completed,
+            last_completed_by=self._last_completed_by,
+            prior_completed_by=self._prior_completed_by,
             irregular_frequency_form_state=self._irregular_frequency_form.get_state(),
             monthly_frequency_form_state=self._monthly_frequency_form.get_state(),
             once_frequency_form_state=self._one_off_frequency_form.get_state(),

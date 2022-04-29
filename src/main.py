@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import datetime
 import os
@@ -155,6 +157,8 @@ def main() -> None:
                     todo_service.add(todo=new_holiday)
 
     main_view = presentation.MainView(window_icon=app_icon)
+
+    app.setWindowIcon(app_icon)
 
     todo_controller = presentation.TodoController(
         category_service=category_service,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 import qtawesome as qta
 
@@ -53,14 +55,14 @@ class UserDash(qtw.QWidget):
                 table.timestamp_col(
                     display_name="Added",
                     attr_name="date_added",
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
                 table.timestamp_col(
                     display_name="Updated",
                     attr_name="date_updated",
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     column_width=100,
                     alignment=table.ColAlignment.Center,
                 ),
@@ -86,7 +88,7 @@ class UserDash(qtw.QWidget):
             key_attr="user_id",
         )
         self._table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_user(
+            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_user(  # noqa
                 current_user=self._current_user,
                 user=self._table.selected_item,
             ) else None

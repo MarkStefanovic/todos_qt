@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw

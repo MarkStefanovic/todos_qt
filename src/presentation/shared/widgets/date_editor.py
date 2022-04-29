@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 
 from dateutil.parser import parse, ParserError
@@ -9,7 +11,7 @@ __all__ = ("DateEditor",)
 class DateEditor(qtw.QWidget):
     date_changed = qtc.pyqtSignal()
 
-    def __init__(self, *, fmt: str = "%m/%d/%Y", parent: qtw.QWidget | None = None):
+    def __init__(self, *, fmt: str = "%m/%d/%y", parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
         self._fmt = fmt
@@ -48,7 +50,7 @@ class DateEditor(qtw.QWidget):
                 self._dt = parse(self._text_edit.text()).date()
                 self._is_valid = True
                 self._text_edit.setStyleSheet("")
-                self.date_changed.emit()
+                self.date_changed.emit()  # noqa
             except ParserError as pe:
                 print(pe)
                 self._dt = None

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 import qtawesome as qta
 
@@ -55,7 +57,7 @@ class CategoryDash(qtw.QWidget):
                     attr_name="date_added",
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
                 ),
@@ -63,7 +65,7 @@ class CategoryDash(qtw.QWidget):
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
                 ),
