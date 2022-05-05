@@ -352,6 +352,8 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         ]
 
         self._table = qtw.QTableWidget(parent=self)
+        self._table.setVerticalScrollMode(qtw.QAbstractItemView.ScrollPerPixel)
+        self._table.verticalScrollBar().setSingleStep(10)
         self._table.verticalHeader().setMinimumSectionSize(40)
         self._table.setAlternatingRowColors(True)
         self._table.setWordWrap(True)
