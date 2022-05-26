@@ -40,6 +40,7 @@ class TodoFormState:
     yearly_frequency_form_state: YearlyFrequencyFormState
     category_options: list[domain.Category]
     user_options: list[domain.User]
+    focus_description: bool
 
     @staticmethod
     def initial(
@@ -72,6 +73,7 @@ class TodoFormState:
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
             category_options=category_options,
             user_options=user_options,
+            focus_description=True,
         )
 
     def to_domain(self) -> domain.Todo:
@@ -190,6 +192,7 @@ class TodoFormState:
             prior_completed_by=todo.prior_completed_by,
             category_options=category_options,
             user_options=user_options,
+            focus_description=True,
         )
 
     def __eq__(self, other: object) -> bool:

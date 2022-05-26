@@ -22,7 +22,7 @@ class TodoDash(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self._current_user = domain.DEFAULT_USER
+        self._current_user = ALL_USER
 
         refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")

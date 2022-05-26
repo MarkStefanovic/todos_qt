@@ -157,6 +157,7 @@ class TodoForm(qtw.QWidget):
             yearly_frequency_form_state=self._yearly_frequency_form.get_state(),
             category_options=self._category_cbo.get_values(),
             user_options=self._user_cbo.get_values(),
+            focus_description=self._description_txt.hasFocus(),
         )
 
     def set_state(self, *, state: TodoFormState) -> None:
@@ -175,7 +176,9 @@ class TodoForm(qtw.QWidget):
         self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
         self._category_cbo.set_values(mapping={category: category.name for category in state.category_options})
         self._category_cbo.set_value(value=state.category)
-        self._user_cbo.set_values(mapping={user: user.display_name for user in state.user_options})
+        self._user_cbo.set_values(
+            mapping={domain.DEFAULT_USER: ""} | {user: user.display_name for user in state.user_options}
+        )
         self._user_cbo.set_value(value=state.user)
         self._note_txt.set_value(state.note)
         self._start_date_edit.set_value(state.start_date)
@@ -187,6 +190,9 @@ class TodoForm(qtw.QWidget):
         self._weekly_frequency_form.set_state(state=state.weekly_frequency_form_state)
         self._xdays_frequency_form.set_state(state=state.xdays_frequency_form_state)
         self._yearly_frequency_form.set_state(state=state.yearly_frequency_form_state)
+
+        if state.focus_description and not self._description_txt.hasFocus():
+            self._description_txt.setFocus()
 
     def _frequency_changed(self) -> None:
         frequency = self._frequency_cbo.get_value()
