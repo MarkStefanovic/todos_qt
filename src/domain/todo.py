@@ -27,7 +27,9 @@ class Todo:
     note: str
     template_todo_id: str | None
     last_completed: datetime.date | None
+    last_completed_by: User | None
     prior_completed: datetime.date | None
+    prior_completed_by: User | None
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
 
@@ -71,6 +73,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -84,6 +88,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -105,6 +111,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -125,6 +133,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -144,6 +154,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -162,6 +174,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -181,6 +195,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -199,6 +215,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -218,6 +236,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -236,6 +256,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -255,6 +277,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -273,6 +297,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -293,6 +319,8 @@ class Todo:
         template_todo_id: str | None,
         last_completed: typing.Optional[datetime.date],
         prior_completed: typing.Optional[datetime.date],
+        last_completed_by: typing.Optional[User],
+        prior_completed_by: typing.Optional[User],
         date_added: datetime.datetime,
         date_updated: typing.Optional[datetime.datetime],
     ) -> Todo:
@@ -312,6 +340,8 @@ class Todo:
             template_todo_id=template_todo_id,
             last_completed=last_completed,
             prior_completed=prior_completed,
+            last_completed_by=last_completed_by,
+            prior_completed_by=prior_completed_by,
             date_added=date_added,
             date_updated=date_updated,
         )
@@ -325,6 +355,8 @@ DEFAULT_TODO = Todo.daily(
     template_todo_id=None,
     last_completed=None,
     prior_completed=None,
+    last_completed_by=None,
+    prior_completed_by=None,
     user=DEFAULT_USER,
     category=TODO_CATEGORY,
     date_added=datetime.datetime.now(),

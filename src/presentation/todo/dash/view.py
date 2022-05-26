@@ -3,13 +3,12 @@ from __future__ import annotations
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
+import qtawesome as qta
 
 from src import domain
 from src.presentation.shared import fonts, icons, widgets
 from src.presentation.shared.widgets import MapCBO, table
 from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER, TodoDashState
-
-import qtawesome as qta
 
 __all__ = ("TodoDash",)
 
@@ -90,7 +89,7 @@ class TodoDash(qtw.QWidget):
                 ),
                 table.button_col(
                     button_text="Complete",
-                    on_click=lambda _: self.complete_btn_clicked.emit(),
+                    on_click=lambda _: self.complete_btn_clicked.emit(),  # noqa
                     alignment=table.ColAlignment.Center,
                 ),
                 table.text_col(
@@ -139,9 +138,12 @@ class TodoDash(qtw.QWidget):
                     display_name="Note",
                     column_width=400,
                 ),
-                table.date_col(
-                    attr_name="last_completed",
-                    display_name="Completed",
+                table.rich_text_col(
+                    display_name="Last Completed",
+                    selector=lambda todo: render_last_completed(
+                        last_completed=todo.last_completed,
+                        last_completed_by=todo.last_completed_by,
+                    ),
                     alignment=table.ColAlignment.Center,
                     column_width=120,
                 ),
@@ -149,7 +151,7 @@ class TodoDash(qtw.QWidget):
                     attr_name="date_added",
                     display_name="Added",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
                 ),
@@ -157,24 +159,24 @@ class TodoDash(qtw.QWidget):
                     attr_name="date_updated",
                     display_name="Updated",
                     alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%Y",
+                    display_format="%m/%d/%y",
                     # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
                 ),
                 table.button_col(
                     button_text="Incomplete",
-                    on_click=lambda _: self.incomplete_btn_clicked.emit(),
+                    on_click=lambda _: self.incomplete_btn_clicked.emit(),  # noqa
                     enable_when=lambda todo: todo.last_completed is not None,
                 ),
                 table.button_col(
                     button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),
+                    on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
                     column_width=60,
                     enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
                 table.button_col(
                     button_text="Delete",
-                    on_click=lambda _: self.delete_btn_clicked.emit(),
+                    on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
                     column_width=80,
                     enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
@@ -182,7 +184,7 @@ class TodoDash(qtw.QWidget):
             key_attr="todo_id",
         )
         self._table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_todo(
+            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_todo(  # noqa
                 user=self._current_user,
                 todo=self._table.selected_item,
             ) else None
@@ -268,3 +270,17 @@ def render_frequency(*, frequency: domain.Frequency) -> str:
         domain.FrequencyType.XDays: "XDays",
         domain.FrequencyType.Yearly: "Yearly",
     }.get(frequency.name, "")
+
+
+def render_last_completed(
+    *,
+    last_completed: datetime.date | None,
+    last_completed_by: domain.User | None,
+) -> str:
+    if last_completed:
+        if last_completed_by:
+            username = "<br>" + last_completed_by.display_name
+        else:
+            username = ""
+        return f"<center>{last_completed:%m/%d/%y}{username}</center>"
+    return ""

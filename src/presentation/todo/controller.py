@@ -175,7 +175,9 @@ class TodoController:
 
         try:
             if todo := state.dash_state.selected_todo:
-                self._todo_service.mark_complete(todo_id=todo.todo_id)
+                current_user = self._user_service.current_user()
+
+                self._todo_service.mark_complete(todo_id=todo.todo_id, user=current_user)
 
                 if state.dash_state.category_filter == ALL_CATEGORY:
                     category_id_filter = None

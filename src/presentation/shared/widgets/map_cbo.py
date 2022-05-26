@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 import warnings
 
@@ -72,4 +74,4 @@ class MapCBO(typing.Generic[Value], qtw.QWidget):
             self.blockSignals(False)
 
     def _on_current_index_changed(self, index: int) -> None:
-        self.value_changed.emit(self._cbo.currentData())
+        self.value_changed.emit(self._cbo.currentData())  # noqa

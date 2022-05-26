@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import datetime
 
@@ -61,6 +63,33 @@ class DbTodoService(domain.TodoService):
             None
         )
 
+    def mark_complete(self, *, todo_id: str, user: domain.User | None) -> None:
+        with sm.Session(self._engine) as session:
+            repo = adapter.DbTodoRepository(session=session)
+
+            if todo := repo.get(todo_id=todo_id):
+                if todo.last_completed:
+                    prior_completed = todo.last_completed
+                    prior_completed_by = todo.last_completed_by
+                else:
+                    prior_completed = None
+                    prior_completed_by = None
+
+                updated_todo = dataclasses.replace(
+                    todo,
+                    last_completed=datetime.date.today(),
+                    prior_completed=prior_completed,
+                    last_completed_by=user,
+                    prior_completed_by=prior_completed_by,
+                )
+
+                repo.update(todo=updated_todo)
+
+                session.commit()
+
+                if self._todos is not None:
+                    self._todos[todo_id] = updated_todo
+
     def where(
         self,
         *,
@@ -94,29 +123,6 @@ class DbTodoService(domain.TodoService):
             todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
 
         return sorted(todos, key=lambda todo: todo.due_date(today=date_filter))
-
-    def mark_complete(self, *, todo_id: str) -> None:
-        with sm.Session(self._engine) as session:
-            repo = adapter.DbTodoRepository(session=session)
-
-            if todo := repo.get(todo_id=todo_id):
-                if todo.last_completed:
-                    prior_completed = todo.last_completed
-                else:
-                    prior_completed = None
-
-                updated_todo = dataclasses.replace(
-                    todo,
-                    last_completed=datetime.date.today(),
-                    prior_completed=prior_completed,
-                )
-
-                repo.update(todo=updated_todo)
-
-                session.commit()
-
-                if self._todos is not None:
-                    self._todos[todo_id] = updated_todo
 
     def mark_incomplete(self, *, todo_id: str) -> None:
         with sm.Session(self._engine) as session:

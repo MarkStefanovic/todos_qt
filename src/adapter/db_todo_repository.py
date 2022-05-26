@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 
 import sqlmodel as sm
@@ -54,6 +56,16 @@ class DbTodoRepository(domain.TodoRepository):
         else:
             month = todo.frequency.month.to_int()
 
+        if todo.last_completed_by:
+            last_completed_by_user_id = todo.last_completed_by.user_id
+        else:
+            last_completed_by_user_id = None
+
+        if todo.prior_completed_by:
+            prior_completed_by_user_id = todo.prior_completed_by.user_id
+        else:
+            prior_completed_by_user_id = None
+
         todo_orm = db.Todo(
             todo_id=todo.todo_id,
             template_todo_id=todo.template_todo_id,
@@ -76,6 +88,8 @@ class DbTodoRepository(domain.TodoRepository):
             due_date=todo.frequency.due_date,
             last_completed=todo.last_completed,
             prior_completed=todo.prior_completed,
+            last_completed_by=last_completed_by_user_id,
+            prior_completed_by=prior_completed_by_user_id,
         )
 
         self._session.add(todo_orm)
@@ -115,7 +129,9 @@ class DbTodoRepository(domain.TodoRepository):
                 ),
                 note=todo_orm.note,
                 last_completed=todo_orm.last_completed,
+                last_completed_by=user_lkp.get(todo_orm.last_completed_by or ""),
                 prior_completed=todo_orm.prior_completed,
+                prior_completed_by=user_lkp.get(todo_orm.prior_completed_by or ""),
                 date_added=todo_orm.date_added,
                 date_updated=todo_orm.date_updated,
             )
@@ -139,8 +155,24 @@ class DbTodoRepository(domain.TodoRepository):
 
         user = user_repo.get(user_id=todo_orm.user_id) or domain.DEFAULT_USER
 
+        if todo_orm.last_completed_by:
+            last_completed_by = user_repo.get(user_id=todo_orm.last_completed_by)
+        else:
+            last_completed_by = None
+
+        if todo_orm.prior_completed_by:
+            prior_completed_by = user_repo.get(user_id=todo_orm.prior_completed_by)
+        else:
+            prior_completed_by = None
+
         if category := category_repo.get(category_id=todo_orm.category_id):
-            return _orm_to_domain(todo_orm=todo_orm, category=category, user=user)
+            return _orm_to_domain(
+                todo_orm=todo_orm,
+                category=category,
+                user=user,
+                last_completed_by=last_completed_by,
+                prior_completed_by=prior_completed_by,
+            )
 
         return None
 
@@ -178,6 +210,17 @@ class DbTodoRepository(domain.TodoRepository):
         todo_orm.due_date = todo.frequency.due_date
         todo_orm.last_completed = todo.last_completed
         todo_orm.prior_completed = todo.prior_completed
+        if todo.last_completed_by:
+            last_completed_by_user_id: str | None = todo.last_completed_by.user_id
+        else:
+            last_completed_by_user_id = None
+        todo_orm.last_completed_by = last_completed_by_user_id
+
+        if todo.prior_completed_by:
+            prior_completed_by_user_id: str | None = todo.prior_completed_by.user_id
+        else:
+            prior_completed_by_user_id = None
+        todo_orm.prior_completed_by = prior_completed_by_user_id
 
         self._session.add(todo_orm)
 
@@ -197,6 +240,8 @@ class DbTodoRepository(domain.TodoRepository):
                     todo_orm=todo_orm,
                     category=category,
                     user=user_lkp.get(todo_orm.user_id, domain.DEFAULT_USER),
+                    last_completed_by=user_lkp.get(todo_orm.last_completed_by or ""),
+                    prior_completed_by=user_lkp.get(todo_orm.prior_completed_by or ""),
                 )
                 for todo_orm in self._session.exec(
                     sm.select(db.Todo)
@@ -303,6 +348,8 @@ def _orm_to_domain(
     todo_orm: db.Todo,
     category: domain.Category,
     user: domain.User,
+    last_completed_by: domain.User | None,
+    prior_completed_by: domain.User | None,
 ) -> domain.Todo:
     return domain.Todo(
         todo_id=todo_orm.todo_id,
@@ -319,6 +366,8 @@ def _orm_to_domain(
         note=todo_orm.note,
         last_completed=todo_orm.last_completed,
         prior_completed=todo_orm.prior_completed,
+        last_completed_by=last_completed_by,
+        prior_completed_by=prior_completed_by,
         date_added=todo_orm.date_added,
         date_updated=todo_orm.date_updated,
     )

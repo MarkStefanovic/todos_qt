@@ -30,6 +30,8 @@ class TodoFormState:
     date_updated: datetime.datetime | None
     last_completed: datetime.date | None
     prior_completed: datetime.date | None
+    last_completed_by: domain.User | None
+    prior_completed_by: domain.User | None
     irregular_frequency_form_state: IrregularFrequencyFormState
     monthly_frequency_form_state: MonthlyFrequencyFormState
     once_frequency_form_state: OnceFrequencyFormState
@@ -60,6 +62,8 @@ class TodoFormState:
             date_updated=None,
             last_completed=None,
             prior_completed=None,
+            last_completed_by=None,
+            prior_completed_by=None,
             irregular_frequency_form_state=IrregularFrequencyFormState.initial(),
             monthly_frequency_form_state=MonthlyFrequencyFormState.initial(),
             once_frequency_form_state=OnceFrequencyFormState.initial(),
@@ -130,6 +134,8 @@ class TodoFormState:
             date_updated=self.date_updated,
             last_completed=self.last_completed,
             prior_completed=self.prior_completed,
+            last_completed_by=self.last_completed_by,
+            prior_completed_by=self.prior_completed_by,
         )
 
     @staticmethod
@@ -180,6 +186,8 @@ class TodoFormState:
             date_updated=todo.date_updated,
             last_completed=todo.last_completed,
             prior_completed=todo.prior_completed,
+            last_completed_by=todo.last_completed_by,
+            prior_completed_by=todo.prior_completed_by,
             category_options=category_options,
             user_options=user_options,
         )

@@ -352,6 +352,8 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         ]
 
         self._table = qtw.QTableWidget(parent=self)
+        self._table.setVerticalScrollMode(qtw.QAbstractItemView.ScrollPerPixel)
+        self._table.verticalScrollBar().setSingleStep(10)
         self._table.verticalHeader().setMinimumSectionSize(40)
         self._table.setAlternatingRowColors(True)
         self._table.setWordWrap(True)
@@ -462,11 +464,17 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     value = getattr(data, col_spec.attr_name)
                 else:
                     value = col_spec.selector(data)
-                lbl = qtw.QLabel()
-                lbl.setTextFormat(qtc.Qt.RichText)
-                lbl.setWordWrap(True)
-                lbl.setText(value)
-                self._table.setCellWidget(row_num, col_num, lbl)
+
+                w: qtw.QWidget
+                if len(value) > 2000:
+                    w = ScrollLabel(value=value, parent=self)
+                else:
+                    w = qtw.QLabel()
+                    w.setTextFormat(qtc.Qt.RichText)
+                    w.setWordWrap(True)
+                    w.setText(value)
+
+                self._table.setCellWidget(row_num, col_num, w)
             elif col_spec.type == ColSpecType.Button:
                 if col_spec.on_click is None:
                     raise Exception("[on_click] is required for a Button column.")
@@ -589,3 +597,58 @@ class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
             return False
 
         return self._value < other._value
+
+
+class ScrollLabel(qtw.QScrollArea, qtw.QTableWidgetItem):
+    def __init__(self, *, value: str, parent: qtw.QWidget | None):
+        super().__init__(parent=parent)
+
+        self._value = value
+
+        self.setWidgetResizable(True)
+
+        self.label = qtw.QLabel(self)
+        self.label.setObjectName("scroll_lbl")
+        self.label.setTextFormat(qtc.Qt.RichText)
+        self.label.setText(value)
+        self.label.setAlignment(qtc.Qt.AlignTop)
+        self.label.setWordWrap(True)
+
+        self.label.setAlignment(qtc.Qt.AlignLeft | qtc.Qt.AlignTop)  # type: ignore
+
+        self.label.setWordWrap(True)
+
+        self.setWidget(self.label)
+
+    def setText(self, text: str) -> None:
+        self.label.setText(text)
+
+    def __lt__(self, other):
+        assert isinstance(other, ScrollLabel)
+
+        return self._value or "" < other._value or ""
+
+
+# class RichTextTableItem(qtw.QLabel):
+#     def __init__(self, value: str):
+#         super().__init__()
+#
+#         self._value = value
+#
+#         self.setTextFormat(qtc.Qt.RichText)
+#         self.setWordWrap(True)
+#         self.setText(value)
+#
+#     def __lt__(self, other: object) -> bool:
+#         assert isinstance(other, RichTextTableItem)
+#
+#         if self._value is None and other is None:
+#             return False
+#
+#         if self._value is None:
+#             return True
+#
+#         if other._value is None:
+#             return False
+#
+#         return self._value < other._value
