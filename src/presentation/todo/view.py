@@ -11,8 +11,8 @@ class TodoView(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.dash = TodoDash()
-        self.form = TodoForm()
+        self.dash = TodoDash(parent=self)
+        self.form = TodoForm(parent=self)
 
         self.stacked_layout = qtw.QStackedLayout()
         self.stacked_layout.addWidget(self.dash)

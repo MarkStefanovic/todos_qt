@@ -11,8 +11,8 @@ class CategoryView(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.dash = CategoryDash()
-        self.form = CategoryForm()
+        self.dash = CategoryDash(parent=self)
+        self.form = CategoryForm(parent=self)
 
         self.stacked_layout = qtw.QStackedLayout()
         self.stacked_layout.addWidget(self.dash)

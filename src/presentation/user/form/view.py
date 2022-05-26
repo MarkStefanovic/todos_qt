@@ -1,10 +1,11 @@
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
-import qtawesome as qta
 
-from src.presentation.shared import fonts
+from src.presentation.shared import fonts, icons
 from src.presentation.user.form.state import UserFormState
+
+import qtawesome as qta
 
 __all__ = ("UserForm",)
 
@@ -12,8 +13,8 @@ __all__ = ("UserForm",)
 class UserForm(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
-        
-        back_btn_icon = qta.icon("ei.arrow-left")
+
+        back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
         self.back_btn.setMaximumWidth(100)
 
@@ -31,7 +32,7 @@ class UserForm(qtw.QWidget):
         form_layout.addRow(display_name_lbl, self._display_name_txt)
         form_layout.addRow(username_lbl, self._username_txt)
 
-        save_btn_icon = qta.icon("fa5.save")
+        save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         self.save_btn.setMaximumWidth(100)
 

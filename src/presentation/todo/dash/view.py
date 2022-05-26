@@ -3,12 +3,13 @@ from __future__ import annotations
 import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
-import qtawesome as qta
 
 from src import domain
-from src.presentation.shared import fonts, widgets
+from src.presentation.shared import fonts, icons, widgets
 from src.presentation.shared.widgets import MapCBO, table
 from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER, TodoDashState
+
+import qtawesome as qta
 
 __all__ = ("TodoDash",)
 
@@ -24,13 +25,13 @@ class TodoDash(qtw.QWidget):
 
         self._current_user = domain.DEFAULT_USER
 
-        refresh_btn_icon = qta.icon("fa.refresh")
+        refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon("ri.add-line", scale_factor=1.3)
+        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)
@@ -140,7 +141,7 @@ class TodoDash(qtw.QWidget):
                 ),
                 table.date_col(
                     attr_name="last_completed",
-                    display_name="Last Completed",
+                    display_name="Completed",
                     alignment=table.ColAlignment.Center,
                     column_width=120,
                 ),

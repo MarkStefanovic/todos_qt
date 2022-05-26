@@ -11,8 +11,8 @@ class UserView(qtw.QWidget):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.dash = UserDash()
-        self.form = UserForm()
+        self.dash = UserDash(parent=self)
+        self.form = UserForm(parent=self)
 
         self.stacked_layout = qtw.QStackedLayout()
         self.stacked_layout.addWidget(self.dash)

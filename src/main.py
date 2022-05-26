@@ -81,7 +81,7 @@ def main() -> None:
     app.setStyle("Fusion")  # type: ignore
 
     app.setStyleSheet("""
-        QWidget { font-family: "Arial"; font-size: 11pt; }
+        QWidget { font-size: 11pt; }
         QHeaderView { font-weight: bold; }
         QPushButton { font-weight: "bold"; }
         QPushButton:hover:!pressed { background-color: rgb(80, 80, 140); }

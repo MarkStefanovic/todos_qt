@@ -1,9 +1,12 @@
 import sys
 
-import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from src.presentation.shared import icons
+
+import qtawesome as qta
 
 __all__ = ("RichTextEditor",)
+
 
 BTN_SIZE = qtc.QSize(20, 20)
 
@@ -12,27 +15,27 @@ class RichTextEditor(qtw.QWidget):
     def __init__(self, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        icon_color = self.parent().palette().text().color()
+        # icon_color = self.parent().palette().text().color()
 
-        highlight_btn_icon = qta.icon("mdi6.format-color-highlight", color=icon_color)
+        highlight_btn_icon = qta.icon(icons.highlight_btn_icon_name, color=self.parent().palette().text().color())
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
         self._highlight_btn.clicked.connect(self._on_highlight_btn_clicked)
         self._highlight_btn.setToolTip("Highlight")
         self._highlight_btn.setIconSize(BTN_SIZE)
 
-        clear_highlight_btn_icon = qta.icon("mdi.format-color-marker-cancel", color=icon_color)
+        clear_highlight_btn_icon = qta.icon(icons.clear_highlight_btn_icon_name, color=self.parent().palette().text().color())
         self._clear_highlight_btn = qtw.QPushButton(clear_highlight_btn_icon, "", parent=self)
         self._clear_highlight_btn.clicked.connect(self._on_clear_highlight_btn_clicked)
         self._clear_highlight_btn.setToolTip("Clear Highlight")
         self._clear_highlight_btn.setIconSize(BTN_SIZE)
 
-        bold_btn_icon = qta.icon("mdi.format-bold", color=icon_color)
+        bold_btn_icon = qta.icon(icons.bold_btn_icon_name, color=self.parent().palette().text().color())
         self._bold_btn = qtw.QPushButton(bold_btn_icon, "", parent=self)
         self._bold_btn.clicked.connect(self._bold_btn_clicked)
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
-        clear_bold_btn_icon = qta.icon("ph.text-bolder-thin", color=icon_color)
+        clear_bold_btn_icon = qta.icon(icons.clear_bold_btn_icon_name, color=self.parent().palette().text().color())
         self._clear_bold_btn = qtw.QPushButton(clear_bold_btn_icon, "", parent=self)
         self._clear_bold_btn.clicked.connect(self._on_clear_bold_btn_clicked)
         self._clear_bold_btn.setToolTip("Clear Bold")
