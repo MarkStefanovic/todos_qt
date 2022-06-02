@@ -35,6 +35,16 @@ class DbTodoService(domain.TodoService):
                 self._todos[todo.todo_id] = todo
             session.commit()
 
+    def cleanup(self) -> None:
+        self._refresh()
+
+        cutoff_date = datetime.date.today() - datetime.timedelta(days=7)
+
+        for todo_id, todo in self._todos.items():
+            if todo.frequency.name == domain.FrequencyType.Once:
+                if todo.last_completed and todo.last_completed < cutoff_date:
+                    self.delete(todo_id=todo_id)
+
     def delete(self, *, todo_id: str) -> None:
         self._refresh()
 

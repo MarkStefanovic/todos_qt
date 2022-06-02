@@ -140,6 +140,7 @@ class DbTodoRepository(domain.TodoRepository):
 
     def delete(self, *, todo_id: str) -> None:
         if orm := self._get_orm(todo_id=todo_id):
+            # self._session.delete(orm)
             orm.date_deleted = datetime.datetime.now()
             self._session.add(orm)
 

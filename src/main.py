@@ -183,6 +183,8 @@ def main() -> None:
     else:
         todo_controller.show_current_todos()
 
+    todo_service.cleanup()
+
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2050:
         width = 2050

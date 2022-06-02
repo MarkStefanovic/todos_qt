@@ -15,6 +15,10 @@ class TodoService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def cleanup(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def delete(self, *, todo_id: str) -> None:
         raise NotImplementedError
 
