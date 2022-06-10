@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import datetime
 
@@ -40,7 +41,7 @@ class DbTodoService(domain.TodoService):
 
         cutoff_date = datetime.date.today() - datetime.timedelta(days=7)
 
-        for todo_id, todo in self._todos.items():
+        for todo_id, todo in copy.copy(self._todos).items():
             if todo.frequency.name == domain.FrequencyType.Once:
                 if todo.last_completed and todo.last_completed < cutoff_date:
                     self.delete(todo_id=todo_id)
