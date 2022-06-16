@@ -69,11 +69,10 @@ class SpellCheckTextEdit(qtw.QTextEdit):
         return self.highlighter.document() is not None
 
     def set_highlighter_enabled(self, enable: bool) -> None:
-        if enable != self.highlighterEnabled():
-            if enable:
-                self.highlighter.setDocument(self.document())
-            else:
-                self.highlighter.setDocument(None)  # type: ignore
+        if enable:
+            self.highlighter.setDocument(self.document())
+        else:
+            self.highlighter.setDocument(None)  # type: ignore
 
 
 class Highlighter(qtg.QSyntaxHighlighter):

@@ -47,13 +47,14 @@ class TodoFormState:
         *,
         category_options: list[domain.Category],
         user_options: list[domain.User],
+        current_user: domain.User | None,
     ) -> TodoFormState:
         return TodoFormState(
             todo_id=domain.create_uuid(),
             template_todo_id=None,
             advance_days=0,
             expire_days=99,
-            user=domain.DEFAULT_USER,
+            user=current_user or domain.DEFAULT_USER,
             category=domain.TODO_CATEGORY,
             description="",
             frequency_name=domain.FrequencyType.Once,

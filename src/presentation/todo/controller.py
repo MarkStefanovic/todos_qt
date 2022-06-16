@@ -155,6 +155,7 @@ class TodoController:
                 form_state=TodoFormState.initial(
                     category_options=categories,
                     user_options=users,
+                    current_user=self._user_service.current_user(),
                 ),
                 dash_active=False,
             )

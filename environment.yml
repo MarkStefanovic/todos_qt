@@ -21,6 +21,7 @@ dependencies:
 - psycopg2-binary
 - sqlmodel
 - pyinstaller
+- pyenchant
 - pip:
   - PyQt5-stubs
   - types-python-dateutil

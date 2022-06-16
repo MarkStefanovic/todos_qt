@@ -20,7 +20,7 @@ class MainView(qtw.QMainWindow):
 
         # noinspection PyTypeChecker
         self.setWindowFlags(
-            self.windowFlags()  # type: ignore
+            self.windowFlags()
             | qtc.Qt.WindowMinimizeButtonHint
             | qtc.Qt.WindowMaximizeButtonHint
             | qtc.Qt.WindowSystemMenuHint
@@ -40,7 +40,32 @@ class MainView(qtw.QMainWindow):
         self.setCentralWidget(self._tabs)
 
         self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
-        self.enter_key_shortcut.activated.connect(self.todos.dash.refresh_btn.click)
+        self.enter_key_shortcut.activated.connect(self._on_enter_key_pressed)
+
+    def _on_enter_key_pressed(self) -> None:
+        if (ix := self._tabs.currentIndex()) == 0:
+            if (todo_ix := self.todos.stacked_layout.currentIndex()) == 0:
+                self.todos.dash.refresh_btn.click()
+            elif todo_ix == 1:
+                self.todos.form.save_btn.click()
+            else:
+                raise Exception(f"Unrecognized todo stacked_layout index: {todo_ix}.")
+        elif ix == 1:
+            if (category_ix := self.categories.stacked_layout.currentIndex()) == 0:
+                self.categories.dash.refresh_btn.click()
+            elif category_ix == 1:
+                self.categories.form.save_btn.click()
+            else:
+                raise Exception(f"Unrecognized category stacked_layout index: {category_ix}.")
+        elif ix == 2:
+            if (user_ix := self.todos.stacked_layout.currentIndex()) == 0:
+                self.users.dash.refresh_btn.click()
+            elif user_ix == 1:
+                self.users.form.save_btn.click()
+            else:
+                raise Exception(f"Unrecognized user stacked_layout index: {user_ix}.")
+        else:
+            raise Exception(f"Unrecognized tab index: {ix}.")
 
     def _on_tab_changed(self) -> None:
         if (ix := self._tabs.currentIndex()) == 0:

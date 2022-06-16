@@ -33,6 +33,7 @@ class TodoState:
             form_state=TodoFormState.initial(
                 category_options=category_options,
                 user_options=user_options,
+                current_user=current_user,
             ),
             dash_active=True,
         )

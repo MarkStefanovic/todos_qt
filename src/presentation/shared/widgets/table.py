@@ -380,8 +380,9 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
     def add_item(self, /, item: Row) -> None:
         key = getattr(item, self._key_attr)
         self._items[key] = item
-        self._table.setRowCount(self.rowCount() + 1)
-        self._set_row(row_num=self.rowCount(), data=item)
+        rows = len(self._items)
+        self._table.setRowCount(rows + 1)
+        self._set_row(row_num=rows, data=item)
 
     def clear_selection(self) -> None:
         self._table.clearSelection()
@@ -453,7 +454,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     value = getattr(data, col_spec.attr_name)
                 else:
                     value = col_spec.selector(data)
-                display_value = col_spec.display_fn(value)  # type: ignore
+                display_value = col_spec.display_fn(value)
                 item = TableItem(value=value, display_value=display_value)
                 item.setTextAlignment(col_spec.alignment.qt_alignment)
                 self._table.setItem(row_num, col_num, item)
@@ -579,7 +580,7 @@ class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
         self._value = value
 
         # noinspection PyTypeChecker
-        self.setFlags(qtc.Qt.ItemIsSelectable | qtc.Qt.ItemIsEnabled)  # type: ignore
+        self.setFlags(qtc.Qt.ItemIsSelectable | qtc.Qt.ItemIsEnabled)
 
     def get_value(self) -> Value:
         return self._value
@@ -614,7 +615,7 @@ class ScrollLabel(qtw.QScrollArea, qtw.QTableWidgetItem):
         self.label.setAlignment(qtc.Qt.AlignTop)
         self.label.setWordWrap(True)
 
-        self.label.setAlignment(qtc.Qt.AlignLeft | qtc.Qt.AlignTop)  # type: ignore
+        self.label.setAlignment(qtc.Qt.AlignLeft | qtc.Qt.AlignTop)
 
         self.label.setWordWrap(True)
 
@@ -623,10 +624,10 @@ class ScrollLabel(qtw.QScrollArea, qtw.QTableWidgetItem):
     def setText(self, text: str) -> None:
         self.label.setText(text)
 
-    def __lt__(self, other):
+    def __lt__(self, other: typing.Any) -> bool:
         assert isinstance(other, ScrollLabel)
 
-        return self._value or "" < other._value or ""
+        return (self._value or "") < (other._value or "")
 
 
 # class RichTextTableItem(qtw.QLabel):

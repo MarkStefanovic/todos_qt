@@ -168,6 +168,7 @@ class TodoForm(qtw.QWidget):
         self._last_completed = state.last_completed
         self._prior_completed = state.prior_completed
 
+        self._user_cbo.set_values(mapping={user: user.display_name for user in state.user_options})
         self._user_cbo.set_value(value=state.user)
         self._description_txt.setText(state.description)
         self._advance_days_sb.setValue(state.advance_days)
