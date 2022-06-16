@@ -260,16 +260,16 @@ def render_days(*, due_date: datetime.date, today: datetime.date) -> str:
 
 def render_frequency(*, frequency: domain.Frequency) -> str:
     return {
-        domain.FrequencyType.Daily: "Daily",
-        domain.FrequencyType.Easter: "Easter",
-        domain.FrequencyType.MemorialDay: "Memorial Day",
-        domain.FrequencyType.Irregular: "Irregular",
-        domain.FrequencyType.Monthly: "Monthly",
-        domain.FrequencyType.Once: "Once",
-        domain.FrequencyType.Weekly: "Weekly",
-        domain.FrequencyType.XDays: "XDays",
-        domain.FrequencyType.Yearly: "Yearly",
-    }.get(frequency.name, "")
+        domain.FrequencyType.Daily: lambda: "Daily",
+        domain.FrequencyType.Easter: lambda: "Easter",
+        domain.FrequencyType.MemorialDay: lambda: "Memorial Day",
+        domain.FrequencyType.Irregular: lambda: "Irregular",
+        domain.FrequencyType.Monthly: lambda: f"Monthly ({frequency.month_day})",
+        domain.FrequencyType.Once: lambda: f"{frequency.due_date:%m/%d/%Y}",
+        domain.FrequencyType.Weekly: lambda: f"Weekly ({frequency.week_day.short_name})",
+        domain.FrequencyType.XDays: lambda: f"XDays ({frequency.days})",
+        domain.FrequencyType.Yearly: lambda: f"Yearly ({frequency.month.to_int()}/{frequency.month_day})",
+    }[frequency.name]()
 
 
 def render_last_completed(
