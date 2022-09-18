@@ -35,7 +35,7 @@ CATEGORY_3 = domain.Category(
 
 
 def test_round_trip(engine: sa.engine.Engine):
-    category_service = service.DbCategoryService(engine=engine)
+    category_service = service.CategoryService(engine=engine)
 
     category_service.add(category=CATEGORY_1)
     category_service.add(category=CATEGORY_2)

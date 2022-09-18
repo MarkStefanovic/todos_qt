@@ -10,10 +10,10 @@ import sqlmodel as sm
 from src import adapter, domain
 from src.domain import Todo
 
-__all__ = ("DbTodoService",)
+__all__ = ("TodoService",)
 
 
-class DbTodoService(domain.TodoService):
+class TodoService(domain.TodoService):
     def __init__(
         self,
         *,
@@ -36,10 +36,29 @@ class DbTodoService(domain.TodoService):
                 self._todos[todo.todo_id] = todo
             session.commit()
 
+    def add_default_holidays_for_all_users(self) -> None:
+        with sm.Session(self._engine) as session:
+            user_repo = adapter.DbUserRepository(session=session)
+            users = user_repo.all()
+
+        for user in users:
+            for holiday in domain.HOLIDAYS:
+                if self.get_by_template_id_and_user_id(
+                    template_id=holiday.todo_id,
+                    user_id=user.user_id,
+                ) is None:
+                    new_holiday = dataclasses.replace(
+                        holiday,
+                        todo_id=domain.create_uuid(),
+                        template_todo_id=holiday.todo_id,
+                        user=user,
+                    )
+                    self.add(todo=new_holiday)
+
     def cleanup(self) -> None:
         self._refresh()
 
-        cutoff_date = datetime.date.today() - datetime.timedelta(days=7)
+        cutoff_date = datetime.date.today() - datetime.timedelta(days=5)
 
         for todo_id, todo in copy.copy(self._todos).items():
             if todo.frequency.name == domain.FrequencyType.Once:

@@ -8,10 +8,10 @@ import sqlmodel as sm
 from src import adapter, domain
 from src.domain import User
 
-__all__ = ("DbUserService",)
+__all__ = ("UserService",)
 
 
-class DbUserService(domain.UserService):
+class UserService(domain.UserService):
     def __init__(
         self,
         *,
@@ -37,6 +37,19 @@ class DbUserService(domain.UserService):
             session.commit()
 
             self._users[user.user_id] = user
+
+    def add_admins(self) -> None:
+        for username in adapter.config.admin_usernames:
+            if self.get_user_by_username(username=username) is None:
+                user = domain.User(
+                    user_id=domain.create_uuid(),
+                    username=username,
+                    display_name=username,
+                    is_admin=True,
+                    date_added=datetime.datetime.now(),
+                    date_updated=None,
+                )
+                self.add(user=user)
 
     def all(self) -> list[User]:
         self._refresh()

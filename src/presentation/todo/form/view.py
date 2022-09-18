@@ -102,12 +102,12 @@ class TodoForm(qtw.QWidget):
         form_layout.addRow(note_lbl, self._note_txt)
         form_layout.addRow(frequency_lbl, self._frequency_cbo)
 
-        back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())
+        back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
         self.back_btn.setFont(fonts.bold)
         self.back_btn.setMaximumWidth(100)
 
-        save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())
+        save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         self.save_btn.setFont(fonts.bold)
         self.save_btn.setMaximumWidth(100)

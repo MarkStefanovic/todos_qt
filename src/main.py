@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
-import datetime
 import os
 import sys
 import types
@@ -55,15 +53,9 @@ def main() -> None:
     log_folder = adapter.fs.root_dir() / "logs"
     log_folder.mkdir(exist_ok=True)
 
-    logger.add(
-        log_folder / "error.log",
-        rotation="5 MB",
-        retention="7 days",
-        level="ERROR",
-    )
-
-    if getattr(sys, "frozen", False):
-        logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
+    logger.remove()
+    logger.add(log_folder / "error.log", rotation="5 MB", retention="7 days", level="ERROR")
+    logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
 
     except_hook = sys.excepthook
 
@@ -113,25 +105,13 @@ def main() -> None:
 
     username = os.environ.get("USERNAME", "unknown").lower()
 
-    category_service = service.DbCategoryService(engine=engine)
+    category_service = service.CategoryService(engine=engine)
 
-    user_service = service.DbUserService(engine=engine, username=username)
+    user_service = service.UserService(engine=engine, username=username)
+    user_service.add_admins()
 
-    todo_service = service.DbTodoService(engine=engine, username=username)
-
-    users: list[domain.User] = []
-    for username in adapter.config.admin_usernames:
-        if user_service.get_user_by_username(username=username) is None:
-            user = domain.User(
-                user_id=domain.create_uuid(),
-                username=username,
-                display_name=username,
-                is_admin=True,
-                date_added=datetime.datetime.now(),
-                date_updated=None,
-            )
-            user_service.add(user=user)
-            users.append(user)
+    todo_service = service.TodoService(engine=engine, username=username)
+    todo_service.cleanup()
 
     if adapter.config.add_holidays:
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
@@ -142,19 +122,7 @@ def main() -> None:
             category_service.add(category=domain.TODO_CATEGORY)
 
     if adapter.config.add_holidays:
-        for user in user_service.all():
-            for holiday in domain.HOLIDAYS:
-                if todo_service.get_by_template_id_and_user_id(
-                    template_id=holiday.todo_id,
-                    user_id=user.user_id,
-                ) is None:
-                    new_holiday = dataclasses.replace(
-                        holiday,
-                        todo_id=domain.create_uuid(),
-                        template_todo_id=holiday.todo_id,
-                        user=user,
-                    )
-                    todo_service.add(todo=new_holiday)
+        todo_service.add_default_holidays_for_all_users()
 
     main_view = presentation.MainView(window_icon=app_icon)
 
@@ -182,8 +150,6 @@ def main() -> None:
         todo_controller.show_current_user_todos()
     else:
         todo_controller.show_current_todos()
-
-    todo_service.cleanup()
 
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2050:

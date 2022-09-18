@@ -24,13 +24,13 @@ class TodoDash(qtw.QWidget):
 
         self._current_user = ALL_USER
 
-        refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())
+        refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())
+        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)
@@ -45,7 +45,7 @@ class TodoDash(qtw.QWidget):
         due_lbl.setFont(fonts.bold)
         self._due_chk = qtw.QCheckBox()
         self._due_chk.setChecked(True)
-        self._due_chk.stateChanged.connect(self.refresh_btn.click)
+        self._due_chk.stateChanged.connect(self.refresh_btn.click)  # noqa
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
@@ -266,9 +266,9 @@ def render_frequency(*, frequency: domain.Frequency) -> str:
         domain.FrequencyType.Irregular: lambda: "Irregular",
         domain.FrequencyType.Monthly: lambda: f"Monthly ({frequency.month_day})",
         domain.FrequencyType.Once: lambda: f"{frequency.due_date:%m/%d/%Y}",
-        domain.FrequencyType.Weekly: lambda: f"Weekly ({frequency.week_day.short_name})",
+        domain.FrequencyType.Weekly: lambda: f"Weekly ({frequency.week_day.short_name})",  # type: ignore
         domain.FrequencyType.XDays: lambda: f"XDays ({frequency.days})",
-        domain.FrequencyType.Yearly: lambda: f"Yearly ({frequency.month.to_int()}/{frequency.month_day})",
+        domain.FrequencyType.Yearly: lambda: f"Yearly ({frequency.month.to_int()}/{frequency.month_day})",  # type: ignore
     }[frequency.name]()
 
 

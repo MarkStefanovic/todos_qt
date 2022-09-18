@@ -15,6 +15,10 @@ class TodoService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def add_default_holidays_for_all_users(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def cleanup(self) -> None:
         raise NotImplementedError
 

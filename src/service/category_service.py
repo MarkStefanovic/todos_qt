@@ -8,10 +8,10 @@ import sqlmodel as sm
 from src import adapter, domain
 from src.domain import Category
 
-__all__ = ("DbCategoryService",)
+__all__ = ("CategoryService",)
 
 
-class DbCategoryService(domain.CategoryService):
+class CategoryService(domain.CategoryService):
     def __init__(self, *, engine: sa.engine.Engine):
         self._engine = engine
 
