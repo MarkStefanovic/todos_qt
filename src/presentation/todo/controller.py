@@ -29,10 +29,9 @@ class TodoController:
         self._view = view
 
         self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
-        self._view.dash.complete_btn_clicked.connect(self._on_dash_complete_btn_clicked)
+        self._view.dash.toggle_complete_btn_clicked.connect(self._on_dash_toggle_completed_btn_clicked)
         self._view.dash.delete_btn_clicked.connect(self._on_dash_delete_btn_clicked)
         self._view.dash.edit_btn_clicked.connect(self._on_dash_edit_btn_clicked)
-        self._view.dash.incomplete_btn_clicked.connect(self._on_dash_incomplete_btn_clicked)
         self._view.dash.refresh_btn.clicked.connect(self._on_dash_refresh_btn_clicked)
 
         self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
@@ -49,7 +48,6 @@ class TodoController:
             today = datetime.date.today()
 
             todos = self._todo_service.where(
-                date_filter=today,
                 due_filter=True,
                 description_like="",
                 category_id_filter=None,
@@ -65,7 +63,6 @@ class TodoController:
                     category_filter=ALL_CATEGORY,
                     description_filter="",
                     user_options=users,
-                    date_filter=today,
                     user_filter=ALL_USER,
                     due_filter=True,
                     status=f"Showing ToDos due today.",
@@ -101,7 +98,6 @@ class TodoController:
                 user_id_filter = None
 
             todos = self._todo_service.where(
-                date_filter=today,
                 due_filter=True,
                 description_like="",
                 category_id_filter=None,
@@ -118,7 +114,6 @@ class TodoController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     todos=todos,
-                    date_filter=today,
                     category_options=categories,
                     category_filter=ALL_CATEGORY,
                     user_options=users,
@@ -171,14 +166,19 @@ class TodoController:
 
         self._view.set_state(state=new_state)
 
-    def _on_dash_complete_btn_clicked(self) -> None:
+    def _on_dash_toggle_completed_btn_clicked(self) -> None:
         state = self._view.get_state()
 
         try:
             if todo := state.dash_state.selected_todo:
                 current_user = self._user_service.current_user()
 
-                self._todo_service.mark_complete(todo_id=todo.todo_id, user=current_user)
+                if todo.days is None:
+                    self._todo_service.mark_incomplete(todo_id=todo.todo_id)
+                elif todo.days <= 0:
+                    self._todo_service.mark_complete(todo_id=todo.todo_id, user=current_user)
+                else:
+                    self._todo_service.mark_incomplete(todo_id=todo.todo_id)
 
                 if state.dash_state.category_filter == ALL_CATEGORY:
                     category_id_filter = None
@@ -192,7 +192,6 @@ class TodoController:
 
                 todos = self._todo_service.where(
                     description_like=state.dash_state.description_filter,
-                    date_filter=state.dash_state.date_filter,
                     due_filter=state.dash_state.due_filter,
                     category_id_filter=category_id_filter,
                     user_id_filter=user_id_filter,
@@ -241,7 +240,6 @@ class TodoController:
 
                     todos = self._todo_service.where(
                         description_like=state.dash_state.description_filter,
-                        date_filter=state.dash_state.date_filter,
                         due_filter=state.dash_state.due_filter,
                         category_id_filter=category_id_filter,
                         user_id_filter=user_id_filter,
@@ -303,54 +301,6 @@ class TodoController:
 
             self._view.set_state(state=new_state)
 
-    def _on_dash_incomplete_btn_clicked(self) -> None:
-        state = self._view.get_state()
-
-        try:
-            if todo := state.dash_state.selected_todo:
-                self._todo_service.mark_incomplete(todo_id=todo.todo_id)
-
-                if state.dash_state.category_filter == ALL_CATEGORY:
-                    category_id_filter = None
-                else:
-                    category_id_filter = state.dash_state.category_filter.category_id
-
-                if state.dash_state.user_filter == ALL_USER:
-                    user_id_filter = None
-                else:
-                    user_id_filter = state.dash_state.user_filter.user_id
-
-                todos = self._todo_service.where(
-                    description_like=state.dash_state.description_filter,
-                    date_filter=state.dash_state.date_filter,
-                    due_filter=state.dash_state.due_filter,
-                    category_id_filter=category_id_filter,
-                    user_id_filter=user_id_filter,
-                )
-
-                new_state = dataclasses.replace(
-                    state,
-                    dash_state=dataclasses.replace(
-                        state.dash_state,
-                        todos=todos,
-                        category_options=self._category_service.all(),
-                        status=_add_timestamp(message=f"{todo.description} set to incomplete."),
-                    ),
-                )
-
-                self._view.set_state(state=new_state)
-        except Exception as e:
-            logger.exception(e)
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                ),
-            )
-
-            self._view.set_state(state=new_state)
-
     def _on_dash_refresh_btn_clicked(self) -> None:
         state = self._view.get_state()
 
@@ -367,7 +317,6 @@ class TodoController:
 
             todos = self._todo_service.where(
                 description_like=state.dash_state.description_filter,
-                date_filter=state.dash_state.date_filter,
                 due_filter=state.dash_state.due_filter,
                 category_id_filter=category_id_filter,
                 user_id_filter=user_id_filter,
@@ -465,7 +414,6 @@ class TodoController:
 
                 todos = self._todo_service.where(
                     description_like=state.dash_state.description_filter,
-                    date_filter=state.dash_state.date_filter,
                     due_filter=state.dash_state.due_filter,
                     category_id_filter=category_id_filter,
                     user_id_filter=user_id_filter,

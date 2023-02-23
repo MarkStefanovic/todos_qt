@@ -1,12 +1,9 @@
-from __future__ import annotations
-
 import datetime
+import typing
 
 import sqlalchemy as sa
-import sqlmodel as sm
 
 from src import adapter, domain
-from src.domain import User
 
 __all__ = ("UserService",)
 
@@ -19,27 +16,25 @@ class UserService(domain.UserService):
         username: str,
         min_seconds_between_refreshes: int = 300,
     ):
-        self._engine = engine
-        self._username = username.lower().strip()
-        self._min_seconds_between_refreshes = min_seconds_between_refreshes
+        self._engine: typing.Final[sa.engine.Engine] = engine
+        self._username: typing.Final[str] = username.lower().strip()
+        self._min_seconds_between_refreshes: typing.Final[int] = min_seconds_between_refreshes
 
         self._users: dict[str, domain.User] = {}
         self._last_refresh: datetime.datetime | None = None
         self._current_user: domain.User | None = None
         self._last_current_user_scan: datetime.datetime | None = None
 
-    def add(self, *, user: User) -> None:
+    def add(self, *, user: domain.User) -> None:
         self._refresh()
 
-        with sm.Session(self._engine) as session:
-            repo = adapter.DbUserRepository(session=session)
-            repo.add(user=user)
-            session.commit()
+        repo = adapter.DbUserRepository(engine=self._engine)
+        repo.add(user=user)
 
-            self._users[user.user_id] = user
+        self._users[user.user_id] = user
 
     def add_admins(self) -> None:
-        for username in adapter.config.admin_usernames:
+        for username in adapter.config.admin_usernames():
             if self.get_user_by_username(username=username) is None:
                 user = domain.User(
                     user_id=domain.create_uuid(),
@@ -51,7 +46,7 @@ class UserService(domain.UserService):
                 )
                 self.add(user=user)
 
-    def all(self) -> list[User]:
+    def all(self) -> list[domain.User]:
         self._refresh()
 
         return list(self._users.values())
@@ -81,19 +76,17 @@ class UserService(domain.UserService):
     def delete(self, *, user_id: str) -> None:
         self._refresh()
 
-        with sm.Session(self._engine) as session:
-            repo = adapter.DbUserRepository(session=session)
-            repo.delete(user_id=user_id)
-            session.commit()
+        repo = adapter.DbUserRepository(engine=self._engine)
+        repo.delete(user_id=user_id)
 
-            del self._users[user_id]
+        del self._users[user_id]
 
-    def get(self, *, user_id: str) -> User | None:
+    def get(self, *, user_id: str) -> domain.User | None:
         self._refresh()
 
         return self._users.get(user_id)
 
-    def get_user_by_username(self, *, username: str) -> User | None:
+    def get_user_by_username(self, *, username: str) -> domain.User | None:
         self._refresh()
 
         return next(
@@ -105,23 +98,20 @@ class UserService(domain.UserService):
         )
 
     def refresh(self) -> None:
-        with sm.Session(self._engine) as session:
-            repo = adapter.DbUserRepository(session=session)
-            self._users = {
-                user.user_id: user
-                for user in repo.all()
-            }
-            self._last_refresh = datetime.datetime.now()
+        repo = adapter.DbUserRepository(engine=self._engine)
+        self._users = {
+            user.user_id: user
+            for user in repo.all()
+        }
+        self._last_refresh = datetime.datetime.now()
 
-    def update(self, *, user: User) -> None:
+    def update(self, *, user: domain.User) -> None:
         self._refresh()
 
-        with sm.Session(self._engine) as session:
-            repo = adapter.DbUserRepository(session=session)
-            repo.update(user=user)
-            session.commit()
+        repo = adapter.DbUserRepository(engine=self._engine)
+        repo.update(user=user)
 
-            self._users[user.user_id] = user
+        self._users[user.user_id] = user
 
     def _refresh(self) -> None:
         if self._last_refresh is None:
@@ -135,3 +125,10 @@ class UserService(domain.UserService):
 
         if time_to_refresh:
             self.refresh()
+
+
+if __name__ == '__main__':
+    eng = adapter.db.create_engine()
+    svc = UserService(engine=eng, username="test")
+    for r in svc.all():
+        print(r)

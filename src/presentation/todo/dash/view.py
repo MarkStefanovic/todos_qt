@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import datetime
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
 import qtawesome as qta
+from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, icons, widgets
@@ -16,8 +14,7 @@ __all__ = ("TodoDash",)
 class TodoDash(qtw.QWidget):
     delete_btn_clicked = qtc.pyqtSignal()
     edit_btn_clicked = qtc.pyqtSignal()
-    complete_btn_clicked = qtc.pyqtSignal()
-    incomplete_btn_clicked = qtc.pyqtSignal()
+    toggle_complete_btn_clicked = qtc.pyqtSignal()
 
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
@@ -34,12 +31,6 @@ class TodoDash(qtw.QWidget):
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)
-
-        date_lbl = qtw.QLabel("Today")
-        date_lbl.setFont(fonts.bold)
-        self._date_edit = widgets.DateEditor()
-        self._date_edit.set_value(datetime.date.today())
-        self._date_edit.date_changed.connect(self.refresh_btn.click)
 
         due_lbl = qtw.QLabel("Due?")
         due_lbl.setFont(fonts.bold)
@@ -68,8 +59,6 @@ class TodoDash(qtw.QWidget):
         toolbar_layout.addWidget(self.refresh_btn)
         toolbar_layout.addWidget(self.add_btn)
         toolbar_layout.addSpacerItem(qtw.QSpacerItem(10, 0, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Minimum))
-        toolbar_layout.addWidget(date_lbl)
-        toolbar_layout.addWidget(self._date_edit)
         toolbar_layout.addWidget(due_lbl)
         toolbar_layout.addWidget(self._due_chk)
         toolbar_layout.addWidget(user_lbl)
@@ -88,8 +77,8 @@ class TodoDash(qtw.QWidget):
                     hidden=True,
                 ),
                 table.button_col(
-                    button_text="Complete",
-                    on_click=lambda _: self.complete_btn_clicked.emit(),  # noqa
+                    selector=lambda todo: "Incomplete" if todo.days is None or todo.days > 0 else "Complete",
+                    on_click=lambda _: self.toggle_complete_btn_clicked.emit(),  # noqa
                     alignment=table.ColAlignment.Center,
                 ),
                 table.text_col(
@@ -98,16 +87,13 @@ class TodoDash(qtw.QWidget):
                     column_width=300,
                 ),
                 table.date_col(
-                    selector=lambda todo: todo.due_date(today=self._date_edit.get_value() or datetime.date.today()),
+                    selector=lambda todo: None if todo.days is None else datetime.date.today() + datetime.timedelta(days=todo.days),
                     display_name="Due Date",
                     alignment=table.ColAlignment.Center,
                     column_width=120,
                 ),
                 table.rich_text_col(
-                    selector=lambda todo: render_days(
-                        due_date=todo.due_date(today=self._date_edit.get_value() or datetime.date.today()),
-                        today=self._date_edit.get_value() or datetime.date.today(),
-                    ),
+                    selector=lambda todo: _render_days(todo.days),
                     display_name="Days",
                     alignment=table.ColAlignment.Center,
                     column_width=60,
@@ -127,7 +113,7 @@ class TodoDash(qtw.QWidget):
                     alignment=table.ColAlignment.Center,
                 ),
                 table.text_col(
-                    selector=lambda todo: render_frequency(frequency=todo.frequency),
+                    selector=lambda todo: _render_frequency(frequency=todo.frequency),
                     display_name="Frequency",
                     column_width=140,
                     hidden=False,
@@ -140,7 +126,7 @@ class TodoDash(qtw.QWidget):
                 ),
                 table.rich_text_col(
                     display_name="Last Completed",
-                    selector=lambda todo: render_last_completed(
+                    selector=lambda todo: _render_last_completed(
                         last_completed=todo.last_completed,
                         last_completed_by=todo.last_completed_by,
                     ),
@@ -162,11 +148,6 @@ class TodoDash(qtw.QWidget):
                     display_format="%m/%d/%y",
                     # display_format="%m/%d/%Y %I:%M %p",
                     column_width=100,
-                ),
-                table.button_col(
-                    button_text="Incomplete",
-                    on_click=lambda _: self.incomplete_btn_clicked.emit(),  # noqa
-                    enable_when=lambda todo: todo.last_completed is not None,
                 ),
                 table.button_col(
                     button_text="Edit",
@@ -200,7 +181,6 @@ class TodoDash(qtw.QWidget):
 
     def get_state(self) -> TodoDashState:
         return TodoDashState(
-            date_filter=self._date_edit.get_value() or datetime.date.today(),
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
             category_filter=self._category_cbo.get_value(),
@@ -246,8 +226,9 @@ class TodoDash(qtw.QWidget):
         self.repaint()
 
 
-def render_days(*, due_date: datetime.date, today: datetime.date) -> str:
-    days = (due_date - today).days
+def _render_days(days: int | None, /) -> str:
+    if days is None:
+        return ""
 
     if days < 0:
         return f'<center><font color="red">{days}</font></center>'
@@ -258,7 +239,7 @@ def render_days(*, due_date: datetime.date, today: datetime.date) -> str:
     return f"<center>{days}</center>"
 
 
-def render_frequency(*, frequency: domain.Frequency) -> str:
+def _render_frequency(*, frequency: domain.Frequency) -> str:
     return {
         domain.FrequencyType.Daily: lambda: "Daily",
         domain.FrequencyType.Easter: lambda: "Easter",
@@ -272,7 +253,7 @@ def render_frequency(*, frequency: domain.Frequency) -> str:
     }[frequency.name]()
 
 
-def render_last_completed(
+def _render_last_completed(
     *,
     last_completed: datetime.date | None,
     last_completed_by: domain.User | None,

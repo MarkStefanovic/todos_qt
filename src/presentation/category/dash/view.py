@@ -27,7 +27,7 @@ class CategoryDash(qtw.QWidget):
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
+        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color()) # type: ignore
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)

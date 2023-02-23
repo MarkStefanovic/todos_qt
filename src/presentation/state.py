@@ -13,7 +13,6 @@ __all__ = ("MainState",)
 
 @dataclasses.dataclass(frozen=True)
 class MainState:
-    today: datetime.date
     active_tab: typing.Union[
         typing.Literal["todo"],
         typing.Literal["category"],
@@ -31,7 +30,6 @@ class MainState:
         current_user: domain.User,
     ) -> MainState:
         return MainState(
-            today=datetime.date.today(),
             active_tab="todo",
             todo_state=TodoState.initial(
                 todos=todos,

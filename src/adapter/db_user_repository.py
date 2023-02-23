@@ -1,91 +1,102 @@
-from __future__ import annotations
-
 import datetime
-
-import sqlmodel as sm
 
 from src import domain
 from src.adapter import db
 from src.domain import User
+
+import sqlalchemy as sa
 
 __all__ = ("DbUserRepository",)
 
 
 # noinspection DuplicatedCode
 class DbUserRepository(domain.UserRepository):
-    def __init__(self, session: sm.Session):
-        self._session = session
+    def __init__(self, engine: sa.engine.Engine):
+        self._engine = engine
 
     def add(self, *, user: User) -> None:
-        user_orm = db.User(
-            user_id=user.user_id,
-            display_name=user.display_name,
-            username=user.username,
-            is_admin=user.is_admin,
-            date_added=datetime.datetime.now(),
-            date_updated=None,
-            date_deleted=None,
-        )
-        self._session.add(user_orm)
+        with self._engine.begin() as con:
+            con.execute(
+                sa.insert(db.user)
+                .values(
+                    user_id=user.user_id,
+                    display_name=user.display_name,
+                    username=user.username,
+                    is_admin=user.is_admin,
+                    date_added=datetime.datetime.now(),
+                    date_updated=None,
+                    date_deleted=None,
+                )
+            )
 
     def all(self) -> list[User]:
-        result = self._session.exec(
-            sm.select(db.User)
-            .where(db.User.date_deleted == None)  # noqa
-        ).all()
-        return [
-            domain.User(
-                user_id=row.user_id,
-                username=row.username,
-                display_name=row.display_name,
-                is_admin=row.is_admin,
-                date_added=row.date_added,
-                date_updated=row.date_updated,
+        with self._engine.begin() as con:
+            # noinspection PyComparisonWithNone
+            result = con.execute(
+                sa.select(db.user)
+                .where(db.user.c.date_deleted == None)
             )
-            for row in result
-        ]
+
+            return [
+                domain.User(
+                    user_id=row.user_id,
+                    username=row.username,
+                    display_name=row.display_name,
+                    is_admin=row.is_admin,
+                    date_added=row.date_added,
+                    date_updated=row.date_updated,
+                )
+                for row in result.fetchall()
+            ]
 
     def delete(self, *, user_id: str) -> None:
-        if todo_orm := self._session.exec(
-            sm.select(db.Todo)
-            .where(db.Todo.date_deleted == None)  # noqa
-            .where(db.Todo.user_id == user_id)
-            .limit(1)
-        ).one_or_none():
-            raise Exception(
-                f"Cannot delete user, as the todo, {todo_orm.description!r}, uses it."
+        with self._engine.begin() as con:
+            result = con.execute(
+                sa.select(db.todo)
+                .where(db.todo.c.date_deleted == None)  # noqa
+                .where(db.todo.c.user_id == user_id)
             )
+            if rows := result.fetchall():
+                for row in rows:
+                    con.execute(
+                        sa.update(db.todo)
+                        .where(db.todo.c.todo_id == row.todo_id)
+                        .values(date_deleted=datetime.datetime.now())
+                    )
 
-        if orm := self._session.exec(
-            sm.select(db.User)
-            .where(db.User.user_id == user_id)
-        ).one_or_none():
-            orm.date_deleted = datetime.datetime.now()
-            self._session.add(orm)
+            con.execute(
+                sa.update(db.user)
+                .values(date_deleted=datetime.datetime.now())
+            )
 
     def get(self, *, user_id: str) -> domain.User | None:
-        if orm := self._session.exec(
-            sm.select(db.User)
-            .where(db.User.user_id == user_id)
-        ).one_or_none():
-            return domain.User(
-                user_id=orm.user_id,
-                username=orm.username,
-                display_name=orm.display_name,
-                is_admin=orm.is_admin,
-                date_added=orm.date_added,
-                date_updated=orm.date_updated,
+        with self._engine.begin() as con:
+            result = con.execute(
+                sa.select(db.user)
+                .where(db.user.c.user_id == user_id)
             )
+
+            if row := result.one_or_none():
+                return domain.User(
+                    user_id=row.user_id,
+                    username=row.username,
+                    display_name=row.display_name,
+                    is_admin=row.is_admin,
+                    date_added=row.date_added,
+                    date_updated=row.date_updated,
+                )
 
         return None
 
     def update(self, *, user: User) -> None:
-        if orm := self._session.exec(
-            sm.select(db.User)
-            .where(db.User.user_id == user.user_id)
-        ).one_or_none():
-            orm.username = user.username
-            orm.display_name = user.display_name
-            orm.date_updated = datetime.datetime.now()
-            orm.is_admin = user.is_admin
-            self._session.add(orm)
+        with self._engine.begin() as con:
+            con.execute(
+                sa.update(db.user)
+                .where(db.user.c.user_id == user.user_id)
+                .values(
+                    username=user.username,
+                    display_name=user.display_name,
+                    date_updated=datetime.datetime.now(),
+                    is_admin=user.is_admin,
+                )
+            )

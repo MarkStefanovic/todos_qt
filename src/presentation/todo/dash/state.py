@@ -29,7 +29,6 @@ ALL_USER = domain.User(
 
 @dataclasses.dataclass(frozen=True)
 class TodoDashState:
-    date_filter: datetime.date
     due_filter: bool
     description_filter: str
     category_filter: domain.Category
@@ -50,7 +49,6 @@ class TodoDashState:
         current_user: domain.User,
     ) -> TodoDashState:
         return TodoDashState(
-            date_filter=datetime.date.today(),
             due_filter=True,
             description_filter="",
             category_filter=ALL_CATEGORY,

@@ -1,7 +1,7 @@
 import datetime
 
 from src import domain
-from src.domain.prior_date import prior_date
+from src.domain.date_calc import prior_date
 
 
 def test_yearly_prior_date():

@@ -1,27 +1,22 @@
 # to create new env: conda env create --file environment.yml
 # to update env: conda env update --file environment.yml --prune
+# remove env: conda env remove -n todos-qt
 name: todos-qt
 channels:
-- conda-forge
-- defaults
+  - conda-forge
+  - defaults
 dependencies:
-- python>=3.10
-- pip
-- loguru
-- pydantic
-- pyqt
-- hypothesis
-- mypy
-- pytest
-#- pytest-qt
-- sqlalchemy
-- pyinstaller
-- python-dateutil
-- qtawesome
-- psycopg2-binary
-- sqlmodel
-- pyinstaller
-- pyenchant
-- pip:
-  - PyQt5-stubs
-  - types-python-dateutil
+  - python>=3.10
+  - loguru
+  - pyqt
+  - hypothesis
+  - mypy
+  - pytest
+  - sqlalchemy
+  - pyinstaller
+  - python-dateutil
+  - qtawesome
+  - psycopg2-binary
+  - pip
+  - pip:
+    - pyqt5-stubs

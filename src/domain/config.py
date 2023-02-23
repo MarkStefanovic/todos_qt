@@ -1,16 +1,11 @@
-from __future__ import annotations
-
-import pydantic
+import dataclasses
 
 __all__ = ("Config",)
 
 
-class Config(pydantic.BaseModel):
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class Config:
     sqlalchemy_url: str
     schema_name: str | None
     add_holidays: bool
     admin_usernames: list[str]
-
-    class Config:
-        extra = pydantic.Extra.ignore
-        frozen = True

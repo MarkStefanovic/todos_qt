@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 from src.presentation.shared import icons
@@ -14,7 +15,7 @@ BTN_SIZE = qtc.QSize(20, 20)
 
 
 class RichTextEditor(qtw.QWidget):
-    def __init__(self, parent: qtw.QWidget | None = None):
+    def __init__(self, parent: qtw.QWidget | None):
         super().__init__(parent=parent)
 
         if parent is None:
@@ -29,6 +30,7 @@ class RichTextEditor(qtw.QWidget):
             clear_bold_btn_icon = qta.icon(icons.clear_bold_btn_icon_name, color=parent.palette().text().color())
 
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
+        # noinspection PyUnresolvedReferences
         self._highlight_btn.clicked.connect(self._on_highlight_btn_clicked)
         self._highlight_btn.setToolTip("Highlight")
         self._highlight_btn.setIconSize(BTN_SIZE)
@@ -102,7 +104,7 @@ class RichTextEditor(qtw.QWidget):
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
-    w = RichTextEditor()
+    w = RichTextEditor(parent=None)
     w.set_value("<b>Te</b>st")
     w.show()
     app.exec()

@@ -4,6 +4,7 @@ import dataclasses
 import datetime
 import decimal
 import enum
+import functools
 import typing
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
@@ -90,7 +91,8 @@ class ColSpec(typing.Generic[Key, Row, Value]):
 
 def button_col(
     *,
-    button_text: str,
+    button_text: str | None = None,
+    selector: typing.Callable[[Row], str] | None = None,
     column_width: int = 100,
     alignment: ColAlignment = ColAlignment.Center,
     enable_when: typing.Callable[[Row], bool] | None = None,
@@ -98,7 +100,7 @@ def button_col(
 ) -> ColSpec[Key, Row, str]:
     return ColSpec(
         attr_name=None,
-        selector=None,
+        selector=selector,
         display_name=button_text,
         display_fn=str,
         column_width=column_width,
@@ -116,13 +118,13 @@ def date_col(
     *,
     display_name: str,
     attr_name: str | None = None,
-    selector: typing.Callable[[Row], datetime.date] | None = None,
+    selector: typing.Callable[[Row], datetime.date | None] | None = None,
     display_format: str = "%m/%d/%y",
     column_width: int = 100,
     hidden: bool = False,
     alignment: ColAlignment = ColAlignment.Right,
-    display_fn: typing.Callable[[datetime.date], str] | None = None,
-) -> ColSpec[Key, Row, datetime.date]:
+    display_fn: typing.Callable[[datetime.date | None], str] | None = None,
+) -> ColSpec[Key, Row, datetime.date | None]:
     if display_fn is None:
         display_fn = lambda dt: "" if dt is None or dt == datetime.date(1900, 1, 1) else dt.strftime(display_format)
 
@@ -402,8 +404,15 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
     def selected_item(self) -> Row | None:
         if indices := self._table.selectedIndexes():
             row_num = indices[0].row()
-            key = self._table.item(row_num, self._col_indices[self._key_attr]).get_value()  # type: ignore
-            return self._items[key]
+            item = self._table.item(row_num, self._col_indices[self._key_attr])
+            if item:
+                if hasattr(item, "get_value"):
+                    key = item.get_value()
+                else:
+                    key = item.data(qtc.Qt.DisplayRole)
+
+                return self._items[key]
+        
         return None
 
     def select_item_by_key(self, *, key: Key) -> None:
@@ -434,8 +443,15 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
 
     def _get_row_num_for_key(self, *, key: Key) -> int | None:
         for row_num in range(self._table.rowCount()):
-            if key == self._table.item(row_num, self._col_indices[self._key_attr]).get_value():  # type: ignore
-                return row_num
+            if item := self._table.item(row_num, self._col_indices[self._key_attr]):
+                if hasattr(item, "get_value"):
+                    item_key = item.get_value()
+                else:
+                    item_key = item.data(qtc.Qt.DisplayRole)
+
+                if key == item_key:
+                    return row_num
+
         return None
 
     def _set_row(self, *, row_num: int, data: Row) -> None:
@@ -480,12 +496,16 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 if col_spec.on_click is None:
                     raise Exception("[on_click] is required for a Button column.")
                 else:
-                    btn = qtw.QPushButton(col_spec.display_name)
+                    if col_spec.selector is None:
+                        btn = qtw.QPushButton(col_spec.display_name)
+                    else:
+                        btn = qtw.QPushButton(col_spec.selector(data))
+
                     btn.setFont(fonts.bold)
                     btn.setObjectName("table_btn")
                     assert col_spec.column_width is not None
                     btn.setMaximumWidth(col_spec.column_width)
-                    btn.clicked.connect(col_spec.on_click)
+                    btn.clicked.connect(col_spec.on_click)  # noqa
                     self._table.setCellWidget(row_num, col_num, btn)
                 if col_spec.enable_when is not None:
                     btn.setEnabled(col_spec.enable_when(data))
@@ -545,9 +565,9 @@ class DropdownCell(qtw.QComboBox):
         self.set_values(values)
         self.set_value(value=initial_value)
 
-        self.currentIndexChanged.connect(self._on_current_index_changed)
+        self.currentIndexChanged.connect(self._on_current_index_changed)  # noqa
 
-    def get_value(self) -> Value:
+    def get_value(self) -> Value:  # type: ignore
         return self.currentData()
 
     def set_value(self, /, value: Value) -> None:

@@ -1,72 +1,76 @@
-from __future__ import annotations
-
-import datetime
-import functools
-
 import sqlalchemy as sa
-import sqlmodel as sm
 
-from src.adapter.config import config
+from src.adapter import config
 
-__all__ = ("get_engine", "Todo")
+__all__ = (
+    "category",
+    "create_engine",
+    # "create_tables",
+    "todo",
+    "user",
+)
 
-
-class Todo(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config.schema_name}
-
-    todo_id: str = sm.Field(primary_key=True)
-    description: str
-    note: str
-    user_id: str
-    category_id: str
-    advance_days: int
-    expire_days: int
-    start_date: datetime.date
-    last_completed: datetime.date | None
-    last_completed_by: str | None
-    prior_completed: datetime.date | None
-    prior_completed_by: str | None
-    template_todo_id: str | None
-
-    date_added: datetime.datetime
-    date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
-
-    # frequency fields
-    frequency: str
-    month: int | None
-    week_day: int | None
-    week_number: int | None
-    month_day: int | None
-    days: int | None
-    due_date: datetime.date | None 
+meta = sa.MetaData()
 
 
-class Category(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config.schema_name}
+todo = sa.Table(
+    "todo",
+    meta,
+    sa.Column("todo_id", sa.Text, primary_key=True),
+    sa.Column("description", sa.Text, nullable=False),
+    sa.Column("note", sa.Text, nullable=False),
+    sa.Column("user_id", sa.Text, nullable=False),
+    sa.Column("category_id", sa.Text, nullable=False),
+    sa.Column("advance_days", sa.Integer, nullable=False),
+    sa.Column("expire_days", sa.Integer, nullable=False),
+    sa.Column("start_date", sa.Date, nullable=False),
+    sa.Column("last_completed", sa.Date, nullable=True),
+    sa.Column("last_completed_by", sa.Text, nullable=True),
+    sa.Column("prior_completed", sa.Date, nullable=True),
+    sa.Column("prior_completed_by", sa.Text, nullable=True),
+    sa.Column("template_todo_id", sa.Text, nullable=True),
+    sa.Column("date_added", sa.DateTime, nullable=False),
+    sa.Column("date_updated", sa.DateTime, nullable=True),
+    sa.Column("date_deleted", sa.DateTime, nullable=True),
+    sa.Column("frequency", sa.Text, nullable=False),
+    sa.Column("month", sa.Integer, nullable=True),
+    sa.Column("week_day", sa.Integer, nullable=True),
+    sa.Column("week_number", sa.Integer, nullable=True),
+    sa.Column("month_day", sa.Integer, nullable=True),
+    sa.Column("days", sa.Integer, nullable=True),
+    sa.Column("due_date", sa.Date, nullable=True),
+    schema=config.db_schema(),
+)
 
-    category_id: str = sm.Field(primary_key=True)
-    name: str
-    note: str
-    date_added: datetime.datetime
-    date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
+category = sa.Table(
+    "category",
+    meta,
+    sa.Column("category_id", sa.Text, primary_key=True),
+    sa.Column("name", sa.Text, nullable=False),
+    sa.Column("note", sa.Text, nullable=False),
+    sa.Column("date_added", sa.DateTime, nullable=False),
+    sa.Column("date_updated", sa.DateTime, nullable=True),
+    sa.Column("date_deleted", sa.DateTime, nullable=True),
+    schema=config.db_schema(),
+)
+
+user = sa.Table(
+    "user",
+    meta,
+    sa.Column("user_id", sa.Text, primary_key=True),
+    sa.Column("display_name", sa.Text, nullable=False),
+    sa.Column("username", sa.Text, nullable=False),
+    sa.Column("is_admin", sa.Boolean, nullable=False),
+    sa.Column("date_added", sa.DateTime, nullable=False),
+    sa.Column("date_updated", sa.DateTime, nullable=True),
+    sa.Column("date_deleted", sa.DateTime, nullable=True),
+    schema=config.db_schema(),
+)
 
 
-class User(sm.SQLModel, table=True):
-    __table_args__ = {"schema": config.schema_name}
-
-    user_id: str = sm.Field(primary_key=True)
-    display_name: str
-    username: str
-    is_admin: bool
-    date_added: datetime.datetime
-    date_updated: datetime.datetime | None
-    date_deleted: datetime.datetime | None
+# def create_tables(*, engine: sa.engine.Engine) -> None:
+#     meta.create_all(bind=engine, tables=[todo, category, user], checkfirst=True)
 
 
-@functools.lru_cache(1)
-def get_engine(*, url: str, echo: bool = False) -> sa.engine.Engine:
-    engine = sm.create_engine(url, echo=echo)
-    sm.SQLModel.metadata.create_all(engine)
-    return engine
+def create_engine(*, url: str = config.db_url(), echo: bool = False) -> sa.engine.Engine:
+    return sa.create_engine(url=url, echo=echo)

@@ -34,7 +34,6 @@ class TodoService(abc.ABC):
     def where(
         self,
         *,
-        date_filter: datetime.date,
         due_filter: bool,
         description_like: str,
         category_id_filter: str | None,

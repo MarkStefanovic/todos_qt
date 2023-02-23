@@ -53,9 +53,8 @@ def main() -> None:
     log_folder = adapter.fs.root_dir() / "logs"
     log_folder.mkdir(exist_ok=True)
 
-    logger.remove()
     logger.add(log_folder / "error.log", rotation="5 MB", retention="7 days", level="ERROR")
-    logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
+    # logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
 
     except_hook = sys.excepthook
 
@@ -72,7 +71,7 @@ def main() -> None:
 
     app = qtw.QApplication(sys.argv)
 
-    app.setStyle("Fusion")  # type: ignore
+    app.setStyle("Fusion")
 
     app.setStyleSheet("""
         QWidget { font-size: 11pt; }
@@ -101,7 +100,7 @@ def main() -> None:
 
     app_icon = qtg.QIcon(str((adapter.fs.assets_folder() / "icons" / "app.png").resolve()))
 
-    engine = adapter.db.get_engine(url=adapter.config.sqlalchemy_url, echo=True)
+    engine = adapter.db.create_engine(url=adapter.config.db_url(), echo=True)
 
     username = os.environ.get("USERNAME", "unknown").lower()
 
@@ -111,9 +110,9 @@ def main() -> None:
     user_service.add_admins()
 
     todo_service = service.TodoService(engine=engine, username=username)
-    todo_service.cleanup()
+    # todo_service.cleanup()
 
-    if adapter.config.add_holidays:
+    if adapter.config.add_holidays():
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
             if category_service.get(category_id=category.category_id) is None:
                 category_service.add(category=category)
@@ -121,7 +120,7 @@ def main() -> None:
         if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:
             category_service.add(category=domain.TODO_CATEGORY)
 
-    if adapter.config.add_holidays:
+    if adapter.config.add_holidays():
         todo_service.add_default_holidays_for_all_users()
 
     main_view = presentation.MainView(window_icon=app_icon)

@@ -2,22 +2,23 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import functools
 import typing
 
 from loguru import logger
 
+from src.domain import date_calc
+from src.domain.frequency_type import FrequencyType
 from src.domain.category import Category, TODO_CATEGORY
-from src.domain.due_date import due_date
 from src.domain.frequency import Frequency
 from src.domain.month import Month
-from src.domain.should_display import should_display
 from src.domain.user import DEFAULT_USER, User
 from src.domain.weekday import Weekday
 
 __all__ = ("Todo", "DEFAULT_TODO",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class Todo:
     todo_id: str
     user: User
@@ -33,17 +34,37 @@ class Todo:
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
 
-    def due_date(self, *, today: datetime.date) -> datetime.date:
+    @functools.cached_property
+    def days(self) -> int | None:
+        due_date = date_calc.due_date(frequency=self.frequency)
+        if (
+            self.last_completed
+            and due_date
+            and self.last_completed >= (due_date - datetime.timedelta(days=self.frequency.advance_display_days))
+        ):
+            if self.frequency.name == FrequencyType.Once:
+                return None
+
+            next_date = date_calc.next_date(frequency=self.frequency, ref_date=due_date)
+            if next_date:
+                return (next_date - datetime.date.today()).days
+            return None
+
+        if due_date is None:
+            return None
+
+        return (due_date - datetime.date.today()).days
+
+    @functools.cached_property
+    def due_date(self) -> datetime.date:
         try:
-            return due_date(
-                frequency=self.frequency,
-                today=today,
-            ) or datetime.date(1900, 1, 1)
+            return date_calc.due_date(frequency=self.frequency) or datetime.date(1900, 1, 1)
         except Exception as e:
-            logger.exception(f"Failed to calculate due_date({today=}) for todo, {self.description}\n{e}")
+            logger.exception(f"Failed to calculate due_date() for todo, {self.description}\n{e}")
             raise e
 
-    def should_display(self, *, today: datetime.date) -> bool:
+    @functools.cached_property
+    def should_display(self) -> bool:
         try:
             if self.last_completed:
                 latest: datetime.date | None = self.last_completed
@@ -52,13 +73,9 @@ class Todo:
             else:
                 latest = None
 
-            return should_display(
-                frequency=self.frequency,
-                today=today,
-                last_completed=latest,
-            )
+            return date_calc.should_display(frequency=self.frequency, last_completed=latest)
         except Exception as e:
-            logger.exception(f"Failed to calculate should_display({today=}) for todo, {self.description}\n{e}")
+            logger.exception(f"Failed to calculate should_display() for todo, {self.description}\n{e}")
             raise e
 
     @staticmethod

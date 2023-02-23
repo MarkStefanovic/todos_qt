@@ -142,8 +142,10 @@ cython_debug/
 *.sqlite
 logs
 *scratch.py
-config.json
 NOTES.md
 todo.db
-config.py
 environment.frozen.yml
+work-config.json
+assets/personal/
+assets/work/
+office-services.spec
