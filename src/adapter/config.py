@@ -17,7 +17,6 @@ __all__ = (
 
 @functools.lru_cache
 def _config() -> dict[str, typing.Any]:
-    # Check if MEIPASS attribute is available in sys else return current file path
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     path = os.path.abspath(os.path.join(bundle_dir, 'config.json'))
     with open(path, "r") as fh:
