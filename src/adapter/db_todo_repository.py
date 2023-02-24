@@ -1,12 +1,11 @@
 import datetime
-import typing
+
+import sqlalchemy as sa
 
 from src import domain
 from src.adapter import db
 from src.adapter.db_category_repository import DbCategoryRepository
 from src.adapter.db_user_repository import DbUserRepository
-
-import sqlalchemy as sa
 
 __all__ = ("DbTodoRepository",)
 
@@ -113,7 +112,7 @@ class DbTodoRepository(domain.TodoRepository):
         with self._engine.begin() as con:
             result = con.execute(
                 sa.select(db.todo)
-                .where(db.todo.c.date_deleted == None)
+                .where(db.todo.c.date_deleted == None)  # noqa
             )
 
         return [
@@ -150,7 +149,7 @@ class DbTodoRepository(domain.TodoRepository):
         with self._engine.begin() as con:
             con.execute(
                 sa.update(db.todo)
-                .where(db.todo.c.date_deleted == None)  # noqa
+                .where(db.todo.c.todo_id == todo_id)
                 .values(date_deleted=datetime.datetime.now())
             )
 

@@ -1,10 +1,10 @@
 import datetime
 
+import sqlalchemy as sa
+
 from src import domain
 from src.adapter import db
 from src.domain import User
-
-import sqlalchemy as sa
 
 __all__ = ("DbUserRepository",)
 
@@ -34,7 +34,7 @@ class DbUserRepository(domain.UserRepository):
             # noinspection PyComparisonWithNone
             result = con.execute(
                 sa.select(db.user)
-                .where(db.user.c.date_deleted == None)
+                .where(db.user.c.date_deleted == None)  # noqa
             )
 
             return [
@@ -51,18 +51,11 @@ class DbUserRepository(domain.UserRepository):
 
     def delete(self, *, user_id: str) -> None:
         with self._engine.begin() as con:
-            result = con.execute(
-                sa.select(db.todo)
-                .where(db.todo.c.date_deleted == None)  # noqa
+            con.execute(
+                sa.update(db.todo)
                 .where(db.todo.c.user_id == user_id)
+                .values(date_deleted=datetime.datetime.now())
             )
-            if rows := result.fetchall():
-                for row in rows:
-                    con.execute(
-                        sa.update(db.todo)
-                        .where(db.todo.c.todo_id == row.todo_id)
-                        .values(date_deleted=datetime.datetime.now())
-                    )
 
             con.execute(
                 sa.update(db.user)

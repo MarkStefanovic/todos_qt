@@ -9,7 +9,6 @@ import sqlalchemy as sa
 __all__ = ("DbCategoryRepository",)
 
 
-
 class DbCategoryRepository(domain.CategoryRepository):
     def __init__(self, *, engine: sa.engine.Engine):
         self._engine = engine
