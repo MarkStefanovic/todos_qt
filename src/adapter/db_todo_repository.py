@@ -238,6 +238,7 @@ class DbTodoRepository(domain.TodoRepository):
                     start_date=todo.frequency.start_date,
                     date_added=todo.date_added,
                     date_updated=todo.date_updated,
+                    date_deleted=None,
                     frequency=FREQUENCY_NAME_LKP[todo.frequency.name],
                     week_day=week_day,
                     week_number=todo.frequency.week_number,

@@ -97,6 +97,7 @@ class DbUserRepository(domain.UserRepository):
                     username=user.username,
                     display_name=user.display_name,
                     date_updated=datetime.datetime.now(),
+                    date_deleted=None,
                     is_admin=user.is_admin,
                 )
             )

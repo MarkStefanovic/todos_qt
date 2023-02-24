@@ -24,7 +24,7 @@ class DbCategoryRepository(domain.CategoryRepository):
                     note=category.note,
                     date_added=category.date_added,
                     date_updated=category.date_updated,
-                    date_deleted=category.date_deleted
+                    date_deleted=None,
                 )
             )
 
@@ -81,7 +81,7 @@ class DbCategoryRepository(domain.CategoryRepository):
                     name=category.name,
                     note=category.note,
                     date_updated=category.date_updated,
-                    date_deleted=category.date_deleted,
+                    date_deleted=None,
                 )
             )
 
