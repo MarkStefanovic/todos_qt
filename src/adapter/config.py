@@ -16,24 +16,26 @@ __all__ = (
 
 
 @functools.lru_cache
-def _config() -> dict[str, typing.Any]:
-    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
-    path = os.path.abspath(os.path.join(bundle_dir, 'config.json'))
-    with open(path, "r") as fh:
+def _config(*, path: pathlib.Path = fs.config_path()) -> dict[str, typing.Any]:
+    with path.open("r") as fh:
         return json.load(fh)
 
 
-def add_holidays() -> bool:
-    return _config()["add-holidays"]
+def add_holidays(*, config_path: pathlib.Path = fs.config_path()) -> bool:
+    return _config(path=config_path)["add-holidays"]
 
 
-def admin_usernames() -> list[str]:
-    return _config()["admin-usernames"]
+def admin_usernames(*, config_path: pathlib.Path = fs.config_path()) -> list[str]:
+    return _config(path=config_path)["admin-usernames"]
 
 
-def db_schema() -> str | None:
-    return _config()["db-schema"]
+def db_schema(*, config_path: pathlib.Path = fs.config_path()) -> str | None:
+    return _config(path=config_path)["db-schema"]
 
 
-def db_url(*, json_config_path: pathlib.Path = fs.get_config_path()) -> str:
-    return _config()["sqlalchemy-connection-string"]
+def db_url(*, config_path: pathlib.Path = fs.config_path()) -> str:
+    return _config(path=config_path)["sqlalchemy-connection-string"]
+
+
+if __name__ == '__main__':
+    print(_config())

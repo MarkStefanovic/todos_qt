@@ -3,7 +3,11 @@ import os
 import pathlib
 import sys
 
-__all__ = ("assets_folder", "root_dir",)
+__all__ = (
+    "assets_folder",
+    "config_path",
+    "root_dir",
+)
 
 
 @functools.lru_cache
@@ -28,9 +32,17 @@ def assets_folder() -> pathlib.Path:
 
 
 @functools.lru_cache
-def get_config_path() -> pathlib.Path:
-    return root_dir() / "assets" / "config.json"
+def config_path() -> pathlib.Path:
+    if getattr(sys, "frozen", False):
+        bundle_folder: str = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+        path = pathlib.Path(os.path.abspath(os.path.join(bundle_folder, 'config.json')))
+    else:
+        path = assets_folder() / "config.json"
+
+    assert path.exists(), f"config path, {path.resolve()!s}, not found."
+
+    return path
 
 
 if __name__ == '__main__':
-    print(root_dir())
+    print(config_path())
