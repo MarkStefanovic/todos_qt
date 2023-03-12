@@ -77,7 +77,7 @@ class TodoDash(qtw.QWidget):
                     hidden=True,
                 ),
                 table.button_col(
-                    selector=lambda todo: "Incomplete" if todo.days is None or todo.days > 0 else "Complete",
+                    selector=lambda todo: "Complete" if todo.should_display else "Incomplete",
                     on_click=lambda _: self.toggle_complete_btn_clicked.emit(),  # noqa
                     alignment=table.ColAlignment.Center,
                 ),

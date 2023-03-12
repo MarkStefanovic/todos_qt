@@ -173,9 +173,7 @@ class TodoController:
             if todo := state.dash_state.selected_todo:
                 current_user = self._user_service.current_user()
 
-                if todo.days is None:
-                    self._todo_service.mark_incomplete(todo_id=todo.todo_id)
-                elif todo.days <= 0:
+                if todo.should_display:
                     self._todo_service.mark_complete(todo_id=todo.todo_id, user=current_user)
                 else:
                     self._todo_service.mark_incomplete(todo_id=todo.todo_id)
