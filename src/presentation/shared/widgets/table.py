@@ -7,6 +7,7 @@ import enum
 import functools
 import typing
 
+# noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src.presentation.shared import fonts
@@ -86,7 +87,8 @@ class ColSpec(typing.Generic[Key, Row, Value]):
 
     def __post_init__(self) -> None:
         if self.type != ColSpecType.Button:
-            assert self.attr_name is not None or self.selector is not None, "Either [attr_name] or [selector] must be provided, but both were None."
+            assert self.attr_name is not None or self.selector is not None, \
+                "Either [attr_name] or [selector] must be provided, but both were None."
 
 
 def button_col(
@@ -126,7 +128,7 @@ def date_col(
     display_fn: typing.Callable[[datetime.date | None], str] | None = None,
 ) -> ColSpec[Key, Row, datetime.date | None]:
     if display_fn is None:
-        display_fn = lambda dt: "" if dt is None or dt == datetime.date(1900, 1, 1) else dt.strftime(display_format)
+        display_fn = functools.partial(_datetime_to_str, display_format=display_format)
 
     return ColSpec(
         attr_name=attr_name,
@@ -311,7 +313,7 @@ def timestamp_col(
     display_fn: typing.Callable[[datetime.date], str] | None = None,
 ) -> ColSpec[Key, Row, datetime.datetime]:
     if display_fn is None:
-        display_fn = lambda ts: "" if ts is None or ts == datetime.datetime(1900, 1, 1) else ts.strftime(display_format)
+        display_fn = functools.partial(_datetime_to_str, display_format=display_format)
 
     return ColSpec(
         attr_name=attr_name,
@@ -363,7 +365,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.setHorizontalHeaderLabels(headers)
         self._table.horizontalHeader().setFont(fonts.bold)
         self._table.setSortingEnabled(True)
-        self._table.doubleClicked.connect(self.double_click)
+        self._table.doubleClicked.connect(self.double_click)  # noqa
 
         for col_num, col_spec in enumerate(self._col_specs):
             if col_spec.hidden:
@@ -487,9 +489,9 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     w = ScrollLabel(value=value, parent=self)
                 else:
                     w = qtw.QLabel()
-                    w.setTextFormat(qtc.Qt.RichText)
-                    w.setWordWrap(True)
-                    w.setText(value)
+                    w.setTextFormat(qtc.Qt.RichText)  # noqa
+                    w.setWordWrap(True)  # noqa
+                    w.setText(value) # noqa
 
                 self._table.setCellWidget(row_num, col_num, w)
             elif col_spec.type == ColSpecType.Button:
@@ -620,9 +622,10 @@ class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
         return self._value < other._value
 
 
-class ScrollLabel(qtw.QScrollArea, qtw.QTableWidgetItem):
+class ScrollLabel(qtw.QScrollArea, TableItem):
     def __init__(self, *, value: str, parent: qtw.QWidget | None):
-        super().__init__(parent=parent)
+        super(qtw.QScrollArea, self).__init__(parent=parent)
+        super(TableItem, self).__init__(value=value, display_value=value)
 
         self._value = value
 
@@ -673,3 +676,13 @@ class ScrollLabel(qtw.QScrollArea, qtw.QTableWidgetItem):
 #             return False
 #
 #         return self._value < other._value
+
+
+def _datetime_to_str(ts: datetime.datetime, display_format: str = "%m/%d/%y %I:%M:%S %p") -> str:
+    if ts is None:
+        return ""
+
+    if ts == datetime.datetime(1900, 1, 1):
+        return ""
+
+    return ts.strftime(display_format)

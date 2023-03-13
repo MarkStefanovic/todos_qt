@@ -90,8 +90,6 @@ class TodoController:
 
             users = self._user_service.all()
 
-            today = datetime.date.today()
-
             if current_user := self._user_service.current_user():
                 user_id_filter = current_user.user_id
             else:
