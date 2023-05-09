@@ -59,6 +59,7 @@ class DbUserRepository(domain.UserRepository):
 
             con.execute(
                 sa.update(db.user)
+                .where(db.user.c.user_id == user_id)
                 .values(date_deleted=datetime.datetime.now())
             )
 
