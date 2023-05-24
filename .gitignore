@@ -145,11 +145,13 @@ logs
 NOTES.md
 todo.db
 environment.frozen.yml
-work-config.json
+config.json
+*config.json
+*secret.json
 assets/personal/
 assets/work/
 office-services.spec
 assets/secret/
 scripts/win/create-office-services-exe.cmd
-config.json
+assets/personal-config.json
 .ruff_cache

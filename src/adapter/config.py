@@ -35,8 +35,13 @@ def db_schema(*, config_path: pathlib.Path = fs.config_path()) -> str | None:
     return _config(path=config_path)["db-schema"]
 
 
-def db_url(*, config_path: pathlib.Path = fs.config_path()) -> str:
-    return _config(path=config_path)["sqlalchemy-connection-string"]
+def db_url(*, secrets_path: pathlib.Path = fs.secrets_path(), assets_folder: pathlib.Path = fs.assets_folder()) -> str:
+    url = _config(path=secrets_path)["sqlalchemy-connection-string"]
+    if url:
+        return url
+
+    full_db_path = assets_folder / "todo.db"
+    return f"sqlite:///{full_db_path.resolve()!s}"
 
 
 if __name__ == '__main__':
