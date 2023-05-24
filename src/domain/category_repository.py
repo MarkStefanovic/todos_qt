@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 
 from src.domain.category import Category
-from src.domain.todo import Todo
 
 __all__ = ("CategoryRepository",)
 

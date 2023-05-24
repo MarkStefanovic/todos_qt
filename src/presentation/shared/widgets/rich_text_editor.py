@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import sys
-import typing
-
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
-from src.presentation.shared import icons
 
 import qtawesome as qta
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+
+from src.presentation.shared import icons
 
 __all__ = ("RichTextEditor",)
 
@@ -24,10 +23,22 @@ class RichTextEditor(qtw.QWidget):
             bold_btn_icon = qta.icon(icons.bold_btn_icon_name)
             clear_bold_btn_icon = qta.icon(icons.clear_bold_btn_icon_name)
         else:
-            highlight_btn_icon = qta.icon(icons.highlight_btn_icon_name, color=parent.palette().text().color())
-            clear_highlight_btn_icon = qta.icon(icons.clear_highlight_btn_icon_name, color=parent.palette().text().color())
-            bold_btn_icon = qta.icon(icons.bold_btn_icon_name, color=parent.palette().text().color())
-            clear_bold_btn_icon = qta.icon(icons.clear_bold_btn_icon_name, color=parent.palette().text().color())
+            highlight_btn_icon = qta.icon(
+                icons.highlight_btn_icon_name,
+                color=parent.palette().text().color(),
+            )
+            clear_highlight_btn_icon = qta.icon(
+                icons.clear_highlight_btn_icon_name,
+                color=parent.palette().text().color(),
+            )
+            bold_btn_icon = qta.icon(
+                icons.bold_btn_icon_name,
+                color=parent.palette().text().color(),
+            )
+            clear_bold_btn_icon = qta.icon(
+                icons.clear_bold_btn_icon_name,
+                color=parent.palette().text().color(),
+            )
 
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
         # noinspection PyUnresolvedReferences
@@ -36,22 +47,22 @@ class RichTextEditor(qtw.QWidget):
         self._highlight_btn.setIconSize(BTN_SIZE)
 
         self._clear_highlight_btn = qtw.QPushButton(clear_highlight_btn_icon, "", parent=self)
-        self._clear_highlight_btn.clicked.connect(self._on_clear_highlight_btn_clicked)
+        self._clear_highlight_btn.clicked.connect(self._on_clear_highlight_btn_clicked)  # noqa
         self._clear_highlight_btn.setToolTip("Clear Highlight")
         self._clear_highlight_btn.setIconSize(BTN_SIZE)
 
         self._bold_btn = qtw.QPushButton(bold_btn_icon, "", parent=self)
-        self._bold_btn.clicked.connect(self._bold_btn_clicked)
+        self._bold_btn.clicked.connect(self._bold_btn_clicked)  # noqa
         self._bold_btn.setToolTip("Bold (Ctrl+B)")
         self._bold_btn.setIconSize(BTN_SIZE)
 
         self._clear_bold_btn = qtw.QPushButton(clear_bold_btn_icon, "", parent=self)
-        self._clear_bold_btn.clicked.connect(self._on_clear_bold_btn_clicked)
+        self._clear_bold_btn.clicked.connect(self._on_clear_bold_btn_clicked)  # noqa
         self._clear_bold_btn.setToolTip("Clear Bold")
         self._clear_bold_btn.setIconSize(BTN_SIZE)
 
         bold_shortcut = qtw.QShortcut(qtg.QKeySequence("Ctrl+B"), self)
-        bold_shortcut.activated.connect(self._bold_btn.click)
+        bold_shortcut.activated.connect(self._bold_btn.click)  # noqa
 
         toolbar = qtw.QHBoxLayout()
         toolbar.addWidget(self._highlight_btn)

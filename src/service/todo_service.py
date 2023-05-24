@@ -140,7 +140,10 @@ class TodoService(domain.TodoService):
         today = datetime.date.today()
         return sorted(
             todos,
-            key=lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today) or datetime.date(1900, 1, 1),
+            key=(
+                lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today)
+                or datetime.date(1900, 1, 1)
+            )
         )
 
     def mark_incomplete(self, *, todo_id: str) -> None:

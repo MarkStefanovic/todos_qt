@@ -21,7 +21,10 @@ class UserDash(qtw.QWidget):
 
         self._current_user = domain.DEFAULT_USER
 
-        refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
+        refresh_btn_icon = qta.icon(
+            icons.refresh_btn_icon_name,
+            color=self.parent().palette().text().color(),  # type: ignore
+        )
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMaximumWidth(100)

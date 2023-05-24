@@ -17,6 +17,7 @@ dependencies:
   - python-dateutil
   - qtawesome
   - psycopg2-binary
+  - ruff
   - pip
   - pip:
     - pyqt5-stubs

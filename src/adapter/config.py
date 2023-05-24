@@ -2,7 +2,6 @@ import functools
 import json
 import os
 import pathlib
-import sys
 import typing
 
 from src.adapter import fs

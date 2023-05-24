@@ -63,7 +63,7 @@ class TodoController:
                     user_options=users,
                     user_filter=ALL_USER,
                     due_filter=True,
-                    status=f"Showing ToDos due today.",
+                    status="Showing ToDos due today.",
                 ),
                 dash_active=True,
             )
@@ -355,30 +355,30 @@ class TodoController:
             error_messages: list[str] = []
             if todo.frequency.name == domain.FrequencyType.Daily:
                 if todo.frequency.advance_display_days > 0:
-                    error_messages.append(f"Advance display days must be 0.")
+                    error_messages.append("Advance display days must be 0.")
                 if todo.frequency.expire_display_days > 1:
-                    error_messages.append(f"Expire days must be less than 1.")
+                    error_messages.append("Expire days must be less than 1.")
             elif todo.frequency.name == domain.FrequencyType.Irregular:
                 if todo.frequency.advance_display_days > 363:
-                    error_messages.append(f"Advance display days must be less than 364.")
+                    error_messages.append("Advance display days must be less than 364.")
                 if todo.frequency.expire_display_days > 363:
-                    error_messages.append(f"Expire days must be less than 364.")
+                    error_messages.append("Expire days must be less than 364.")
             elif todo.frequency.name == domain.FrequencyType.Monthly:
                 if todo.frequency.advance_display_days > 27:
-                    error_messages.append(f"Advance display days must be less than 28.")
+                    error_messages.append("Advance display days must be less than 28.")
                 if todo.frequency.expire_display_days > 27:
-                    error_messages.append(f"Expire days must be less than 28.")
+                    error_messages.append("Expire days must be less than 28.")
             elif todo.frequency.name == domain.FrequencyType.XDays:
                 assert todo.frequency.days is not None
                 if todo.frequency.advance_display_days > todo.frequency.days:
-                    error_messages.append(f"Advance display days must be less than the number of days between.")
+                    error_messages.append("Advance display days must be less than the number of days between.")
                 if todo.frequency.expire_display_days > todo.frequency.days:
-                    error_messages.append(f"Expire days must be less than the days between.")
+                    error_messages.append("Expire days must be less than the days between.")
             elif todo.frequency.name == domain.FrequencyType.Yearly:
                 if todo.frequency.advance_display_days > 363:
-                    error_messages.append(f"Advance display days must be less than 364.")
+                    error_messages.append("Advance display days must be less than 364.")
                 if todo.frequency.expire_display_days > 363:
-                    error_messages.append(f"Expire days must be less than 364.")
+                    error_messages.append("Expire days must be less than 364.")
 
             if error_messages:
                 popup.error_message(

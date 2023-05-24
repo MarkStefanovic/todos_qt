@@ -4,7 +4,7 @@ import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
-from src.presentation.shared import fonts, icons, widgets
+from src.presentation.shared import fonts, icons
 from src.presentation.shared.widgets import MapCBO, table
 from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER, TodoDashState
 
@@ -21,13 +21,19 @@ class TodoDash(qtw.QWidget):
 
         self._current_user = ALL_USER
 
-        refresh_btn_icon = qta.icon(icons.refresh_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
+        refresh_btn_icon = qta.icon(
+            icons.refresh_btn_icon_name,
+            color=self.parent().palette().text().color(),  # type: ignore
+        )
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.bold)
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
+        add_btn_icon = qta.icon(
+            icons.add_btn_icon_name,
+            color=self.parent().palette().text().color(),  # type: ignore
+        )
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self.add_btn.setFont(fonts.bold)
         self.add_btn.setMaximumWidth(100)
@@ -40,13 +46,19 @@ class TodoDash(qtw.QWidget):
 
         category_lbl = qtw.QLabel("Category")
         category_lbl.setFont(fonts.bold)
-        self._category_cbo: MapCBO[domain.Category] = MapCBO(mapping={ALL_CATEGORY: "All"}, value=ALL_CATEGORY)
+        self._category_cbo: MapCBO[domain.Category] = MapCBO(
+            mapping={ALL_CATEGORY: "All"},
+            value=ALL_CATEGORY,
+        )
         self._category_cbo.setMaximumWidth(150)
         self._category_cbo.value_changed.connect(self.refresh_btn.click)
 
         user_lbl = qtw.QLabel("User")
         user_lbl.setFont(fonts.bold)
-        self.user_cbo: MapCBO[domain.User] = MapCBO(mapping={ALL_USER: "All"}, value=ALL_USER)
+        self.user_cbo: MapCBO[domain.User] = MapCBO(
+            mapping={ALL_USER: "All"},
+            value=ALL_USER,
+        )
         self.user_cbo.setMaximumWidth(150)
         self.user_cbo.value_changed.connect(self.refresh_btn.click)
 
@@ -87,7 +99,11 @@ class TodoDash(qtw.QWidget):
                     column_width=300,
                 ),
                 table.date_col(
-                    selector=lambda todo: None if todo.days is None else datetime.date.today() + datetime.timedelta(days=todo.days),
+                    selector=(
+                        lambda todo:
+                            None if todo.days is None
+                            else datetime.date.today() + datetime.timedelta(days=todo.days)
+                    ),
                     display_name="Due Date",
                     alignment=table.ColAlignment.Center,
                     column_width=120,
@@ -249,7 +265,9 @@ def _render_frequency(*, frequency: domain.Frequency) -> str:
         domain.FrequencyType.Once: lambda: f"{frequency.due_date:%m/%d/%Y}",
         domain.FrequencyType.Weekly: lambda: f"Weekly ({frequency.week_day.short_name})",  # type: ignore
         domain.FrequencyType.XDays: lambda: f"XDays ({frequency.days})",
-        domain.FrequencyType.Yearly: lambda: f"Yearly ({frequency.month.to_int()}/{frequency.month_day})",  # type: ignore
+        domain.FrequencyType.Yearly: (
+            lambda: f"Yearly ({frequency.month.to_int()}/{frequency.month_day})"  # type: ignore
+        ),
     }[frequency.name]()
 
 

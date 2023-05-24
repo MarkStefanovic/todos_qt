@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-import datetime
 
 from src.domain.user import User
 from src.domain.todo import Todo

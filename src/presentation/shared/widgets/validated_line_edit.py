@@ -1,3 +1,4 @@
+import functools
 import typing
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
@@ -46,28 +47,38 @@ class ValidatedTextWidget(ValidatedLineEdit):
         *,
         field_name: str,
         initial_value: str,
-        min_length: typing.Optional[int] = None,
-        max_length: typing.Optional[int] = None,
-        additional_rules: typing.Optional[
-            typing.List[typing.Callable[[str], typing.Optional[str]]]
-        ] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        additional_rules: list[typing.Callable[[str], str | None]] | None = None,
     ) -> None:
-        validators: typing.List[typing.Callable[[str], typing.Optional[str]]] = []
+        validators: list[typing.Callable[[str], str | None]] = []
         if min_length:
-            validator = (
-                lambda txt: f"{field_name.capitalize()} must be at least {min_length} characters."
-                if len(txt) < min_length
-                else None
+            validator = functools.partial(
+                _validate_min_length,
+                field_name=field_name,
+                min_length=min_length,
             )
             validators.append(validator)
         if max_length:
-            validator = (
-                lambda txt: f"{field_name.capitalize()} must be at most {max_length} characters."
-                if len(txt) > typing.cast(int, max_length)
-                else None
+            validator = functools.partial(
+                _validate_max_length,
+                field_name=field_name,
+                max_length=max_length,
             )
             validators.append(validator)
         if additional_rules:
             validators += additional_rules
 
         super().__init__(initial_value=initial_value, validators=validators)
+
+
+def _validate_max_length(field_name: str, max_length: int, txt: str) -> str | None:
+    if len(txt) > max_length:
+        return f"{field_name.capitalize()} must be at most {max_length} characters."
+    return None
+
+
+def _validate_min_length(field_name: str, min_length: int, txt: str) -> str | None:
+    if len(txt) < min_length:
+        return f"{field_name.capitalize()} must be at least {min_length} characters."
+    return None
