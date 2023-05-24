@@ -622,10 +622,10 @@ class TableItem(typing.Generic[Value], qtw.QTableWidgetItem):
         return self._value < other._value
 
 
-class ScrollLabel(qtw.QScrollArea, TableItem):
+class ScrollLabel(qtw.QScrollArea, TableItem[str]):
     def __init__(self, *, value: str, parent: qtw.QWidget | None):
         super(qtw.QScrollArea, self).__init__(parent=parent)
-        super(TableItem, self).__init__(value=value, display_value=value)
+        super(TableItem, self).__init__(value=value, display_value=value)  # type: ignore
 
         self._value = value
 

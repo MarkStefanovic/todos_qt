@@ -8,9 +8,9 @@ import typing
 from loguru import logger
 
 from src.domain import date_calc
-from src.domain.frequency_type import FrequencyType
 from src.domain.category import Category, TODO_CATEGORY
 from src.domain.frequency import Frequency
+from src.domain.frequency_type import FrequencyType
 from src.domain.month import Month
 from src.domain.user import DEFAULT_USER, User
 from src.domain.weekday import Weekday
@@ -36,29 +36,31 @@ class Todo:
 
     @functools.cached_property
     def days(self) -> int | None:
-        due_date = date_calc.due_date(frequency=self.frequency)
         if (
             self.last_completed
-            and due_date
-            and self.last_completed >= (due_date - datetime.timedelta(days=self.frequency.advance_display_days))
+            and self.due_date
+            and self.last_completed >= (self.due_date - datetime.timedelta(days=self.frequency.advance_display_days))
         ):
             if self.frequency.name == FrequencyType.Once:
                 return None
 
-            next_date = date_calc.next_date(frequency=self.frequency, ref_date=due_date)
+            next_date = date_calc.next_date(frequency=self.frequency, ref_date=self.due_date)
             if next_date:
                 return (next_date - datetime.date.today()).days
             return None
 
-        if due_date is None:
+        if self.due_date is None:
             return None
 
-        return (due_date - datetime.date.today()).days
+        return (self.due_date - datetime.date.today()).days
 
     @functools.cached_property
     def due_date(self) -> datetime.date:
         try:
-            return date_calc.due_date(frequency=self.frequency) or datetime.date(1900, 1, 1)
+            return date_calc.due_date(
+                frequency=self.frequency,
+                ref_date=datetime.date.today(),
+            ) or datetime.date(1900, 1, 1)
         except Exception as e:
             logger.exception(f"Failed to calculate due_date() for todo, {self.description}\n{e}")
             raise e

@@ -6,7 +6,8 @@ a = Analysis(
     ["src/main.py"],
     pathex=[],
     binaries=[],
-    datas=[("assets/secret/config.json", ".")],
+    datas=[],
+    #datas=[("assets/config.json", ".")],
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],
@@ -38,5 +39,5 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
-    icon="assets/icons/app.ico"
+    icon="assets/app.ico"
 )

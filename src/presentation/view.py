@@ -11,10 +11,10 @@ __all__ = ("MainView",)
 
 
 class MainView(qtw.QMainWindow):
-    def __init__(self, *, window_icon: qtg.QIcon):
+    def __init__(self, *, window_icon: qtg.QIcon, username: str):
         super().__init__()
 
-        self.setWindowTitle("Todos")
+        self.setWindowTitle(f"Todos - {username}")
 
         self.setWindowIcon(window_icon)
 

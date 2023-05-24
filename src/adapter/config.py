@@ -9,7 +9,7 @@ from src.adapter import fs
 
 __all__ = (
     "add_holidays",
-    "admin_usernames",
+    "current_user",
     "db_schema",
     "db_url",
 )
@@ -25,8 +25,11 @@ def add_holidays(*, config_path: pathlib.Path = fs.config_path()) -> bool:
     return _config(path=config_path)["add-holidays"]
 
 
-def admin_usernames(*, config_path: pathlib.Path = fs.config_path()) -> list[str]:
-    return _config(path=config_path)["admin-usernames"]
+def current_user(*, config_path: pathlib.Path = fs.config_path()) -> str:
+    username = _config(path=config_path).get("current-user")
+    if username:
+        return username
+    return os.environ.get("USERNAME", "anonymous")
 
 
 def db_schema(*, config_path: pathlib.Path = fs.config_path()) -> str | None:

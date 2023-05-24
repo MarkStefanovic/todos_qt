@@ -137,9 +137,10 @@ class TodoService(domain.TodoService):
         if category_id_filter:
             todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
 
+        today = datetime.date.today()
         return sorted(
             todos,
-            key=lambda todo: domain.date_calc.due_date(frequency=todo.frequency) or datetime.date(1900, 1, 1),
+            key=lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today) or datetime.date(1900, 1, 1),
         )
 
     def mark_incomplete(self, *, todo_id: str) -> None:

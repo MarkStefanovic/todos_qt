@@ -13,15 +13,11 @@ class UserService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add_admins(self) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def all(self) -> list[User]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def current_user(self) -> User | None:
+    def current_user(self) -> User:
         raise NotImplementedError
 
     @abc.abstractmethod

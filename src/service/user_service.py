@@ -33,25 +33,12 @@ class UserService(domain.UserService):
 
         self._users[user.user_id] = user
 
-    def add_admins(self) -> None:
-        for username in adapter.config.admin_usernames():
-            if self.get_user_by_username(username=username) is None:
-                user = domain.User(
-                    user_id=domain.create_uuid(),
-                    username=username,
-                    display_name=username,
-                    is_admin=True,
-                    date_added=datetime.datetime.now(),
-                    date_updated=None,
-                )
-                self.add(user=user)
-
     def all(self) -> list[domain.User]:
         self._refresh()
 
         return list(self._users.values())
 
-    def current_user(self) -> domain.User | None:
+    def current_user(self) -> domain.User:
         if self._current_user:
             return self._current_user
 
@@ -70,6 +57,24 @@ class UserService(domain.UserService):
                 if user.username.lower().strip() == self._username:
                     self._current_user = user
                     break
+
+            if self._current_user is None:
+                repo = adapter.DbUserRepository(engine=self._engine)
+
+                new_user = domain.User(
+                    user_id=domain.create_uuid(),
+                    username=self._username.lower().strip(),
+                    display_name=self._username.lower().strip(),
+                    is_admin=False,
+                    date_added=datetime.datetime.now(),
+                    date_updated=None,
+                )
+
+                repo.add(user=new_user)
+
+                self._current_user = new_user
+
+        assert self._current_user is not None
 
         return self._current_user
 

@@ -45,8 +45,6 @@ class TodoController:
 
             users = self._user_service.all()
 
-            today = datetime.date.today()
-
             todos = self._todo_service.where(
                 due_filter=True,
                 description_like="",
@@ -90,16 +88,13 @@ class TodoController:
 
             users = self._user_service.all()
 
-            if current_user := self._user_service.current_user():
-                user_id_filter = current_user.user_id
-            else:
-                user_id_filter = None
+            current_user = self._user_service.current_user()
 
             todos = self._todo_service.where(
                 due_filter=True,
                 description_like="",
                 category_id_filter=None,
-                user_id_filter=user_id_filter,
+                user_id_filter=current_user.user_id,
             )
 
             if current_user is None:

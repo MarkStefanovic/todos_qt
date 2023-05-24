@@ -151,3 +151,4 @@ assets/work/
 office-services.spec
 assets/secret/
 scripts/win/create-office-services-exe.cmd
+config.json

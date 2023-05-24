@@ -1,6 +1,0 @@
-{
-  "sqlalchemy-connection-string": "sqlite:///todo.db",
-  "db-schema": null,
-  "add-holidays": true,
-  "admin-usernames": ["admin"]
-}

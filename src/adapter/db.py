@@ -5,7 +5,7 @@ from src.adapter import config
 __all__ = (
     "category",
     "create_engine",
-    # "create_tables",
+    "create_tables",
     "todo",
     "user",
 )
@@ -68,9 +68,14 @@ user = sa.Table(
 )
 
 
-# def create_tables(*, engine: sa.engine.Engine) -> None:
-#     meta.create_all(bind=engine, tables=[todo, category, user], checkfirst=True)
+def create_tables(*, engine: sa.engine.Engine) -> None:
+    meta.create_all(bind=engine, tables=[todo, category, user], checkfirst=True)
 
 
 def create_engine(*, url: str = config.db_url(), echo: bool = False) -> sa.engine.Engine:
     return sa.create_engine(url=url, echo=echo)
+
+
+if __name__ == '__main__':
+    eng = create_engine()
+    create_tables(engine=eng)
