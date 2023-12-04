@@ -48,6 +48,8 @@ def secrets_path() -> pathlib.Path:
         path = pathlib.Path(os.path.abspath(os.path.join(bundle_folder, 'secret.json')))
 
         assert path.exists(), f"secret.json path, {path.resolve()!s}, not found."
+
+        return path
     else:
         path = assets_folder() / "secret.json"
 

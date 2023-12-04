@@ -21,3 +21,4 @@ dependencies:
   - pip
   - pip:
     - pyqt5-stubs
+    - pip-audit
