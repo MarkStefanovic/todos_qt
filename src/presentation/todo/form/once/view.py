@@ -15,7 +15,7 @@ class OnceFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         due_date_lbl = qtw.QLabel("Due Date")
-        due_date_lbl.setFont(fonts.bold)
+        due_date_lbl.setFont(fonts.BOLD)
         self._due_date_edit = widgets.DateEditor()
         self._due_date_edit.setFixedWidth(150)
 

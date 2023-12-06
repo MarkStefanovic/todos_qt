@@ -26,12 +26,12 @@ class UserDash(qtw.QWidget):
             color=self.parent().palette().text().color(),  # type: ignore
         )
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self.refresh_btn.setFont(fonts.bold)
+        self.refresh_btn.setFont(fonts.BOLD)
         self.refresh_btn.setMaximumWidth(100)
 
         add_btn_icon = qta.icon(icons.add_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self.add_btn.setFont(fonts.bold)
+        self.add_btn.setFont(fonts.BOLD)
         self.add_btn.setMaximumWidth(100)
 
         toolbar = qtw.QHBoxLayout()
@@ -92,10 +92,12 @@ class UserDash(qtw.QWidget):
             key_attr="user_id",
         )
         self._table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_user(  # noqa
+            lambda: self.edit_btn_clicked.emit()
+            if domain.permissions.user_can_edit_user(  # noqa
                 current_user=self._current_user,
                 user=self._table.selected_item,
-            ) else None
+            )
+            else None
         )
 
         self._status_bar = qtw.QStatusBar()

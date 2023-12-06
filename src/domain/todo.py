@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
-import functools
 import typing
 
 from loguru import logger
@@ -15,7 +14,10 @@ from src.domain.month import Month
 from src.domain.user import DEFAULT_USER, User
 from src.domain.weekday import Weekday
 
-__all__ = ("Todo", "DEFAULT_TODO",)
+__all__ = (
+    "Todo",
+    "DEFAULT_TODO",
+)
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -34,27 +36,26 @@ class Todo:
     date_added: datetime.datetime
     date_updated: datetime.datetime | None
 
-    @functools.cached_property
     def days(self) -> int | None:
+        due_date = self.due_date()
         if (
             self.last_completed
-            and self.due_date
-            and self.last_completed >= (self.due_date - datetime.timedelta(days=self.frequency.advance_display_days))
+            and due_date
+            and self.last_completed >= (due_date - datetime.timedelta(days=self.frequency.advance_display_days))
         ):
             if self.frequency.name == FrequencyType.Once:
                 return None
 
-            next_date = date_calc.next_date(frequency=self.frequency, ref_date=self.due_date)
+            next_date = date_calc.next_date(frequency=self.frequency, ref_date=due_date)
             if next_date:
                 return (next_date - datetime.date.today()).days
             return None
 
-        if self.due_date is None:
+        if due_date is None:
             return None
 
-        return (self.due_date - datetime.date.today()).days
+        return (due_date - datetime.date.today()).days
 
-    @functools.cached_property
     def due_date(self) -> datetime.date:
         try:
             return date_calc.due_date(
@@ -65,7 +66,6 @@ class Todo:
             logger.exception(f"Failed to calculate due_date() for todo, {self.description}\n{e}")
             raise e
 
-    @functools.cached_property
     def should_display(self) -> bool:
         try:
             if self.last_completed:

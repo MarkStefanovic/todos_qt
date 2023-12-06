@@ -66,8 +66,7 @@ class DbTodoRepository(domain.TodoRepository):
 
         with self._engine.begin() as con:
             con.execute(
-                sa.insert(db.todo)
-                .values(
+                sa.insert(db.todo).values(
                     todo_id=todo.todo_id,
                     template_todo_id=todo.template_todo_id,
                     expire_days=todo.frequency.expire_display_days,
@@ -97,22 +96,15 @@ class DbTodoRepository(domain.TodoRepository):
     def all(self) -> list[domain.Todo]:
         category_repo = DbCategoryRepository(engine=self._engine)
 
-        category_lkp = {
-            category.category_id: category
-            for category in category_repo.get_active()
-        }
+        category_lkp = {category.category_id: category for category in category_repo.get_active()}
 
         user_repo = DbUserRepository(engine=self._engine)
 
-        user_lkp = {
-            user.user_id: user
-            for user in user_repo.all()
-        }
+        user_lkp = {user.user_id: user for user in user_repo.all()}
 
         with self._engine.begin() as con:
             result = con.execute(
-                sa.select(db.todo)
-                .where(db.todo.c.date_deleted == None)  # noqa
+                sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
             )
 
         return [
@@ -148,17 +140,12 @@ class DbTodoRepository(domain.TodoRepository):
     def delete(self, *, todo_id: str) -> None:
         with self._engine.begin() as con:
             con.execute(
-                sa.update(db.todo)
-                .where(db.todo.c.todo_id == todo_id)
-                .values(date_deleted=datetime.datetime.now())
+                sa.update(db.todo).where(db.todo.c.todo_id == todo_id).values(date_deleted=datetime.datetime.now())
             )
 
     def get(self, *, todo_id: str) -> domain.Todo | None:
         with self._engine.begin() as con:
-            result = con.execute(
-                sa.select(db.todo)
-                .where(db.todo.c.todo_id == todo_id)
-            )
+            result = con.execute(sa.select(db.todo).where(db.todo.c.todo_id == todo_id))
 
             row = result.one_or_none()
 
@@ -244,7 +231,7 @@ class DbTodoRepository(domain.TodoRepository):
                     month=month,
                     month_day=todo.frequency.month_day,
                     days=todo.frequency.days,
-                    due_date=domain.due_date(frequency=todo.frequency),
+                    due_date=domain.due_date(frequency=todo.frequency, ref_date=datetime.date.today()),
                     last_completed=todo.last_completed,
                     prior_completed=todo.prior_completed,
                     last_completed_by=None if todo.last_completed_by is None else todo.last_completed_by.user_id,
@@ -257,10 +244,7 @@ class DbTodoRepository(domain.TodoRepository):
 
         user_repo = DbUserRepository(engine=self._engine)
 
-        user_lkp = {
-            user.user_id: user
-            for user in user_repo.all()
-        }
+        user_lkp = {user.user_id: user for user in user_repo.all()}
 
         if category := category_repo.get(category_id=category_id):
             with self._engine.begin() as con:
@@ -394,7 +378,7 @@ def _parse_frequency(
         raise ValueError(f"Unrecognized frequency, {frequency!r}.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     eng = db.create_engine()
     repo = DbTodoRepository(engine=eng)
     for r in repo.all():

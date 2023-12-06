@@ -87,8 +87,9 @@ class ColSpec(typing.Generic[Key, Row, Value]):
 
     def __post_init__(self) -> None:
         if self.type != ColSpecType.Button:
-            assert self.attr_name is not None or self.selector is not None, \
-                "Either [attr_name] or [selector] must be provided, but both were None."
+            assert (
+                self.attr_name is not None or self.selector is not None
+            ), "Either [attr_name] or [selector] must be provided, but both were None."
 
 
 def button_col(
@@ -351,8 +352,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                 self._col_indices[col_spec.attr_name] = col_num
 
         headers = [
-            ("" if col_spec.type == ColSpecType.Button else col_spec.display_name) or ""
-            for col_spec in self._col_specs
+            ("" if col_spec.type == ColSpecType.Button else col_spec.display_name) or "" for col_spec in self._col_specs
         ]
 
         self._table = qtw.QTableWidget(parent=self)
@@ -363,7 +363,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
         self._table.setWordWrap(True)
         self._table.setColumnCount(len(headers))
         self._table.setHorizontalHeaderLabels(headers)
-        self._table.horizontalHeader().setFont(fonts.bold)
+        self._table.horizontalHeader().setFont(fonts.BOLD)
         self._table.setSortingEnabled(True)
         self._table.doubleClicked.connect(self.double_click)  # noqa
 
@@ -414,7 +414,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     key = item.data(qtc.Qt.DisplayRole)
 
                 return self._items[key]
-        
+
         return None
 
     def select_item_by_key(self, *, key: Key) -> None:
@@ -423,10 +423,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
             self._table.selectRow(row_num)
 
     def set_all(self, /, data: list[Row]) -> None:
-        self._items = {
-            getattr(row, self._key_attr): row
-            for row in data
-        }
+        self._items = {getattr(row, self._key_attr): row for row in data}
 
         self._table.clearContents()
         self._table.setRowCount(len(data))
@@ -491,7 +488,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     w = qtw.QLabel()
                     w.setTextFormat(qtc.Qt.RichText)  # noqa
                     w.setWordWrap(True)  # noqa
-                    w.setText(value) # noqa
+                    w.setText(value)  # noqa
 
                 self._table.setCellWidget(row_num, col_num, w)
             elif col_spec.type == ColSpecType.Button:
@@ -503,7 +500,7 @@ class Table(typing.Generic[Row, Key], qtw.QWidget):
                     else:
                         btn = qtw.QPushButton(col_spec.selector(data))
 
-                    btn.setFont(fonts.bold)
+                    btn.setFont(fonts.BOLD)
                     btn.setObjectName("table_btn")
                     assert col_spec.column_width is not None
                     btn.setMaximumWidth(col_spec.column_width)
@@ -574,11 +571,7 @@ class DropdownCell(qtw.QComboBox):
 
     def set_value(self, /, value: Value) -> None:
         ix = next(
-            (
-                i
-                for i in range(self.count())
-                if value == self.itemData(i)
-            ),
+            (i for i in range(self.count()) if value == self.itemData(i)),
             -1,
         )
         self.setCurrentIndex(ix)

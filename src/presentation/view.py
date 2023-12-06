@@ -1,55 +1,54 @@
 from __future__ import annotations
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src.presentation.category.view import CategoryView
+from src.presentation.category.widget import CategoryWidget
 from src.presentation.shared import fonts
-from src.presentation.todo.view import TodoView
-from src.presentation.user.view import UserView
+from src.presentation.todo.widget import TodoWidget
 
 __all__ = ("MainView",)
 
 
-class MainView(qtw.QMainWindow):
-    def __init__(self, *, window_icon: qtg.QIcon, username: str):
+class MainView(qtw.QWidget):
+    def __init__(
+        self,
+        *,
+        category_widget: CategoryWidget,
+        todo_widget: TodoWidget,
+    ):
         super().__init__()
 
-        self.setWindowTitle(f"Todos - {username}")
-
-        self.setWindowIcon(window_icon)
-
-        # noinspection PyTypeChecker
-        self.setWindowFlags(
-            self.windowFlags()
-            | qtc.Qt.WindowMinimizeButtonHint
-            | qtc.Qt.WindowMaximizeButtonHint
-            | qtc.Qt.WindowSystemMenuHint
-        )
-
-        self.todos = TodoView()
-        self.categories = CategoryView()
-        self.users = UserView()
+        self._todos = todo_widget
+        self._categories = category_widget
+        # self.users = UserView()
 
         self._tabs = qtw.QTabWidget()
-        self._tabs.setFont(fonts.bold)
-        self._tabs.addTab(self.todos, "Todo")
-        self._tabs.addTab(self.categories, "Category")
-        self._tabs.addTab(self.users, "Users")
+        self._tabs.setFont(fonts.BOLD)
+        self._tabs.addTab(self._todos, "Todo")
+        self._tabs.addTab(self._categories, "Category")
+        # self._tabs.addTab(self.users, "Users")
+        # noinspection PyUnresolvedReferences
+
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self._tabs)
+        self.setLayout(layout)
+
+        # noinspection PyUnresolvedReferences
         self._tabs.currentChanged.connect(self._on_tab_changed)
 
-        self.setCentralWidget(self._tabs)
-
         self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
+        # noinspection PyUnresolvedReferences
         self.enter_key_shortcut.activated.connect(self._on_enter_key_pressed)
+
+    def on_load(self) -> None:
+        self._todos.refresh_dash()
 
     def _on_enter_key_pressed(self) -> None:
         if (ix := self._tabs.currentIndex()) == 0:
-            if (todo_ix := self.todos.stacked_layout.currentIndex()) == 0:
-                self.todos.dash.refresh_btn.click()
-            elif todo_ix == 1:
-                self.todos.form.save_btn.click()
+            if self._todos.current_view() == "dash":
+                self._todos.refresh_dash()
             else:
-                raise Exception(f"Unrecognized todo stacked_layout index: {todo_ix}.")
+                self._todos.save_form()
         elif ix == 1:
             if (category_ix := self.categories.stacked_layout.currentIndex()) == 0:
                 self.categories.dash.refresh_btn.click()
@@ -69,12 +68,11 @@ class MainView(qtw.QMainWindow):
 
     def _on_tab_changed(self) -> None:
         if (ix := self._tabs.currentIndex()) == 0:
-            if self.todos.stacked_layout.currentIndex() == 0:
-                self.todos.dash.refresh_btn.click()
+            if self._todos.current_view() == "dash":
+                self._todos.refresh_dash()
         elif ix == 1:
             if self.categories.stacked_layout.currentIndex() == 0:
                 self.categories.dash.refresh_btn.click()
         else:
             if self.users.stacked_layout.currentIndex() == 0:
                 self.users.dash.refresh_btn.click()
-

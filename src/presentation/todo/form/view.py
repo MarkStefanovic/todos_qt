@@ -26,41 +26,41 @@ class TodoForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.setFont(fonts.bold)
+        description_lbl.setFont(fonts.BOLD)
         self._description_txt = qtw.QLineEdit()
 
         advance_days_lbl = qtw.QLabel("Advance Days")
-        advance_days_lbl.setFont(fonts.bold)
+        advance_days_lbl.setFont(fonts.BOLD)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setRange(0, 999)
         self._advance_days_sb.setFixedWidth(80)
 
         expire_days_lbl = qtw.QLabel("Expire Days")
-        expire_days_lbl.setFont(fonts.bold)
+        expire_days_lbl.setFont(fonts.BOLD)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setRange(1, 999)
         self._expire_days_sb.setFixedWidth(80)
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.setFont(fonts.bold)
+        user_lbl.setFont(fonts.BOLD)
         self._user_cbo: MapCBO[domain.User] = MapCBO()
         self._user_cbo.setFixedWidth(150)
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.setFont(fonts.bold)
+        category_lbl.setFont(fonts.BOLD)
         self._category_cbo: MapCBO[domain.Category] = MapCBO()
         self._category_cbo.setFixedWidth(150)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.setFont(fonts.bold)
+        note_lbl.setFont(fonts.BOLD)
         self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
-        start_date_lbl.setFont(fonts.bold)
+        start_date_lbl.setFont(fonts.BOLD)
         self._start_date_edit = DateEditor()
 
         frequency_lbl = qtw.QLabel("Frequency")
-        frequency_lbl.setFont(fonts.bold)
+        frequency_lbl.setFont(fonts.BOLD)
         self._frequency_cbo = widgets.MapCBO(
             mapping={
                 domain.FrequencyType.Daily: "Daily",
@@ -104,12 +104,12 @@ class TodoForm(qtw.QWidget):
 
         back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setFont(fonts.bold)
+        self.back_btn.setFont(fonts.BOLD)
         self.back_btn.setMaximumWidth(100)
 
         save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setFont(fonts.bold)
+        self.save_btn.setFont(fonts.BOLD)
         self.save_btn.setMaximumWidth(100)
         self.save_btn.setDefault(True)
 

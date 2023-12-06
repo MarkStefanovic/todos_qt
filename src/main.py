@@ -74,10 +74,17 @@ def main() -> None:
 
     app.setStyle("Fusion")
 
-    app.setStyleSheet("""
-        QWidget { font-size: 11pt; }
+    app.setStyleSheet(
+        """
+        QWidget { 
+            font-family: Arial;
+            font-size: 12pt; 
+        }
         QHeaderView { font-weight: bold; }
-        QPushButton { font-weight: "bold"; }
+        QPushButton { 
+            color: cyan;
+            font-weight: bold; 
+        }
         QPushButton:hover:!pressed { background-color: rgb(80, 80, 140); }
         QPushButton:!hover { background-color: rgb(60, 60, 80); }
         QTabBar::tab:selected { 
@@ -95,7 +102,8 @@ def main() -> None:
         QPushButton#table_btn:disabled { color: none; }
         QPushButton#table_btn:hover:!pressed { background-color: rgb(80, 80, 140); }
         QPushButton#table_btn:!hover { background-color: none; }
-    """)
+    """
+    )
 
     app.setPalette(cobalt())
 
@@ -110,7 +118,6 @@ def main() -> None:
     user_service = service.UserService(engine=engine, username=username)
 
     todo_service = service.TodoService(engine=engine, username=username)
-    # todo_service.cleanup()
 
     if adapter.config.add_holidays():
         for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
@@ -123,32 +130,40 @@ def main() -> None:
     if adapter.config.add_holidays():
         todo_service.add_default_holidays_for_all_users()
 
-    main_view = presentation.MainView(window_icon=app_icon, username=username)
-
-    app.setWindowIcon(app_icon)
-
-    todo_controller = presentation.TodoController(
+    main_view = presentation.MainWidget(
+        window_icon=app_icon,
+        username=username,
         category_service=category_service,
         todo_service=todo_service,
         user_service=user_service,
-        view=main_view.todos,
     )
 
-    presentation.CategoryController(
-        category_service=category_service,
-        user_service=user_service,
-        view=main_view.categories,
-    )
+    app.setWindowIcon(app_icon)
 
-    presentation.UserController(
-        user_service=user_service,
-        view=main_view.users,
-    )
+    # todo_controller = presentation.TodoController(
+    #     category_service=category_service,
+    #     todo_service=todo_service,
+    #     user_service=user_service,
+    #     view=main_view.todos,
+    # )
+
+    # presentation.CategoryController(
+    #     category_service=category_service,
+    #     user_service=user_service,
+    #     view=main_view.categories,
+    # )
+    #
+    # user_controller = presentation.UserController(
+    #     user_service=user_service,
+    #     view=main_view.users,
+    # )
 
     # if user_service.current_user():
-    todo_controller.show_current_user_todos()
+    # todo_controller.show_current_user_todos()
     # else:
     #     todo_controller.show_current_todos()
+
+    # user_controller.refresh()
 
     screen = app.desktop().screenGeometry()
     if screen.width() >= 2050:

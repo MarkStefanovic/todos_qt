@@ -37,10 +37,13 @@ class TodoService(domain.TodoService):
 
         for user in users:
             for holiday in domain.HOLIDAYS:
-                if self.get_by_template_id_and_user_id(
-                    template_id=holiday.todo_id,
-                    user_id=user.user_id,
-                ) is None:
+                if (
+                    self.get_by_template_id_and_user_id(
+                        template_id=holiday.todo_id,
+                        user_id=user.user_id,
+                    )
+                    is None
+                ):
                     new_holiday = dataclasses.replace(
                         holiday,
                         todo_id=domain.create_uuid(),
@@ -78,11 +81,11 @@ class TodoService(domain.TodoService):
 
         return next(
             (
-                todo for todo in self._todos.values()
-                if todo.template_todo_id == template_id
-                and todo.user.user_id == user_id
+                todo
+                for todo in self._todos.values()
+                if todo.template_todo_id == template_id and todo.user.user_id == user_id
             ),
-            None
+            None,
         )
 
     def mark_complete(self, *, todo_id: str, user: domain.User | None) -> None:
@@ -122,13 +125,10 @@ class TodoService(domain.TodoService):
         todos = (todo for todo in self._todos.values())
 
         if description := description_like.strip().lower():
-            todos = (
-                todo for todo in self._todos.values() if
-                description in todo.description.lower()
-            )
+            todos = (todo for todo in self._todos.values() if description in todo.description.lower())
 
         if due_filter:
-            todos = (todo for todo in todos if todo.should_display)
+            todos = (todo for todo in todos if todo.should_display())
 
         if user_id_filter:
             assert not isinstance(user_id_filter, domain.User)
@@ -143,7 +143,7 @@ class TodoService(domain.TodoService):
             key=(
                 lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today)
                 or datetime.date(1900, 1, 1)
-            )
+            ),
         )
 
     def mark_incomplete(self, *, todo_id: str) -> None:
@@ -169,10 +169,7 @@ class TodoService(domain.TodoService):
 
     def refresh(self) -> None:
         repo = adapter.DbTodoRepository(engine=self._engine)
-        self._todos = {
-            todo.todo_id: todo
-            for todo in repo.all()
-        }
+        self._todos = {todo.todo_id: todo for todo in repo.all()}
         self._last_refresh = datetime.datetime.now()
 
     def update(self, *, todo: domain.Todo) -> None:
@@ -196,7 +193,7 @@ class TodoService(domain.TodoService):
             self.refresh()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     eng = adapter.db.create_engine()
     svc = TodoService(engine=eng, username="test")
     for r in svc.where(

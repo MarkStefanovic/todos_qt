@@ -261,8 +261,10 @@ def should_display(
 
         if last_completed is None:
             return start_date <= today <= end_date
+
         if start_date <= last_completed <= end_date:
             return False
+
         return start_date <= today <= end_date
 
 

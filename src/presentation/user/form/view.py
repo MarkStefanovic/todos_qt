@@ -21,12 +21,12 @@ class UserForm(qtw.QWidget):
         self.back_btn.setMaximumWidth(100)
 
         display_name_lbl = qtw.QLabel("Name")
-        display_name_lbl.setFont(fonts.bold)
+        display_name_lbl.setFont(fonts.BOLD)
         self._display_name_txt = qtw.QLineEdit()
         self._display_name_txt.setMaximumWidth(400)
 
         username_lbl = qtw.QLabel("Username")
-        username_lbl.setFont(fonts.bold)
+        username_lbl.setFont(fonts.BOLD)
         self._username_txt = qtw.QLineEdit()
         self._username_txt.setMaximumWidth(400)
 

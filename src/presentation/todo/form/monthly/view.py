@@ -13,7 +13,7 @@ class MonthlyFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         month_day_lbl = qtw.QLabel("Day")
-        month_day_lbl.setFont(fonts.bold)
+        month_day_lbl.setFont(fonts.BOLD)
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 28)
         self._month_day_sb.setFixedWidth(100)

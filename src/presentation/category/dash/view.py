@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+
+from PyQt5 import QtCore as qtc, QtWidgets as qtw  # noqa
+from loguru import logger
 
 from src import domain
+from src.presentation.category import requests
 from src.presentation.category.dash.state import CategoryDashState
 from src.presentation.shared import fonts, icons
-from src.presentation.shared.widgets import table
+from src.presentation.shared.widgets import table_view
 
 import qtawesome as qta
 
@@ -13,8 +16,9 @@ __all__ = ("CategoryDash",)
 
 
 class CategoryDash(qtw.QWidget):
-    delete_btn_clicked = qtc.pyqtSignal()
-    edit_btn_clicked = qtc.pyqtSignal()
+    delete_requests = qtc.pyqtSignal(requests.DeleteCategory)
+    edit_requests = qtc.pyqtSignal(requests.EditCategory)
+    refresh_requests = qtc.pyqtSignal()
 
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
@@ -26,7 +30,7 @@ class CategoryDash(qtw.QWidget):
             color=self.parent().palette().text().color(),  # type: ignore
         )
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self.refresh_btn.setFont(fonts.bold)
+        self.refresh_btn.setFont(fonts.BOLD)
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
@@ -35,73 +39,60 @@ class CategoryDash(qtw.QWidget):
             color=self.parent().palette().text().color(),  # type: ignore
         )
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self.add_btn.setFont(fonts.bold)
+        self.add_btn.setFont(fonts.BOLD)
         self.add_btn.setMaximumWidth(100)
 
         toolbar_layout = qtw.QHBoxLayout()
         toolbar_layout.addWidget(self.refresh_btn)
         toolbar_layout.addWidget(self.add_btn)
-        toolbar_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
+        toolbar_layout.addStretch()
 
-        self.table: table.Table[domain.Category, str] = table.Table(
-            col_specs=[
-                table.text_col(
+        self.table: table_view.TableView[domain.Category, str] = table_view.TableView(
+            attrs=(
+                table_view.text(
+                    name="category_id",
                     display_name="ID",
-                    attr_name="category_id",
-                    hidden=True,
+                    key=True,
                 ),
-                table.text_col(
+                table_view.text(
                     display_name="Name",
-                    attr_name="name",
-                    column_width=200,
+                    name="name",
+                    width=200,
                 ),
-                table.rich_text_col(
+                table_view.text(
                     display_name="Note",
-                    attr_name="note",
-                    column_width=400,
+                    name="note",
+                    width=400,
+                    rich_text=True,
                 ),
-                table.timestamp_col(
-                    attr_name="date_added",
+                table_view.date(
+                    name="date_added",
                     display_name="Added",
-                    alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%y",
-                    # display_format="%m/%d/%Y %I:%M %p",
-                    column_width=100,
                 ),
-                table.timestamp_col(
-                    attr_name="date_updated",
+                table_view.date(
+                    name="date_updated",
                     display_name="Updated",
-                    alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%y",
-                    # display_format="%m/%d/%Y %I:%M %p",
-                    column_width=100,
                 ),
-                table.button_col(
+                table_view.button(
+                    name="edit",
                     button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),
-                    column_width=60,
-                    enable_when=lambda category: domain.permissions.user_can_edit_category(
+                    width=60,
+                    enabled_selector=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
                     ),
                 ),
-                table.button_col(
+                table_view.button(
+                    name="delete",
                     button_text="Delete",
-                    on_click=lambda _: self.delete_btn_clicked.emit(),
-                    column_width=60,
-                    enable_when=lambda category: domain.permissions.user_can_edit_category(
+                    width=60,
+                    enabled_selector=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
                     ),
                 ),
-            ],
-            key_attr="category_id",
-        )
-        self.table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_category(
-                user=self._current_user,
-                category=self.table.selected_item,
-            ) else None
+            ),
+            parent=self,
         )
 
         self._status_bar = qtw.QStatusBar()
@@ -112,6 +103,11 @@ class CategoryDash(qtw.QWidget):
         layout.addWidget(self._status_bar)
         self.setLayout(layout)
 
+        self.table.button_clicked.connect(self._on_button_clicked)
+        self.table.double_click.connect(self._on_double_click)
+        # noinspection PyUnresolvedReferences
+        self.refresh_btn.clicked.connect(lambda _: self.refresh_requests.emit())
+
     def get_state(self) -> CategoryDashState:
         return CategoryDashState(
             categories=self.table.items,
@@ -120,11 +116,46 @@ class CategoryDash(qtw.QWidget):
             current_user=self._current_user,
         )
 
+    def refresh(self) -> None:
+        self.refresh_requests.emit()
+
     def set_state(self, *, state: CategoryDashState) -> None:
         self._current_user = state.current_user
-        self.table.set_all(state.categories)
+        self.table.set_items(state.categories)
         if state.selected_category is None:
             self.table.clear_selection()
         else:
             self.table.select_item_by_key(key=state.selected_category.category_id)
         self._status_bar.showMessage(state.status)
+
+    def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Category, str]) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
+
+        match event.attr.name:
+            case "delete":
+                if domain.permissions.user_can_edit_category(
+                    user=self._current_user,
+                    category=event.item,
+                ):
+                    request = requests.DeleteCategory(category=event.item)
+
+                    self.delete_requests.emit(request)
+            case "edit":
+                if domain.permissions.user_can_edit_category(
+                    user=self._current_user,
+                    category=event.item,
+                ):
+                    request = requests.EditCategory(category=event.item)
+
+                    self.edit_requests.emit(request)
+            case _:
+                logger.error(f"attr name, {event.attr.name!r}, not recognized.")
+
+    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Category, str]) -> None:
+        if domain.permissions.user_can_edit_category(
+            user=self._current_user,
+            category=self.table.selected_item,
+        ):
+            delete_request = requests.DeleteCategory(category=event.item)
+
+            self.delete_requests.emit(delete_request)

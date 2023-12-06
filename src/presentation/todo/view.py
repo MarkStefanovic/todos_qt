@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from PyQt5 import QtWidgets as qtw
+import typing
+
+from PyQt5 import QtWidgets as qtw  # noqa
 
 from src.presentation.todo.state import TodoState
 from src.presentation.todo.dash.view import TodoDash
 from src.presentation.todo.form.view import TodoForm
+
 
 __all__ = ("TodoView",)
 
@@ -22,12 +25,18 @@ class TodoView(qtw.QWidget):
 
         self.setLayout(self.stacked_layout)
 
+    def refresh_dash(self) -> None:
+        self.dash.refresh_btn.click()
+
     def get_state(self) -> TodoState:
         return TodoState(
             dash_state=self.dash.get_state(),
             form_state=self.form.get_state(),
             dash_active=self.stacked_layout.currentIndex() == 0,
         )
+
+    def save_form(self) -> None:
+        self.form.save_btn.click()
 
     def set_state(self, *, state: TodoState) -> None:
         self.dash.set_state(state=state.dash_state)
@@ -36,3 +45,8 @@ class TodoView(qtw.QWidget):
             self.stacked_layout.setCurrentIndex(0)
         else:
             self.stacked_layout.setCurrentIndex(1)
+
+    def current_view(self) -> typing.Literal["dash", "form"]:
+        if self.stacked_layout.currentIndex() == 0:
+            return "dash"
+        return "form"

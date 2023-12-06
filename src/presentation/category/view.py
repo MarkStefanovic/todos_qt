@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing
+
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.category.dash.view import CategoryDash
@@ -21,6 +23,11 @@ class CategoryView(qtw.QWidget):
         self.stacked_layout.addWidget(self.form)
 
         self.setLayout(self.stacked_layout)
+
+    def current_view(self) -> typing.Literal["dash", "form"]:
+        if self.stacked_layout.currentIndex() == 0:
+            return "dash"
+        return "form"
 
     def get_state(self) -> CategoryState:
         return CategoryState(

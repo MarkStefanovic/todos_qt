@@ -14,7 +14,7 @@ class WeeklyFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.setFont(fonts.bold)
+        weekday_lbl.setFont(fonts.BOLD)
         self._weekday_cbo = widgets.MapCBO(
             mapping={
                 domain.Weekday.Monday: "Monday",

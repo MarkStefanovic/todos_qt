@@ -1,20 +1,22 @@
-import datetime
+import typing
 
 import qtawesome as qta
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from loguru import logger
 
 from src import domain
 from src.presentation.shared import fonts, icons
-from src.presentation.shared.widgets import MapCBO, table
+from src.presentation.shared.widgets import MapCBO, table_view
 from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER, TodoDashState
+from src.presentation.todo import requests
 
 __all__ = ("TodoDash",)
 
 
 class TodoDash(qtw.QWidget):
-    delete_btn_clicked = qtc.pyqtSignal()
-    edit_btn_clicked = qtc.pyqtSignal()
-    toggle_complete_btn_clicked = qtc.pyqtSignal()
+    delete_requests = qtc.pyqtSignal(requests.DeleteTodo)
+    edit_requests = qtc.pyqtSignal(requests.EditTodo)
+    toggle_completed_requests = qtc.pyqtSignal(requests.ToggleCompleted)
 
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
@@ -26,7 +28,7 @@ class TodoDash(qtw.QWidget):
             color=self.parent().palette().text().color(),  # type: ignore
         )
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self.refresh_btn.setFont(fonts.bold)
+        self.refresh_btn.setFont(fonts.BOLD)
         self.refresh_btn.setMaximumWidth(100)
         self.refresh_btn.setDefault(True)
 
@@ -35,17 +37,17 @@ class TodoDash(qtw.QWidget):
             color=self.parent().palette().text().color(),  # type: ignore
         )
         self.add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self.add_btn.setFont(fonts.bold)
+        self.add_btn.setFont(fonts.BOLD)
         self.add_btn.setMaximumWidth(100)
 
         due_lbl = qtw.QLabel("Due?")
-        due_lbl.setFont(fonts.bold)
+        due_lbl.setFont(fonts.BOLD)
         self._due_chk = qtw.QCheckBox()
         self._due_chk.setChecked(True)
         self._due_chk.stateChanged.connect(self.refresh_btn.click)  # noqa
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.setFont(fonts.bold)
+        category_lbl.setFont(fonts.BOLD)
         self._category_cbo: MapCBO[domain.Category] = MapCBO(
             mapping={ALL_CATEGORY: "All"},
             value=ALL_CATEGORY,
@@ -54,7 +56,7 @@ class TodoDash(qtw.QWidget):
         self._category_cbo.value_changed.connect(self.refresh_btn.click)
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.setFont(fonts.bold)
+        user_lbl.setFont(fonts.BOLD)
         self.user_cbo: MapCBO[domain.User] = MapCBO(
             mapping={ALL_USER: "All"},
             value=ALL_USER,
@@ -63,7 +65,7 @@ class TodoDash(qtw.QWidget):
         self.user_cbo.value_changed.connect(self.refresh_btn.click)
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.setFont(fonts.bold)
+        description_lbl.setFont(fonts.BOLD)
         self._description_filter_txt = qtw.QLineEdit("")
         self._description_filter_txt.setMaximumWidth(200)
 
@@ -81,111 +83,149 @@ class TodoDash(qtw.QWidget):
         toolbar_layout.addWidget(self._description_filter_txt)
         toolbar_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
 
-        self._table: table.Table[domain.Todo, str] = table.Table(
-            col_specs=[
-                table.text_col(
-                    attr_name="todo_id",
+        fm = qtg.QFontMetrics(fonts.BOLD)
+
+        self._table: table_view.TableView[domain.Todo, str] = table_view.TableView(
+            attrs=(
+                table_view.integer(
+                    name="todo_id",
                     display_name="ID",
-                    hidden=True,
+                    key=True,
                 ),
-                table.button_col(
-                    selector=lambda todo: "Complete" if todo.should_display else "Incomplete",
-                    on_click=lambda _: self.toggle_complete_btn_clicked.emit(),  # noqa
-                    alignment=table.ColAlignment.Center,
+                table_view.button(
+                    name="complete",
+                    button_text="Complete",
+                    text_selector=lambda todo: "Complete" if todo.should_display() else "Incomplete",
+                    width=fm.width(" Incomplete "),
                 ),
-                table.text_col(
-                    attr_name="description",
+                table_view.text(
+                    name="description",
                     display_name="Description",
-                    column_width=300,
+                    width=300,
                 ),
-                table.date_col(
-                    selector=(
-                        lambda todo:
-                            None if todo.days is None
-                            else datetime.date.today() + datetime.timedelta(days=todo.days)
-                    ),
+                table_view.date(
+                    name="due_date",
                     display_name="Due Date",
-                    alignment=table.ColAlignment.Center,
-                    column_width=120,
+                    value_selector=lambda todo: todo.due_date(),
                 ),
-                table.rich_text_col(
-                    selector=lambda todo: _render_days(todo.days),
+                table_view.text(
+                    name="days",
                     display_name="Days",
-                    alignment=table.ColAlignment.Center,
-                    column_width=60,
+                    value_selector=lambda todo: _render_days(todo.days()),
+                    rich_text=True,
                 ),
-                table.text_col(
-                    selector=lambda todo: todo.user.display_name,
+                table_view.text(
+                    name="user",
                     display_name="User",
-                    column_width=140,
-                    hidden=False,
-                    alignment=table.ColAlignment.Center,
+                    value_selector=lambda todo: todo.user.display_name,
+                    width=140,
+                    alignment="center",
                 ),
-                table.text_col(
-                    selector=lambda todo: todo.category.name,
+                table_view.text(
+                    name="category",
                     display_name="Category",
-                    column_width=140,
-                    hidden=False,
-                    alignment=table.ColAlignment.Center,
+                    value_selector=lambda todo: todo.category.name,
+                    alignment="center",
                 ),
-                table.text_col(
-                    selector=lambda todo: _render_frequency(frequency=todo.frequency),
+                table_view.text(
+                    name="frequency",
                     display_name="Frequency",
-                    column_width=140,
-                    hidden=False,
-                    alignment=table.ColAlignment.Center,
+                    value_selector=lambda todo: _render_frequency(frequency=todo.frequency),
+                    alignment="center",
                 ),
-                table.rich_text_col(
-                    attr_name="note",
+                table_view.text(
+                    name="note",
                     display_name="Note",
-                    column_width=400,
+                    width=400,
+                    rich_text=True,
                 ),
-                table.rich_text_col(
+                table_view.date(
+                    name="last_completed",
                     display_name="Last Completed",
-                    selector=lambda todo: _render_last_completed(
-                        last_completed=todo.last_completed,
-                        last_completed_by=todo.last_completed_by,
+                ),
+                table_view.text(
+                    name="last_completed_by",
+                    display_name="Last Completed By",
+                    value_selector=(
+                        lambda todo: todo.last_completed_by.display_name if todo.last_completed_by is not None else ""
                     ),
-                    alignment=table.ColAlignment.Center,
-                    column_width=120,
+                    alignment="center",
+                    width=120,
                 ),
-                table.timestamp_col(
-                    attr_name="date_added",
+                table_view.date(
+                    name="date_added",
                     display_name="Added",
-                    alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%y",
-                    # display_format="%m/%d/%Y %I:%M %p",
-                    column_width=100,
                 ),
-                table.timestamp_col(
-                    attr_name="date_updated",
+                table_view.date(
+                    name="date_updated",
                     display_name="Updated",
-                    alignment=table.ColAlignment.Center,
-                    display_format="%m/%d/%y",
-                    # display_format="%m/%d/%Y %I:%M %p",
-                    column_width=100,
                 ),
-                table.button_col(
+                table_view.button(
+                    name="edit",
                     button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
-                    column_width=60,
-                    enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
+                    width=60,
+                    # enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
-                table.button_col(
+                table_view.button(
+                    name="delete",
                     button_text="Delete",
-                    on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
-                    column_width=80,
-                    enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
+                    width=80,
+                    # enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
                 ),
-            ],
-            key_attr="todo_id",
+            ),
+            parent=self,
         )
-        self._table.double_click.connect(
-            lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_todo(  # noqa
-                user=self._current_user,
-                todo=self._table.selected_item,
-            ) else None
-        )
+        #     col_specs=[
+        #         table.rich_text_col(
+        #             display_name="Last Completed",
+        #             selector=lambda todo: _render_last_completed(
+        #                 last_completed=todo.last_completed,
+        #                 last_completed_by=todo.last_completed_by,
+        #             ),
+        #             alignment=table.ColAlignment.Center,
+        #             column_width=120,
+        #         ),
+        #         table.timestamp_col(
+        #             attr_name="date_added",
+        #             display_name="Added",
+        #             alignment=table.ColAlignment.Center,
+        #             display_format="%m/%d/%y",
+        #             # display_format="%m/%d/%Y %I:%M %p",
+        #             column_width=100,
+        #         ),
+        #         table.timestamp_col(
+        #             attr_name="date_updated",
+        #             display_name="Updated",
+        #             alignment=table.ColAlignment.Center,
+        #             display_format="%m/%d/%y",
+        #             # display_format="%m/%d/%Y %I:%M %p",
+        #             column_width=100,
+        #         ),
+        #         table.button_col(
+        #             button_text="Edit",
+        #             on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
+        #             column_width=60,
+        #             enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
+        #         ),
+        #         table.button_col(
+        #             button_text="Delete",
+        #             on_click=lambda _: self.delete_btn_clicked.emit(),  # noqa
+        #             column_width=80,
+        #             enable_when=lambda todo: domain.permissions.user_can_edit_todo(user=self._current_user, todo=todo),
+        #         ),
+        #     ],
+        #     key_attr="todo_id",
+        # )
+        # self._table.double_click.connect(
+        #     lambda: self.edit_btn_clicked.emit() if domain.permissions.user_can_edit_todo(  # noqa
+        #         user=self._current_user,
+        #         todo=self._table.selected_item,
+        #     ) else None
+        # )
+
+        self._table.button_clicked.connect(self._on_button_clicked)
+
+        self._table.double_click.connect(self._on_double_click)
 
         self._status_bar = qtw.QStatusBar()
 
@@ -212,20 +252,12 @@ class TodoDash(qtw.QWidget):
     def set_state(self, *, state: TodoDashState) -> None:
         self._current_user = state.current_user
 
-        self.user_cbo.set_values(
-            mapping={ALL_USER: "All"} | {
-                user: user.display_name
-                for user in state.user_options
-            }
-        )
+        self.user_cbo.set_values(mapping={ALL_USER: "All"} | {user: user.display_name for user in state.user_options})
         if self.user_cbo.get_value() != state.user_filter:
             self.user_cbo.set_value(value=state.user_filter)
 
         self._category_cbo.set_values(
-            mapping={ALL_CATEGORY: "All"} | {
-                category: category.name
-                for category in state.category_options
-            }
+            mapping={ALL_CATEGORY: "All"} | {category: category.name for category in state.category_options}
         )
         if self._category_cbo.get_value() != state.category_filter:
             self._category_cbo.set_value(value=state.category_filter)
@@ -233,13 +265,51 @@ class TodoDash(qtw.QWidget):
         # self._date_edit.set_value(state.date_filter)
         self._due_chk.setChecked(state.due_filter)
         self._description_filter_txt.setText(state.description_filter)
-        self._table.set_all(state.todos)
+        self._table.set_items(state.todos)
         if state.selected_todo is None:
             self._table.clear_selection()
         else:
             self._table.select_item_by_key(key=state.selected_todo.todo_id)
         self._status_bar.showMessage(state.status)
         self.repaint()
+
+    def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
+
+        match event.attr.name:
+            case "delete":
+                if domain.permissions.user_can_edit_todo(
+                    user=self._current_user,
+                    todo=event.item,
+                ):
+                    request = requests.DeleteTodo(todo=event.item)
+
+                    self.delete_requests.emit(request)
+            case "edit":
+                if domain.permissions.user_can_edit_todo(
+                    user=self._current_user,
+                    todo=event.item,
+                ):
+                    request = requests.EditTodo(todo=event.item)
+
+                    self.edit_requests.emit(request)
+            case "complete":
+                request = requests.ToggleCompleted(todo=event.item)
+
+                self.toggle_completed_requests.emit(request)
+            case _:
+                logger.error(f"attr name, {event.attr.name!r}, not recognized.")
+
+    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
+
+        if domain.permissions.user_can_edit_todo(
+            user=self._current_user,
+            todo=event.item,
+        ):
+            edit_request = requests.EditTodo(todo=event.item)
+
+            self.edit_requests.emit(edit_request)
 
 
 def _render_days(days: int | None, /) -> str:
@@ -271,15 +341,15 @@ def _render_frequency(*, frequency: domain.Frequency) -> str:
     }[frequency.name]()
 
 
-def _render_last_completed(
-    *,
-    last_completed: datetime.date | None,
-    last_completed_by: domain.User | None,
-) -> str:
-    if last_completed:
-        if last_completed_by:
-            username = "<br>" + last_completed_by.display_name
-        else:
-            username = ""
-        return f"<center>{last_completed:%m/%d/%y}{username}</center>"
-    return ""
+# def _render_last_completed(
+#     *,
+#     last_completed: datetime.date | None,
+#     last_completed_by: domain.User | None,
+# ) -> str:
+#     if last_completed:
+#         if last_completed_by:
+#             username = "<br>" + last_completed_by.display_name
+#         else:
+#             username = ""
+#         return f"<center>{last_completed:%m/%d/%y}{username}</center>"
+#     return ""

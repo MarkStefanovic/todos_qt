@@ -17,11 +17,40 @@ class UserController:
         self._view = view
 
         self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
-        self._view.dash.delete_btn_clicked.connect(self._on_dash_delete_btn_clicked)
-        self._view.dash.edit_btn_clicked.connect(self._on_dash_edit_btn_clicked)
-        self._view.dash.refresh_btn.clicked.connect(self._on_dash_refresh_btn_clicked)
+        self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
+        self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
+        self._view.dash.refresh_btn.clicked.connect(self.refresh)
         self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
         self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
+
+    def refresh(self) -> None:
+        state = self._view.get_state()
+
+        try:
+            users = self._user_service.all()
+
+            current_user = self._user_service.current_user()
+
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    users=users,
+                    current_user=current_user,
+                    status=_add_timestamp(message="Refreshed."),
+                ),
+            )
+        except Exception as e:
+            logger.exception(e)
+            new_state = dataclasses.replace(
+                state,
+                dash_state=dataclasses.replace(
+                    state.dash_state,
+                    status=_add_timestamp(message=str(e)),
+                ),
+            )
+
+        self._view.set_state(state=new_state)
 
     def _on_dash_add_btn_clicked(self) -> None:
         state = self._view.get_state()
@@ -53,7 +82,7 @@ class UserController:
                             state.dash_state,
                             users=users,
                             status=_add_timestamp(message=f"Deleted {user.display_name}."),
-                        )
+                        ),
                     )
                 else:
                     new_state = dataclasses.replace(
@@ -61,7 +90,7 @@ class UserController:
                         dash_state=dataclasses.replace(
                             state.dash_state,
                             status=_add_timestamp(message="Delete cancelled."),
-                        )
+                        ),
                     )
             else:
                 new_state = dataclasses.replace(
@@ -69,7 +98,7 @@ class UserController:
                     dash_state=dataclasses.replace(
                         state.dash_state,
                         status=_add_timestamp(message="No user was selected."),
-                    )
+                    ),
                 )
         except Exception as e:
             logger.exception(e)
@@ -78,7 +107,7 @@ class UserController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     status=_add_timestamp(message=str(e)),
-                )
+                ),
             )
 
         self._view.set_state(state=new_state)
@@ -98,36 +127,7 @@ class UserController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     status=_add_timestamp(message="Please select a user first."),
-                )
-            )
-
-        self._view.set_state(state=new_state)
-
-    def _on_dash_refresh_btn_clicked(self) -> None:
-        state = self._view.get_state()
-
-        try:
-            users = self._user_service.all()
-
-            current_user = self._user_service.current_user()
-
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    users=users,
-                    current_user=current_user,
-                    status=_add_timestamp(message="Refreshed."),
                 ),
-            )
-        except Exception as e:
-            logger.exception(e)
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                )
             )
 
         self._view.set_state(state=new_state)
@@ -172,7 +172,7 @@ class UserController:
                 dash_state=dataclasses.replace(
                     state.dash_state,
                     status=_add_timestamp(message=str(e)),
-                )
+                ),
             )
 
         self._view.set_state(state=new_state)

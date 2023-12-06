@@ -13,7 +13,7 @@ class XDaysFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         days_lbl = qtw.QLabel("Days Between")
-        days_lbl.setFont(fonts.bold)
+        days_lbl.setFont(fonts.BOLD)
         self._days_sb = qtw.QSpinBox()
         self._days_sb.setRange(1, 364)
         self._days_sb.setFixedWidth(100)

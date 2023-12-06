@@ -18,16 +18,16 @@ class CategoryForm(qtw.QWidget):
 
         back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setFont(fonts.bold)
+        self.back_btn.setFont(fonts.BOLD)
         self.back_btn.setMaximumWidth(100)
 
         name_lbl = qtw.QLabel("Name")
-        name_lbl.setFont(fonts.bold)
+        name_lbl.setFont(fonts.BOLD)
         self._name_txt = qtw.QLineEdit()
         self._name_txt.setMaximumWidth(400)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.setFont(fonts.bold)
+        note_lbl.setFont(fonts.BOLD)
         self._note_txt = qtw.QTextEdit()
 
         form_layout = qtw.QFormLayout()
@@ -40,7 +40,7 @@ class CategoryForm(qtw.QWidget):
 
         save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setFont(fonts.bold)
+        self.save_btn.setFont(fonts.BOLD)
         self.save_btn.setFixedWidth(100)
 
         layout = qtw.QVBoxLayout()

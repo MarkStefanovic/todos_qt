@@ -14,7 +14,7 @@ class IrregularFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
-        month_lbl.setFont(fonts.bold)
+        month_lbl.setFont(fonts.BOLD)
         self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO(
             mapping={
                 domain.Month.January: "Jan",
@@ -35,13 +35,13 @@ class IrregularFrequencyForm(qtw.QWidget):
         self._month_cbo.setFixedWidth(150)
 
         week_number_lbl = qtw.QLabel("Week #")
-        week_number_lbl.setFont(fonts.bold)
+        week_number_lbl.setFont(fonts.BOLD)
         self._week_number_sb = qtw.QSpinBox()
         self._week_number_sb.setRange(1, 5)
         self._week_number_sb.setFixedWidth(150)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.setFont(fonts.bold)
+        weekday_lbl.setFont(fonts.BOLD)
         self._weekday_cbo = widgets.MapCBO(
             mapping={
                 domain.Weekday.Monday: "Monday",
