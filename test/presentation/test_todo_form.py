@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc
 
 from src import domain
 from src.presentation.todo.form.state import TodoFormState
-from src.presentation.todo.form.view import TodoForm
+from src.presentation.todo.view.form.view import TodoForm
 
 
 @given(

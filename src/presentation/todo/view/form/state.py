@@ -4,12 +4,12 @@ import dataclasses
 import datetime
 
 from src import domain
-from src.presentation.todo.form.irregular.state import IrregularFrequencyFormState
-from src.presentation.todo.form.monthly.state import MonthlyFrequencyFormState
-from src.presentation.todo.form.once.state import OnceFrequencyFormState
+from src.presentation.todo.view.form.irregular import IrregularFrequencyFormState
+from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
+from src.presentation.todo.view.form.once import OnceFrequencyFormState
 from src.presentation.todo.form.weekly.state import WeeklyFrequencyFormState
-from src.presentation.todo.form.xdays.state import XDaysFrequencyFormState
-from src.presentation.todo.form.yearly.state import YearlyFrequencyFormState
+from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
+from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
 __all__ = ("TodoFormState",)
 

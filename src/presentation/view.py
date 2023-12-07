@@ -40,8 +40,11 @@ class MainView(qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self.enter_key_shortcut.activated.connect(self._on_enter_key_pressed)
 
+        self._tabs_loaded: set[int] = set()
+
     def on_load(self) -> None:
-        self._todos.refresh_dash()
+        self._todos.show_current_user_todos()
+        self._tabs_loaded.add(0)
 
     def _on_enter_key_pressed(self) -> None:
         if (ix := self._tabs.currentIndex()) == 0:
@@ -50,29 +53,29 @@ class MainView(qtw.QWidget):
             else:
                 self._todos.save_form()
         elif ix == 1:
-            if (category_ix := self.categories.stacked_layout.currentIndex()) == 0:
-                self.categories.dash.refresh_btn.click()
-            elif category_ix == 1:
-                self.categories.form.save_btn.click()
+            if self._categories.current_view() == "dash":
+                self._categories.refresh_dash()
             else:
-                raise Exception(f"Unrecognized category stacked_layout index: {category_ix}.")
+                self._categories.save_form()
         elif ix == 2:
-            if (user_ix := self.todos.stacked_layout.currentIndex()) == 0:
-                self.users.dash.refresh_btn.click()
-            elif user_ix == 1:
-                self.users.form.save_btn.click()
+            if self._users.current_view == "dash":
+                self._users.refresh_dash()
             else:
-                raise Exception(f"Unrecognized user stacked_layout index: {user_ix}.")
+                self._users.save_form()
         else:
             raise Exception(f"Unrecognized tab index: {ix}.")
 
     def _on_tab_changed(self) -> None:
-        if (ix := self._tabs.currentIndex()) == 0:
+        current_tab = self._tabs.currentIndex()
+        if current_tab in self._tabs_loaded:
+            return None
+
+        if current_tab == 0:
             if self._todos.current_view() == "dash":
                 self._todos.refresh_dash()
-        elif ix == 1:
-            if self.categories.stacked_layout.currentIndex() == 0:
-                self.categories.dash.refresh_btn.click()
+        elif current_tab == 1:
+            if self._categories.current_view() == "dash":
+                self._categories.refresh_dash()
         else:
-            if self.users.stacked_layout.currentIndex() == 0:
-                self.users.dash.refresh_btn.click()
+            if self._users.current_view() == "dash":
+                self._users.dash._refresh_btn.click()

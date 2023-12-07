@@ -258,9 +258,6 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
     def _on_double_click(self, *, index: qtc.QModelIndex) -> None:
         attr = self._view_model.get_attr_for_column_number(index.column())
 
-        if attr.data_type == "button":
-            return self._on_click(index=index)
-
         key_index = self._view_model.index(index.row(), self._key_col)
 
         if not key_index.isValid():

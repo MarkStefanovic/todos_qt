@@ -45,11 +45,12 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         if event is not None:
             if event.type() == qtc.QEvent.MouseButtonRelease:
-                button_height = min(option.fontMetrics.height() + 8, option.rect.height())
+                if self._button_is_enabled(index=index):
+                    button_height = min(option.fontMetrics.height() + 8, option.rect.height())
 
-                y_coord: int = event.y()  # type: ignore
-                if option.rect.top() < y_coord < option.rect.top() + button_height:
-                    self._on_click(index=index)
+                    y_coord: int = event.y()  # type: ignore
+                    if option.rect.top() < y_coord < option.rect.top() + button_height:
+                        self._on_click(index=index)
 
                 return True
 
@@ -61,6 +62,9 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         option: qtw.QStyleOptionViewItem,
         index: qtc.QModelIndex,
     ) -> None:
+        if not self._button_is_enabled(index=index):
+            return None
+
         btn = qtw.QStyleOptionButton()
 
         if self._button_text_selector is None:
@@ -79,14 +83,13 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
             min(option.fontMetrics.height() + 8, option.rect.height()),
         )
 
-        if self._button_is_enabled(index=index):
-            btn.state = (
-                qtw.QStyle.State_Raised if option.state & qtw.QStyle.State_MouseOver else qtw.QStyle.State_Sunken
-            )
-        else:
-            btn.state = qtw.QStyle.State_Off
+        btn.state = qtw.QStyle.State_Raised if option.state & qtw.QStyle.State_MouseOver else qtw.QStyle.State_Sunken
 
         self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
+        # else:
+        #     btn.state = qtw.QStyle.State_Off
+        #
+        # self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
 
     def _on_click(self, *, index: qtc.QModelIndex) -> None:
         self.clicked.emit(index)

@@ -16,10 +16,10 @@ class UserController:
         self._user_service = user_service
         self._view = view
 
-        self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
+        self._view.dash._add_btn.clicked.connect(self._on_dash_add_btn_clicked)
         self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
         self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
-        self._view.dash.refresh_btn.clicked.connect(self.refresh)
+        self._view.dash._refresh_btn.clicked.connect(self.refresh)
         self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
         self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
 

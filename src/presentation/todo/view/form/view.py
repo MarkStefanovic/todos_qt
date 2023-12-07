@@ -8,12 +8,12 @@ from src import domain
 from src.presentation.shared import fonts, icons, widgets
 from src.presentation.shared.widgets import DateEditor, MapCBO
 from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
-from src.presentation.todo.form.irregular.view import IrregularFrequencyForm
-from src.presentation.todo.form.monthly.view import MonthlyFrequencyForm
-from src.presentation.todo.form.once.view import OnceFrequencyForm
+from src.presentation.todo.view.form.irregular import IrregularFrequencyForm
+from src.presentation.todo.view.form.monthly import MonthlyFrequencyForm
+from src.presentation.todo.view.form.once import OnceFrequencyForm
 from src.presentation.todo.form.state import TodoFormState
 from src.presentation.todo.form.weekly.view import WeeklyFrequencyForm
-from src.presentation.todo.form.xdays.view import XDaysFrequencyForm
+from src.presentation.todo.view.form.xdays.view import XDaysFrequencyForm
 from src.presentation.todo.form.yearly.view import YearlyFrequencyForm
 
 import qtawesome as qta
@@ -22,6 +22,9 @@ __all__ = ("TodoForm",)
 
 
 class TodoForm(qtw.QWidget):
+    back_requests = qtc.pyqtSignal()
+    save_requests = qtc.pyqtSignal()
+
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
@@ -130,6 +133,11 @@ class TodoForm(qtw.QWidget):
         self._prior_completed: datetime.date | None = None
         self._last_completed_by: domain.User | None = None
         self._prior_completed_by: domain.User | None = None
+
+        # noinspection PyUnresolvedReferences
+        self.back_btn.clicked.connect(lambda _: self.back_requests.emit())
+        # noinspection PyUnresolvedReferences
+        self.save_btn.clicked.connect(lambda _: self.save_requests.emit())
 
     def get_state(self) -> TodoFormState:
         return TodoFormState(

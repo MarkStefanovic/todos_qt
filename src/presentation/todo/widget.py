@@ -40,5 +40,5 @@ class TodoWidget(qtw.QWidget):
     def save_form(self) -> None:
         self._view.save_form()
 
-    def show_current_todos(self) -> None:
+    def show_current_user_todos(self) -> None:
         return self._controller.show_current_user_todos()

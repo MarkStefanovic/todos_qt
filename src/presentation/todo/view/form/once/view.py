@@ -5,7 +5,7 @@ import datetime
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts, widgets
-from src.presentation.todo.form.once.state import OnceFrequencyFormState
+from src.presentation.todo.view.form.once import OnceFrequencyFormState
 
 __all__ = ("OnceFrequencyForm",)
 

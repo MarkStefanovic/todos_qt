@@ -59,6 +59,9 @@ class CategoryForm(qtw.QWidget):
             date_updated=self._date_updated,
         )
 
+    def save(self) -> None:
+        return self.save()
+
     def set_state(self, *, state: CategoryFormState) -> None:
         self._name_txt.setText(state.name)
         self._note_txt.setText(state.note)

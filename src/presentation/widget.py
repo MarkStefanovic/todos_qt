@@ -3,6 +3,7 @@ from __future__ import annotations
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import service
+from src.presentation.category.widget import CategoryWidget
 from src.presentation.todo.widget import TodoWidget
 from src.presentation.view import MainView
 
@@ -33,17 +34,11 @@ class MainWidget(qtw.QMainWindow):
             | qtc.Qt.WindowSystemMenuHint
         )
 
-        # self.setWindowTitle(f"Todos - {username}")
-        #
-        # self.setWindowIcon(window_icon)
-        #
-        # # noinspection PyTypeChecker
-        # self.setWindowFlags(
-        #     self.windowFlags()
-        #     | qtc.Qt.WindowMinimizeButtonHint
-        #     | qtc.Qt.WindowMaximizeButtonHint
-        #     | qtc.Qt.WindowSystemMenuHint
-        # )
+        category_widget = CategoryWidget(
+            category_service=category_service,
+            user_service=user_service,
+            parent=self,
+        )
 
         todo_widget = TodoWidget(
             category_service=category_service,
@@ -52,7 +47,10 @@ class MainWidget(qtw.QMainWindow):
             parent=self,
         )
 
-        self._view = MainView(todo_widget=todo_widget)
+        self._view = MainView(
+            category_widget=category_widget,
+            todo_widget=todo_widget,
+        )
 
         self.setCentralWidget(self._view)
 

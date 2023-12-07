@@ -36,6 +36,12 @@ class CategoryView(qtw.QWidget):
             dash_active=self.stacked_layout.currentIndex() == 0,
         )
 
+    def refresh_dash(self) -> None:
+        return self.dash.refresh()
+
+    def save_form(self) -> None:
+        return self.form.save()
+
     def set_state(self, *, state: CategoryState) -> None:
         self.dash.set_state(state=state.dash_state)
         self.form.set_state(state=state.form_state)

@@ -25,8 +25,8 @@ class CategoryController:
         self._user_service = user_service
         self._view = view
 
-        self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
-        self._view.dash.refresh_btn.clicked.connect(self._on_dash_refresh_btn_clicked)
+        self._view.dash.add_requests.connect(self._on_dash_add_btn_clicked)
+        self._view.dash.refresh_requests.connect(self._on_dash_refresh_btn_clicked)
         self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
         self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
 
@@ -148,7 +148,7 @@ class CategoryController:
             )
         except Exception as e:
             logger.exception(e)
-            
+
             new_state = dataclasses.replace(
                 state,
                 dash_state=dataclasses.replace(

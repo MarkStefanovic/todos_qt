@@ -5,9 +5,7 @@ import logging
 from src import domain
 from src.presentation.shared.widgets import popup
 from src.presentation.todo import requests
-from src.presentation.todo.dash.state import ALL_CATEGORY, ALL_USER
-from src.presentation.todo.form.state import TodoFormState
-from src.presentation.todo.view import TodoView
+from src.presentation.todo.view.view import TodoView
 
 __all__ = ("TodoController",)
 
@@ -29,18 +27,16 @@ class TodoController:
         self._user_service = user_service
         self._view = view
 
-        self._view.dash.add_btn.clicked.connect(self._on_dash_add_btn_clicked)
+        self._view.dash.add_requests.connect(self._on_dash_add_btn_clicked)
         self._view.dash.toggle_completed_requests.connect(self._on_dash_toggle_completed)
         self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
         self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
-        self._view.dash.refresh_btn.clicked.connect(self._on_dash_refresh_btn_clicked)
+        self._view.dash.refresh_requests.connect(self._on_dash_refresh_btn_clicked)
 
-        self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
-        self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
+        self._view.form.back_requests.connect(self._on_form_back_btn_clicked)
+        self._view.form.save_requests.connect(self._on_form_save_btn_clicked)
 
     def show_current_todos(self) -> None:
-        state = self._view.get_state()
-
         try:
             categories = self._category_service.all()
 
@@ -53,33 +49,11 @@ class TodoController:
                 user_id_filter=None,
             )
 
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    todos=todos,
-                    category_options=categories,
-                    category_filter=ALL_CATEGORY,
-                    description_filter="",
-                    user_options=users,
-                    user_filter=ALL_USER,
-                    due_filter=True,
-                    status="Showing ToDos due today.",
-                ),
-                dash_active=True,
-            )
+            self._view.dash.set_items(todos)
         except Exception as e:
             logger.exception(e)
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                ),
-                dash_active=True,
-            )
 
-        self._view.set_state(state=new_state)
+            self._view.dash.set_status
 
     def show_current_user_todos(self) -> None:
         state = self._view.get_state()

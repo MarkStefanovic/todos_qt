@@ -6,6 +6,7 @@ from src.domain.config import *
 from src.domain.create_uuid import *
 from src.domain.create_uuid import *
 from src.domain.date_calc import *
+from src.domain.error import *
 from src.domain.frequency import *
 from src.domain.frequency_type import *
 from src.domain.holidays import *

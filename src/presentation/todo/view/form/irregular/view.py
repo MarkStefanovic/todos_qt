@@ -4,7 +4,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, widgets
-from src.presentation.todo.form.irregular.state import IrregularFrequencyFormState
+from src.presentation.todo.view.form.irregular import IrregularFrequencyFormState
 
 __all__ = ("IrregularFrequencyForm",)
 

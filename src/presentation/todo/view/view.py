@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import typing
 
-from PyQt5 import QtWidgets as qtw  # noqa
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+
 
 from src.presentation.todo.state import TodoState
-from src.presentation.todo.dash.view import TodoDash
-from src.presentation.todo.form.view import TodoForm
+from src.presentation.todo.view.dash import TodoDash
+from src.presentation.todo.view.form.view import TodoForm
 
 
 __all__ = ("TodoView",)
@@ -26,7 +27,7 @@ class TodoView(qtw.QWidget):
         self.setLayout(self.stacked_layout)
 
     def refresh_dash(self) -> None:
-        self.dash.refresh_btn.click()
+        self.dash.refresh_requests.emit()
 
     def get_state(self) -> TodoState:
         return TodoState(

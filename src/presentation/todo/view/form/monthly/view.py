@@ -3,7 +3,7 @@ from __future__ import annotations
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts
-from src.presentation.todo.form.monthly.state import MonthlyFrequencyFormState
+from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
 
 __all__ = ("MonthlyFrequencyForm",)
 

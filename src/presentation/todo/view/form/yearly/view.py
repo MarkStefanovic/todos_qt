@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, widgets
-from src.presentation.todo.form.yearly.state import YearlyFrequencyFormState
+from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
 __all__ = ("YearlyFrequencyForm",)
 
