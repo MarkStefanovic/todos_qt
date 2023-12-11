@@ -29,5 +29,10 @@ class RefreshRequest:
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
+class SaveRequest:
+    todo: domain.Todo
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class ToggleCompleted:
     todo: domain.Todo

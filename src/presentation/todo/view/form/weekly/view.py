@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.shared import fonts, widgets
-from src.presentation.todo.form.weekly.state import WeeklyFrequencyFormState
+from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 
 __all__ = ("WeeklyFrequencyForm",)
 

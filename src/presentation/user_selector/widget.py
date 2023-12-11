@@ -35,3 +35,6 @@ class UserSelectorWidget(qtw.QWidget):
 
     def refresh(self) -> None | domain.Error:
         return self._controller.refresh()
+
+    def select_item(self, /, item: domain.User) -> None:
+        return self._view.select_item(item)

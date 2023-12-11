@@ -4,10 +4,10 @@ import dataclasses
 import datetime
 
 from src import domain
-from src.presentation.todo.view.form.irregular import IrregularFrequencyFormState
+from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
 from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
-from src.presentation.todo.view.form.once import OnceFrequencyFormState
-from src.presentation.todo.form.weekly.state import WeeklyFrequencyFormState
+from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
+from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
 from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
@@ -38,15 +38,13 @@ class TodoFormState:
     weekly_frequency_form_state: WeeklyFrequencyFormState
     xdays_frequency_form_state: XDaysFrequencyFormState
     yearly_frequency_form_state: YearlyFrequencyFormState
-    category_options: list[domain.Category]
-    user_options: list[domain.User]
+    categories_stale: bool | domain.Unspecified
+    users_stale: bool | domain.Unspecified
     focus_description: bool
 
     @staticmethod
     def initial(
         *,
-        category_options: list[domain.Category],
-        user_options: list[domain.User],
         current_user: domain.User | None,
     ) -> TodoFormState:
         return TodoFormState(
@@ -72,8 +70,8 @@ class TodoFormState:
             weekly_frequency_form_state=WeeklyFrequencyFormState.initial(),
             xdays_frequency_form_state=XDaysFrequencyFormState.initial(),
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
-            category_options=category_options,
-            user_options=user_options,
+            categories_stale=True,
+            users_stale=True,
             focus_description=True,
         )
 
@@ -142,12 +140,7 @@ class TodoFormState:
         )
 
     @staticmethod
-    def from_domain(
-        *,
-        todo: domain.Todo,
-        category_options: list[domain.Category],
-        user_options: list[domain.User],
-    ) -> TodoFormState:
+    def from_domain(*, todo: domain.Todo) -> TodoFormState:
         irregular_frequency_form_state = IrregularFrequencyFormState.initial()
         monthly_frequency_form_state = MonthlyFrequencyFormState.initial()
         once_frequency_form_state = OnceFrequencyFormState.initial()
@@ -191,8 +184,8 @@ class TodoFormState:
             prior_completed=todo.prior_completed,
             last_completed_by=todo.last_completed_by,
             prior_completed_by=todo.prior_completed_by,
-            category_options=category_options,
-            user_options=user_options,
+            categories_stale=domain.Unspecified(),
+            users_stale=domain.Unspecified(),
             focus_description=True,
         )
 

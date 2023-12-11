@@ -35,3 +35,6 @@ class CategorySelectorWidget(qtw.QWidget):
 
     def refresh(self) -> None | domain.Error:
         return self._controller.refresh()
+
+    def select_item(self, /, item: domain.Category) -> None:
+        self._view.select_item(item)

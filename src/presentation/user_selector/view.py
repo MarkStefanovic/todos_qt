@@ -26,6 +26,16 @@ class UserSelectorView(qtw.QComboBox):
         self.addItem(fonts.NORMAL_FONT_METRICS.width(" " * 40))
         self.adjustSize()
 
+    def get_selected_item(self) -> domain.User:
+        return self.currentData()
+
+    def select_item(self, /, item: domain.User) -> None:
+        for ix in range(self.count()):
+            user = self.itemData(ix)
+            if user.user_id == item.user_id:
+                self.setCurrentIndex(ix)
+                return None
+
     def set_items(self, /, items: typing.Iterable[domain.User]) -> None:
         self.blockSignals(True)
         try:
@@ -41,9 +51,6 @@ class UserSelectorView(qtw.QComboBox):
             self.blockSignals(False)
 
         self.adjustSize()
-
-    def get_selected_item(self) -> domain.User:
-        return self.currentData()
 
     def _on_current_index_changed(self, ix: int) -> None:
         item = self.itemData(ix)

@@ -16,7 +16,7 @@ class Error(Exception):
     error_message: str
 
     @staticmethod
-    def new(error_message: str, /, args: dict[str, typing.Hashable] | None = None) -> Error:
+    def new(error_message: str, **kwargs: typing.Hashable) -> Error:
         try:
             frame = inspect.stack()[1].frame
             fn_name = frame.f_code.co_name
@@ -29,10 +29,10 @@ class Error(Exception):
                 error_message="An error occurred while inspecting the first frame to create a new Context.",
             )
 
-        if args is None:
-            fn_args: dict[str, typing.Hashable] = {}
+        if kwargs:
+            fn_args: dict[str, typing.Hashable] = kwargs
         else:
-            fn_args = args
+            fn_args = {}
 
         return Error(
             file=filename,
@@ -55,7 +55,7 @@ def example(x: int) -> float | Error:
     try:
         return 5 / x
     except Exception as e:
-        return Error.new(str(e), args={"x": 1})
+        return Error.new(str(e), x=1)
 
 
 if __name__ == "__main__":

@@ -13,6 +13,14 @@ class StatusBar(qtw.QStatusBar):
 
         self.setFont(fonts.NORMAL)
 
+        self._message: str = ""
+
+    @property
+    def message(self) -> str:
+        return self._message
+
     def set_status(self, /, status: str) -> None:
+        self._message = status
+
         self.showMessage(f"{datetime.datetime.now():%I:%M %p}: {status}")
         self.repaint()

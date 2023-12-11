@@ -33,7 +33,7 @@ class TodoService(domain.TodoService):
 
     def add_default_holidays_for_all_users(self) -> None:
         user_repo = adapter.DbUserRepository(engine=self._engine)
-        users = user_repo.all()
+        users = user_repo.all_todos()
 
         for user in users:
             for holiday in domain.HOLIDAYS:
@@ -169,7 +169,7 @@ class TodoService(domain.TodoService):
 
     def refresh(self) -> None:
         repo = adapter.DbTodoRepository(engine=self._engine)
-        self._todos = {todo.todo_id: todo for todo in repo.all()}
+        self._todos = {todo.todo_id: todo for todo in repo.all_todos()}
         self._last_refresh = datetime.datetime.now()
 
     def update(self, *, todo: domain.Todo) -> None:

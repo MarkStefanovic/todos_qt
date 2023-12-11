@@ -94,20 +94,11 @@ class UserService(domain.UserService):
     def get_user_by_username(self, *, username: str) -> domain.User | None:
         self._refresh()
 
-        return next(
-            (
-                user for user in self._users.values()
-                if user.username.lower() == username.lower()
-            ),
-            None
-        )
+        return next((user for user in self._users.values() if user.username.lower() == username.lower()), None)
 
     def refresh(self) -> None:
         repo = adapter.DbUserRepository(engine=self._engine)
-        self._users = {
-            user.user_id: user
-            for user in repo.all()
-        }
+        self._users = {user.user_id: user for user in repo.all_todos()}
         self._last_refresh = datetime.datetime.now()
 
     def update(self, *, user: domain.User) -> None:
@@ -132,7 +123,7 @@ class UserService(domain.UserService):
             self.refresh()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     eng = adapter.db.create_engine()
     svc = UserService(engine=eng, username="test")
     for r in svc.all():

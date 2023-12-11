@@ -3,8 +3,8 @@ import typing
 
 import pytest
 import sqlalchemy as sa
-import sqlmodel as sm
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtWidgets as qtw  # noqa
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger("test")
 
@@ -13,14 +13,13 @@ QT_APP = qtw.QApplication([])
 
 @pytest.fixture(scope="function")
 def engine() -> sa.engine.Engine:
-    eng = sm.create_engine("sqlite://", echo=True)
-    sm.SQLModel.metadata.create_all(eng)
+    eng = sa.create_engine("sqlite://", echo=True)
     return eng
 
 
 @pytest.fixture(scope="function")
-def session(engine: sa.engine.Engine) -> typing.Generator[sm.Session, None, None]:
-    session = sm.Session(engine)
+def session(engine: sa.engine.Engine) -> typing.Generator[Session, None, None]:
+    session = Session(engine)
     yield session
     session.close()
     #

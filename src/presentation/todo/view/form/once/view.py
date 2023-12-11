@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import datetime
 
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtWidgets as qtw  # noqa
 
 from src.presentation.shared import fonts, widgets
-from src.presentation.todo.view.form.once import OnceFrequencyFormState
+from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
 
 __all__ = ("OnceFrequencyForm",)
 
@@ -25,7 +25,9 @@ class OnceFrequencyForm(qtw.QWidget):
         self.setLayout(form_layout)
 
     def get_state(self) -> OnceFrequencyFormState:
-        return OnceFrequencyFormState(due_date=self._due_date_edit.get_value() or datetime.date.today())
+        return OnceFrequencyFormState(
+            due_date=self._due_date_edit.get_value() or datetime.date.today(),
+        )
 
     def set_state(self, *, state: OnceFrequencyFormState) -> None:
         self._due_date_edit.set_value(state.due_date)

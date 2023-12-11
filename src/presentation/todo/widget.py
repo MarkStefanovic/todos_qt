@@ -2,8 +2,8 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src import service
-from src.presentation.todo.view import TodoView
+from src import service, domain
+from src.presentation.todo.view.view import TodoView
 from src.presentation.todo.controller import TodoController
 
 
@@ -11,9 +11,8 @@ class TodoWidget(qtw.QWidget):
     def __init__(
         self,
         *,
-        category_service: service.CategoryService,
         todo_service: service.TodoService,
-        user_service: service.UserService,
+        current_user: domain.User,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
@@ -21,9 +20,8 @@ class TodoWidget(qtw.QWidget):
         self._view = TodoView(parent=self)
 
         self._controller = TodoController(
-            category_service=category_service,
             todo_service=todo_service,
-            user_service=user_service,
+            current_user=current_user,
             view=self._view,
         )
 
@@ -39,6 +37,3 @@ class TodoWidget(qtw.QWidget):
 
     def save_form(self) -> None:
         self._view.save_form()
-
-    def show_current_user_todos(self) -> None:
-        return self._controller.show_current_user_todos()

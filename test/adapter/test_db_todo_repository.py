@@ -1,9 +1,9 @@
 import dataclasses
 import datetime
 
-from src import adapter, domain
+import sqlalchemy as sa
 
-import sqlmodel as sm
+from src import adapter, domain
 
 TODO_1 = domain.Todo.daily(
     todo_id="1" * 32,
@@ -61,38 +61,27 @@ TODO_3 = domain.Todo.yearly(
 )
 
 
-def test_round_trip(session: sm.Session):
-    category_repo = adapter.DbCategoryRepository(session=session)
+def test_round_trip(engine: sa.Engine):
+    category_repo = adapter.DbCategoryRepository(engine=sa.engine)
 
     category_repo.add(category=domain.TODO_CATEGORY)
 
-    session.commit()
-
-    todo_repo = adapter.DbTodoRepository(session=session)
+    todo_repo = adapter.DbTodoRepository(engine=engine)
 
     todo_repo.add(todo=TODO_1)
     todo_repo.add(todo=TODO_2)
     todo_repo.add(todo=TODO_3)
 
-    session.commit()
+    assert len(todo_repo.all_todos()) == 3
 
-    assert len(todo_repo.all()) == 3
-
-    updated_todo_1 = dataclasses.replace(
-        TODO_1,
-        note="Updated note 1."
-    )
+    updated_todo_1 = dataclasses.replace(TODO_1, note="Updated note 1.")
 
     todo_repo.update(todo=updated_todo_1)
 
-    session.commit()
-
     assert todo_repo.get(todo_id=TODO_1.todo_id).note == "Updated note 1."
 
-    assert len(todo_repo.all()) == 3
+    assert len(todo_repo.all_todos()) == 3
 
     todo_repo.delete(todo_id=TODO_2.todo_id)
 
-    session.commit()
-
-    assert len(todo_repo.all()) == 2
+    assert len(todo_repo.all_todos()) == 2

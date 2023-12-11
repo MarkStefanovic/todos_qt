@@ -1,4 +1,4 @@
-import datetime
+import typing
 
 import sqlalchemy as sa
 
@@ -9,75 +9,70 @@ __all__ = ("CategoryService",)
 
 class CategoryService(domain.CategoryService):
     def __init__(self, *, engine: sa.engine.Engine):
-        self._engine = engine
+        self._engine: typing.Final[sa.engine.Engine] = engine
 
-        self._categories: dict[str, domain.Category] = {}
-        self._last_refresh: datetime.datetime | None = None
+    def add(self, /, category: domain.Category) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                add_result = adapter.category_repo.add(con=con, category=category)
+                if isinstance(add_result, domain.Error):
+                    return add_result
+        except Exception as e:
+            return domain.Error.new(str(e), category=category)
 
-    def add(self, *, category: domain.Category) -> None:
-        self._refresh()
+    def all(self) -> list[domain.Category] | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.category_repo.get_active(con=con)
+        except Exception as e:
+            return domain.Error.new(str(e))
 
-        repo = adapter.DbCategoryRepository(engine=self._engine)
-        repo.add(category=category)
-        self._categories[category.category_id] = category
+    def delete(self, *, category_id: str) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                category = adapter.category_repo.get(con=con, category_id=category_id)
+                if isinstance(category, domain.Error):
+                    return category
 
-    def all(self) -> list[domain.Category]:
-        self._refresh()
+                if category is None:
+                    return None
 
-        # noinspection PyTypeChecker
-        return sorted(self._categories.values(), key=lambda c: c.name)
+                matching_todos = adapter.todo_repo.where_category(con=con, category_id=category_id)
+                if isinstance(matching_todos, domain.Error):
+                    return matching_todos
 
-    def delete(self, *, category_id: str) -> None:
-        self._refresh()
+                if matching_todos:
+                    raise ValueError(
+                        f"Cannot delete the category, {category.name}, as it is used "
+                        f"by {len(matching_todos)} todos."
+                    )
 
-        todo_repo = adapter.DbTodoRepository(engine=self._engine)
-        if matching_todos := todo_repo.where_category(category_id=category_id):
-            if category := self._categories[category_id]:
-                raise ValueError(
-                    f"Cannot delete the category, {category.name}, as it is used "
-                    f"by {len(matching_todos)} todos."
-                )
-            else:
-                raise Exception("Category does not exist in the database.")
+                delete_result = adapter.category_repo.delete(con=con, category_id=category_id)
+                if isinstance(delete_result, domain.Error):
+                    return delete_result
 
-        category_repo = adapter.DbCategoryRepository(engine=self._engine)
-        category_repo.delete(category_id=category_id)
-        del self._categories[category_id]
+                return None
+        except Exception as e:
+            return domain.Error.new(str(e), category_id=category_id)
 
-    def get(self, *, category_id: str) -> domain.Category | None:
-        self._refresh()
+    def get(self, *, category_id: str) -> domain.Category | None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.category_repo.get(con=con, category_id=category_id)
+        except Exception as e:
+            return domain.Error.new(str(e), category_id=category_id)
 
-        return self._categories.get(category_id)
-
-    def refresh(self) -> None:
-        repo = adapter.DbCategoryRepository(engine=self._engine)
-        self._categories = {
-            category.category_id: category
-            for category in repo.get_active()
-        }
-        self._last_refresh = datetime.datetime.now()
-
-    def update(self, *, category: domain.Category) -> None:
-        self._refresh()
-
-        repo = adapter.DbCategoryRepository(engine=self._engine)
-        repo.update(category=category)
-        self._categories[category.category_id] = category
-
-    def _refresh(self) -> None:
-        if self._last_refresh is None:
-            time_to_refresh = True
-        else:
-            if (datetime.datetime.now() - self._last_refresh).seconds > 300:
-                time_to_refresh = True
-            else:
-                time_to_refresh = False
-
-        if time_to_refresh:
-            self.refresh()
+    def update(self, *, category: domain.Category) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                update_result = adapter.category_repo.update(con=con, category=category)
+                if isinstance(update_result, domain.Error):
+                    return update_result
+        except Exception as e:
+            return domain.Error.new(str(e), category=category)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     eng = adapter.db.create_engine()
     svc = CategoryService(engine=eng)
     for r in svc.all():

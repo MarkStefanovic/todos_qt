@@ -26,6 +26,16 @@ class CategorySelectorView(qtw.QComboBox):
         self.addItem(fonts.NORMAL_FONT_METRICS.width(" " * 40))
         self.adjustSize()
 
+    def get_selected_item(self) -> domain.Category:
+        return self.currentData()
+
+    def select_item(self, /, item: domain.Category) -> None:
+        for ix in range(self.count()):
+            category: domain.Category = self.itemData(ix)
+            if category.category_id == item.category_id:
+                self.setCurrentIndex(ix)
+                return None
+
     def set_items(self, /, items: typing.Iterable[domain.Category]) -> None:
         self.blockSignals(True)
         try:
@@ -41,9 +51,6 @@ class CategorySelectorView(qtw.QComboBox):
             self.blockSignals(False)
 
         self.adjustSize()
-
-    def get_selected_item(self) -> domain.Category:
-        return self.currentData()
 
     def _on_current_index_changed(self, ix: int) -> None:
         item = self.itemData(ix)
