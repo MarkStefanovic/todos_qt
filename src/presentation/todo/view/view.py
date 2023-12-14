@@ -5,11 +5,10 @@ import typing
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
+from src.presentation.category_selector.widget import CategorySelectorWidget
 from src.presentation.todo.state import TodoState
-from src.presentation.todo.view.dash.state import TodoDashState
-from src.presentation.todo.view.dash.view import TodoDash
-from src.presentation.todo.view.form.state import TodoFormState
-from src.presentation.todo.view.form.view import TodoForm
+from src.presentation.todo.view import dash, form
+from src.presentation.user_selector.widget import UserSelectorWidget
 
 __all__ = ("TodoView",)
 
@@ -18,18 +17,33 @@ class TodoView(qtw.QWidget):
     def __init__(
         self,
         *,
+        dash_requests: dash.requests.TodoDashRequests,
+        form_requests: form.requests.TodoFormRequests,
+        dash_category_selector: CategorySelectorWidget,
+        form_category_selector: CategorySelectorWidget,
+        dash_user_selector: UserSelectorWidget,
+        form_user_selector: UserSelectorWidget,
         current_user: domain.User,
         parent: qtw.QWidget | None = None,
     ):
         super().__init__(parent=parent)
 
-        self.dash = TodoDash(
+        self._dash_requests: typing.Final[dash.requests.TodoDashRequests] = dash_requests
+        self._form_requests: typing.Final[form.requests.TodoFormRequests] = form_requests
+
+        self.dash = dash.TodoDash(
             parent=self,
             current_user=current_user,
+            todo_dash_requests=dash_requests,
+            category_selector=dash_category_selector,
+            user_selector=dash_user_selector,
         )
 
-        self.form = TodoForm(
+        self.form = form.TodoForm(
             parent=self,
+            todo_form_requests=self._form_requests,
+            category_selector=form_category_selector,
+            user_selector=form_user_selector,
         )
 
         self.stacked_layout = qtw.QStackedLayout()
@@ -51,47 +65,15 @@ class TodoView(qtw.QWidget):
     def save_form(self) -> None:
         self.form.save_btn.click()
 
-    def set_state(
-        self,
-        *,
-        dash_state: TodoDashState | domain.Unspecified = domain.Unspecified,
-        form_state: TodoFormState | domain.Unspecified = domain.Unspecified,
-        dash_active: bool | domain.Unspecified = domain.Unspecified,
-    ) -> None:
-        if not isinstance(dash_state, domain.Unspecified):
-            self.dash.set_state(dash_state)
+    def set_state(self, /, state: TodoState) -> None:
+        if not isinstance(state.dash_state, domain.Unspecified):
+            self.dash.set_state(state.dash_state)
 
-        if not isinstance(form_state, domain.Unspecified):
-            self.form.set_state(
-                todo_id=form_state.todo_id,
-                template_todo_id=form_state.template_todo_id,
-                advance_days=form_state.advance_days,
-                expire_days=form_state.expire_days,
-                user=form_state.user,
-                category=form_state.category,
-                description=form_state.description,
-                frequency_name=form_state.frequency_name,
-                note=form_state.note,
-                start_date=form_state.start_date,
-                date_added=form_state.date_added,
-                date_updated=form_state.date_updated,
-                last_completed=form_state.last_completed,
-                prior_completed=form_state.prior_completed,
-                last_completed_by=form_state.last_completed_by,
-                prior_completed_by=form_state.prior_completed_by,
-                irregular_frequency_form_state=form_state.irregular_frequency_form_state,
-                monthly_frequency_form_state=form_state.monthly_frequency_form_state,
-                once_frequency_form_state=form_state.once_frequency_form_state,
-                weekly_frequency_form_state=form_state.weekly_frequency_form_state,
-                xdays_frequency_form_state=form_state.xdays_frequency_form_state,
-                yearly_frequency_form_state=form_state.yearly_frequency_form_state,
-                categories_stale=form_state.categories_stale,
-                users_stale=form_state.users_stale,
-                focus_description=form_state.focus_description,
-            )
+        if not isinstance(state.form_state, domain.Unspecified):
+            self.form.set_state(state.form_state)
 
-        if not isinstance(dash_active, domain.Unspecified):
-            if dash_active:
+        if not isinstance(state.dash_active, domain.Unspecified):
+            if state.dash_active:
                 self.stacked_layout.setCurrentIndex(0)
             else:
                 self.stacked_layout.setCurrentIndex(1)

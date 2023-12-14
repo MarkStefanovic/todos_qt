@@ -9,16 +9,13 @@ __all__ = ("CategoryDashState",)
 
 @dataclasses.dataclass(frozen=True)
 class CategoryDashState:
-    categories: list[domain.Category]
-    selected_category: domain.Category | None
-    status: str
-    current_user: domain.User
+    categories: list[domain.Category] | domain.Unspecified = domain.Unspecified()
+    selected_category: domain.Category | domain.Unspecified = domain.Unspecified()
+    status: str | domain.Unspecified = domain.Unspecified()
+    category_added: domain.Category | domain.Unspecified = domain.Unspecified()
+    category_deleted: domain.Category | domain.Unspecified = domain.Unspecified()
+    category_edited: domain.Category | domain.Unspecified = domain.Unspecified()
 
-    @staticmethod
-    def initial(*, current_user: domain.User) -> CategoryDashState:
-        return CategoryDashState(
-            categories=[],
-            selected_category=None,
-            status="",
-            current_user=current_user,
-        )
+
+if __name__ == "__main__":
+    print(CategoryDashState())

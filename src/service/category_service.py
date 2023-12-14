@@ -23,7 +23,7 @@ class CategoryService(domain.CategoryService):
     def all(self) -> list[domain.Category] | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.category_repo.get_active(con=con)
+                return adapter.category_repo.where(con=con, active=True)
         except Exception as e:
             return domain.Error.new(str(e))
 
@@ -37,7 +37,12 @@ class CategoryService(domain.CategoryService):
                 if category is None:
                     return None
 
-                matching_todos = adapter.todo_repo.where_category(con=con, category_id=category_id)
+                matching_todos = adapter.todo_repo.where(
+                    con=con,
+                    category_id=category_id,
+                    user_id=domain.Unspecified(),
+                    description_starts_with=domain.Unspecified(),
+                )
                 if isinstance(matching_todos, domain.Error):
                     return matching_todos
 

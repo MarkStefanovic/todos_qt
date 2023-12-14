@@ -11,14 +11,10 @@ __all__ = ("CategoryState",)
 
 @dataclasses.dataclass(frozen=True)
 class CategoryState:
-    dash_state: CategoryDashState
-    form_state: CategoryFormState
-    dash_active: bool
+    dash_state: CategoryDashState | domain.Unspecified = domain.Unspecified()
+    form_state: CategoryFormState | domain.Unspecified = domain.Unspecified()
+    dash_active: bool | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
-    def initial(*, current_user: domain.User) -> CategoryState:
-        return CategoryState(
-            dash_state=CategoryDashState.initial(current_user=current_user),
-            form_state=CategoryFormState.initial(),
-            dash_active=True,
-        )
+    def set_status(status: str, /) -> CategoryState:
+        return CategoryState(dash_state=CategoryDashState(status=status))

@@ -4,8 +4,11 @@ import typing
 from src import domain, service
 from src.presentation.shared.widgets import popup
 from src.presentation.todo import requests
+from src.presentation.todo.state import TodoState
 from src.presentation.todo.view.form.state import TodoFormState
-from src.presentation.todo.view.view import TodoView
+
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc
 
 __all__ = ("TodoController",)
 
@@ -14,41 +17,44 @@ logger = logging.getLogger()
 
 # noinspection DuplicatedCode
 class TodoController:
+    states = qtc.pyqtSignal(TodoState)
+
     def __init__(
         self,
         *,
+        todo_requests: requests.TodoRequests,
         todo_service: domain.TodoService,
         current_user: domain.User,
-        view: TodoView,
     ):
         self._todo_service: typing.Final[service.TodoService] = todo_service
         self._current_user: typing.Final[domain.User] = current_user
-        self._view: typing.Final[TodoView] = view
+        self._todo_requests: typing.Final[requests.TodoRequests] = todo_requests
 
-        self._view.dash.add_requests.connect(self._on_dash_add_btn_clicked)
-        self._view.dash.toggle_completed_requests.connect(self._on_dash_toggle_completed)
-        self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
-        self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
-        self._view.dash.refresh_requests.connect(self._on_dash_refresh_btn_clicked)
+        self._todo_requests.add.connect(self._on_add_request)
+        self._todo_requests.toggle_completed.connect(self._on_toggle_completed_request)
+        self._todo_requests.delete.connect(self._on_delete_request)
+        self._todo_requests.edit.connect(self._on_edit_request)
+        self._todo_requests.refresh.connect(self._on_refresh_request)
+        self._todo_requests.back.connect(self._on_back_request)
+        self._todo_requests.save.connect(self._on_save_request)
 
-        self._view.form.back_requests.connect(self._on_form_back_btn_clicked)
-        self._view.form.save_requests.connect(self._on_form_save_btn_clicked)
-
-    def _on_dash_add_btn_clicked(self) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_dash_add_btn_clicked()")
+    def _on_add_request(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_add_request()")
 
         try:
-            self._view.set_state(
+            state = TodoState(
                 dash_active=False,
                 form_state=TodoFormState.initial(current_user=self._current_user),
             )
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_add_request() failed: {e!s}")
 
-            self._view.dash.set_state(status=str(e))
+            state = TodoState.set_status(str(e))
 
-    def _on_dash_toggle_completed(self, /, event: requests.ToggleCompleted) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_dash_toggle_completed({event=!r})")
+        self.states.emit(state)
+
+    def _on_toggle_completed_request(self, /, event: requests.ToggleCompleted) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_toggle_completed_request({event=!r})")
 
         try:
             if event.todo.should_display():
@@ -63,7 +69,7 @@ class TodoController:
 
             todo = self._todo_service.get(todo_id=event.todo.todo_id)
             if isinstance(todo, domain.Error):
-                logger.error(f"{self.__class__.__name__}._on_dash_toggle_completed({event=!r}) failed: {todo!s}")
+                logger.error(f"{self.__class__.__name__}._on_toggle_completed_request({event=!r}) failed: {todo!s}")
                 self._view.dash.set_state(status=str(todo))
                 return None
 
@@ -72,11 +78,12 @@ class TodoController:
                 status=f"{event.todo.description} marked {status}.",
             )
         except Exception as e:
-            logger.exception(e)
+            logger.debug(f"{self.__class__.__name__}._on_toggle_completed_request({event=!r}) failed: {e!s}")
+
             self._view.dash.set_state(status=str(e))
 
-    def _on_dash_delete_btn_clicked(self, /, event: requests.DeleteTodo) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_dash_delete_btn_clicked({event=!r})")
+    def _on_delete_request(self, /, event: requests.DeleteTodo) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_delete_request({event=!r})")
 
         try:
             if popup.confirm(question=f"Are you sure you want to delete {event.todo.description}?"):
@@ -87,11 +94,12 @@ class TodoController:
                     status=f"{event.todo.description} deleted.",
                 )
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_delete_request({event=!r}) failed: {e!s}")
+
             self._view.dash.set_state(status=str(e))
 
-    def _on_dash_edit_btn_clicked(self, /, event: requests.EditTodo) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_dash_edit_btn_clicked()")
+    def _on_edit_request(self, /, event: requests.EditTodo) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_edit_request()")
 
         try:
             form_state = TodoFormState.from_domain(todo=event.todo)
@@ -101,12 +109,12 @@ class TodoController:
                 dash_active=False,
             )
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_edit_request() failed: {e!s}")
 
             self._view.dash.set_state(status=str(e))
 
-    def _on_dash_refresh_btn_clicked(self, /, event: requests.RefreshRequest) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_dash_refresh_btn_clicked({event=!r})")
+    def _on_refresh_request(self, /, event: requests.RefreshRequest) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_refresh_request({event=!r})")
 
         try:
             todos = self._todo_service.where(
@@ -123,17 +131,17 @@ class TodoController:
                 status="Todos refreshed.",
             )
         except Exception as e:
-            logger.error(f"{self.__class__.__name__}._on_dash_refresh_btn_clicked({event=!r}) failed: {e!s}")
+            logger.error(f"{self.__class__.__name__}._on_refresh_request({event=!r}) failed: {e!s}")
 
             self._view.dash.set_state(status=str(e))
 
-    def _on_form_back_btn_clicked(self) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_form_back_btn_clicked()")
+    def _on_back_request(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_back_request()")
 
         self._view.set_state(dash_active=True)
 
-    def _on_form_save_btn_clicked(self, /, event: requests.SaveRequest) -> None:
-        logger.debug(f"{self.__class__.__name__}._on_form_save_btn_clicked({event=!r})")
+    def _on_save_request(self, /, event: requests.SaveRequest) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_save_request({event=!r})")
 
         try:
             error_messages: list[str] = []
@@ -187,6 +195,6 @@ class TodoController:
 
                 self._view.set_state(dash_active=True)
         except Exception as e:
-            logger.error(f"{self.__class__.__name__}._on_form_save_btn_clicked({event=!r}) failed: {e!s}")
+            logger.error(f"{self.__class__.__name__}._on_save_request({event=!r}) failed: {e!s}")
 
             popup.error_message(message=str(e))

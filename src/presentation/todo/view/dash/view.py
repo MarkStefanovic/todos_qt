@@ -8,25 +8,20 @@ from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
 from src.presentation.shared import fonts, icons
 from src.presentation.shared.widgets import table_view, StatusBar
-from src.presentation.todo import requests
-
-__all__ = ("TodoDash",)
+from src.presentation.todo.view.dash import requests
 
 from src.presentation.todo.view.dash.state import TodoDashState
 
 from src.presentation.user_selector import UserSelectorWidget
 
+__all__ = ("TodoDash",)
+
 
 class TodoDash(qtw.QWidget):
-    add_requests = qtc.pyqtSignal()
-    delete_requests = qtc.pyqtSignal(requests.DeleteTodo)
-    edit_requests = qtc.pyqtSignal(requests.EditTodo)
-    refresh_requests = qtc.pyqtSignal()
-    toggle_completed_requests = qtc.pyqtSignal(requests.ToggleCompleted)
-
     def __init__(
         self,
         *,
+        todo_dash_requests: requests.TodoDashRequests,
         category_selector: CategorySelectorWidget,
         user_selector: UserSelectorWidget,
         current_user: domain.User,
@@ -34,6 +29,7 @@ class TodoDash(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
+        self._requests: typing.Final[requests.TodoDashRequests] = todo_dash_requests
         self._category_selector: typing.Final[CategorySelectorWidget] = category_selector
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
         self._current_user: typing.Final[domain.User] = current_user
@@ -206,7 +202,7 @@ class TodoDash(qtw.QWidget):
         return TodoDashState(
             due_filter=self._due_chk.isChecked(),
             description_filter=self._description_filter_txt.text(),
-            category_filter=self._category_selector.get_selected_item(),
+            category_filter=self._category_selector.selected_item(),
             user_filter=self._user_selector.get_selected_item(),
             selected_todo=self._table.selected_item,
             todos=tuple(self._table.items),
@@ -221,84 +217,55 @@ class TodoDash(qtw.QWidget):
     def refresh(self) -> None:
         self._refresh_btn.click()
 
-    def set_state(
-        self,
-        *,
-        added_todo: domain.Todo | None = None,
-        category_filter: domain.Category | domain.Unspecified = domain.Unspecified,
-        categories_stale: bool | domain.Unspecified = domain.Unspecified,
-        deleted_todo: domain.Todo | None = None,
-        description_filter: str | domain.Unspecified = domain.Unspecified,
-        due_filter: bool | domain.Unspecified = domain.Unspecified,
-        selected_todo: domain.Todo | domain.Unspecified = domain.Unspecified,
-        todos: tuple[domain.Todo, ...] | domain.Unspecified = domain.Unspecified,
-        updated_todo: domain.Todo | None = None,
-        user_filter: domain.User | domain.Unspecified = domain.Unspecified,
-        users_stale: bool | domain.Unspecified = domain.Unspecified,
-        status: str | domain.Unspecified = domain.Unspecified,
-    ) -> None | domain.Error:
+    def set_state(self, /, state: TodoDashState) -> None:
         try:
-            if not isinstance(added_todo, domain.Unspecified):
-                self._table.add_item(added_todo)
+            if state.added_todo:
+                self._table.add_item(state.added_todo)
 
-            if not isinstance(user_filter, domain.Unspecified):
-                self._user_selector.select_item(user_filter)
+            if isinstance(state.user_filter, domain.User):
+                self._user_selector.select_item(state.user_filter)
 
-            if not isinstance(users_stale, domain.Unspecified):
+            if state.users_stale is True:
                 self._user_selector.refresh()
 
-            if not isinstance(category_filter, domain.Unspecified):
-                self._category_selector.select_item(category_filter)
+            if state.categories_stale is True:
+                self._category_selector.refresh()
 
-            if not isinstance(categories_stale, domain.Unspecified):
-                if categories_stale:
-                    self._category_selector.refresh()
+            if isinstance(state.category_filter, domain.Category):
+                self._category_selector.select_item(state.category_filter)
 
-            if not isinstance(due_filter, domain.Unspecified):
-                self._due_chk.setChecked(due_filter)
+            if state.categories_stale is True:
+                self._category_selector.refresh()
 
-            if not isinstance(description_filter, domain.Unspecified):
-                self._description_filter_txt.setText(description_filter)
+            if isinstance(state.due_filter, bool):
+                self._due_chk.setChecked(state.due_filter)
 
-            if not isinstance(deleted_todo, domain.Unspecified):
-                self._table.delete_item(key=deleted_todo.todo_id)
+            if isinstance(state.description_filter, str):
+                self._description_filter_txt.setText(state.description_filter)
 
-            if not isinstance(todos, domain.Unspecified):
-                self._table.set_items(todos)
+            if state.deleted_todo:
+                self._table.delete_item(key=state.deleted_todo.todo_id)
 
-            if not isinstance(updated_todo, domain.Unspecified):
-                self._table.update_item(updated_todo)
+            if not isinstance(state.todos, domain.Unspecified):
+                self._table.set_items(state.todos)
 
-            if not isinstance(selected_todo, domain.Unspecified):
-                selected_todo = selected_todo
+            if state.updated_todo:
+                self._table.update_item(state.updated_todo)
 
-                if selected_todo is None:
+            if isinstance(state.selected_todo, domain.Todo):
+                self._table.select_item_by_key(key=state.selected_todo.todo_id)
+            else:
+                if state.selected_todo is None:
                     self._table.clear_selection()
-                else:
-                    self._table.select_item_by_key(key=selected_todo.todo_id)
 
-            if not isinstance(status, domain.Unspecified):
-                self._status_bar.showMessage(status)
+            if isinstance(state.status, str):
+                self._status_bar.showMessage(state.status)
 
             self.repaint()
         except Exception as e:
-            return domain.Error.new(
-                str(e),
-                args={
-                    "added_todo": added_todo,
-                    "category_filter": category_filter,
-                    "categories_stale": categories_stale,
-                    "deleted_todo": deleted_todo,
-                    "description_filter": description_filter,
-                    "due_filter": due_filter,
-                    "selected_todo": selected_todo,
-                    "todos": todos,
-                    "updated_todo": updated_todo,
-                    "user_filter": user_filter,
-                    "users_stale": users_stale,
-                    "status": status,
-                },
-            )
+            logger.error(f"{self.__class__.__name__}.set_state(...) failed: {e}")
+
+            self._status_bar.set_status(str(e))
 
     def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
@@ -311,7 +278,7 @@ class TodoDash(qtw.QWidget):
                 ):
                     request = requests.DeleteTodo(todo=event.item)
 
-                    self.delete_requests.emit(request)
+                    self._requests.delete.emit(request)
             case "edit":
                 if domain.permissions.user_can_edit_todo(
                     user=self._current_user,
@@ -319,11 +286,11 @@ class TodoDash(qtw.QWidget):
                 ):
                     request = requests.EditTodo(todo=event.item)
 
-                    self.edit_requests.emit(request)
+                    self._requests.edit.emit(request)
             case "complete":
                 request = requests.ToggleCompleted(todo=event.item)
 
-                self.toggle_completed_requests.emit(request)
+                self._requests.toggle_completed.emit(request)
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
@@ -336,7 +303,7 @@ class TodoDash(qtw.QWidget):
         ):
             edit_request = requests.EditTodo(todo=event.item)
 
-            self.edit_requests.emit(edit_request)
+            self._requests.edit.emit(edit_request)
 
     def _on_refresh_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_refresh_btn_clicked()")
@@ -344,11 +311,11 @@ class TodoDash(qtw.QWidget):
         request = requests.RefreshRequest(
             is_due=self._due_chk.isChecked(),
             description=self._description_filter_txt.text(),
-            category=self._category_selector.get_selected_item(),
+            category=self._category_selector.selected_item(),
             user=self._user_selector.get_selected_item(),
         )
 
-        self.refresh_requests.emit(request)
+        self._requests.refresh.emit(request)
 
 
 def _render_days(days: int | None, /) -> str:

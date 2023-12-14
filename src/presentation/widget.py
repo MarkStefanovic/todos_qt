@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
-from src import service
+from src import service, domain
 from src.presentation.category.widget import CategoryWidget
 from src.presentation.todo.widget import TodoWidget
 from src.presentation.view import MainView
@@ -15,14 +16,14 @@ class MainWidget(qtw.QMainWindow):
         self,
         *,
         window_icon: qtg.QIcon,
-        username: str,
+        current_user: domain.User,
         category_service: service.CategoryService,
         todo_service: service.TodoService,
         user_service: service.UserService,
     ):
         super().__init__()
 
-        self.setWindowTitle(f"Todos - {username}")
+        self.setWindowTitle(f"Todos - {current_user.username}")
 
         self.setWindowIcon(window_icon)
 
@@ -36,14 +37,13 @@ class MainWidget(qtw.QMainWindow):
 
         category_widget = CategoryWidget(
             category_service=category_service,
-            user_service=user_service,
+            current_user=current_user,
             parent=self,
         )
 
         todo_widget = TodoWidget(
-            category_service=category_service,
             todo_service=todo_service,
-            user_service=user_service,
+            current_user=current_user,
             parent=self,
         )
 

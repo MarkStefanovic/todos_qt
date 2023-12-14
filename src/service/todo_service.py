@@ -16,101 +16,130 @@ class TodoService(domain.TodoService):
         *,
         engine: sa.engine.Engine,
         username: str,
-        min_seconds_between_refreshes: int = 300,
     ):
         self._engine: typing.Final[sa.engine.Engine] = engine
         self._username: typing.Final[str] = username
-        self._min_seconds_between_refreshes: typing.Final[int] = min_seconds_between_refreshes
 
-        self._todos: dict[str, domain.Todo] = {}
-        self._last_refresh: datetime.datetime | None = None
+    def add(self, *, todo: domain.Todo) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.todo_repo.add(con=con, todo=todo)
+        except Exception as e:
+            return domain.Error.new(str(e), todo=todo)
 
-    def add(self, *, todo: domain.Todo) -> None:
-        repo = adapter.DbTodoRepository(engine=self._engine)
-        repo.add(todo=todo)
-        if self._todos is not None:
-            self._todos[todo.todo_id] = todo
+    def add_default_holidays_for_all_users(self) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                users = adapter.user_repo.where(con=con)
+                if isinstance(users, domain.Error):
+                    return users
 
-    def add_default_holidays_for_all_users(self) -> None:
-        user_repo = adapter.DbUserRepository(engine=self._engine)
-        users = user_repo.all_todos()
+                for user in users:
+                    for holiday in domain.HOLIDAYS:
+                        todo = self.get_by_template_id_and_user_id(
+                            template_id=holiday.todo_id,
+                            user_id=user.user_id,
+                        )
 
-        for user in users:
-            for holiday in domain.HOLIDAYS:
-                if (
-                    self.get_by_template_id_and_user_id(
-                        template_id=holiday.todo_id,
-                        user_id=user.user_id,
-                    )
-                    is None
-                ):
-                    new_holiday = dataclasses.replace(
-                        holiday,
-                        todo_id=domain.create_uuid(),
-                        template_todo_id=holiday.todo_id,
-                        user=user,
-                    )
-                    self.add(todo=new_holiday)
+                        if todo is None:
+                            new_holiday = dataclasses.replace(
+                                holiday,
+                                todo_id=domain.create_uuid(),
+                                template_todo_id=holiday.todo_id,
+                                user=user,
+                            )
 
-    def cleanup(self) -> None:
-        self._refresh()
+                            add_result = adapter.todo_repo.add(con=con, todo=new_holiday)
+                            if isinstance(add_result, domain.Error):
+                                return add_result
+            return None
+        except Exception as e:
+            return domain.Error.new(str(e))
 
-        cutoff_date = datetime.date.today() - datetime.timedelta(days=5)
+    def cleanup(self) -> None | domain.Error:
+        try:
+            cutoff_date = datetime.date.today() - datetime.timedelta(days=5)
 
-        for todo_id, todo in copy.copy(self._todos).items():
-            if todo.frequency.name == domain.FrequencyType.Once:
-                if todo.last_completed and todo.last_completed < cutoff_date:
-                    self.delete(todo_id=todo_id)
+            with self._engine.begin() as con:
+                for todo_id, todo in copy.copy(self._todos).items():
+                    if todo.frequency.name == domain.FrequencyType.Once:
+                        if todo.last_completed and todo.last_completed < cutoff_date:
+                            delete_result = adapter.todo_repo.delete(con=con, todo_id=todo_id)
+                            if isinstance(delete_result, domain.Error):
+                                return delete_result
 
-    def delete(self, *, todo_id: str) -> None:
-        self._refresh()
+            return None
+        except Exception as e:
+            return domain.Error.new(str(e))
 
-        repo = adapter.DbTodoRepository(engine=self._engine)
-        repo.delete(todo_id=todo_id)
+    def delete(self, *, todo_id: str) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.todo_repo.delete(con=con, todo_id=todo_id)
+        except Exception as e:
+            return domain.Error.new(str(e), todo_id=todo_id)
 
-        if self._todos is not None:
-            del self._todos[todo_id]
+    def get(self, *, todo_id: str) -> domain.Todo | None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.todo_repo.get_by_id(con=con, todo_id=todo_id)
+        except Exception as e:
+            return domain.Error.new(str(e), todo_id=todo_id)
 
-    def get(self, *, todo_id: str) -> domain.Todo | None:
-        self._refresh()
+    def get_by_template_id_and_user_id(
+        self,
+        *,
+        template_id: str,
+        user_id: str,
+    ) -> domain.Todo | None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                todos = adapter.todo_repo.all_todos(con=con)
+                if isinstance(todos, domain.Error):
+                    return todos
 
-        return self._todos.get(todo_id)
+                return next(
+                    (todo for todo in todos if todo.template_todo_id == template_id and todo.user.user_id == user_id),
+                    None,
+                )
+        except Exception as e:
+            return domain.Error.new(str(e), template_id=template_id, user_id=user_id)
 
-    def get_by_template_id_and_user_id(self, *, template_id: str, user_id: str) -> domain.Todo | None:
-        self._refresh()
+    def mark_complete(
+        self,
+        *,
+        todo_id: str,
+        user: domain.User | None,
+    ) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                todo = adapter.todo_repo.get_by_id(con=con, todo_id=todo_id)
+                if isinstance(todo, domain.Error):
+                    return todo
 
-        return next(
-            (
-                todo
-                for todo in self._todos.values()
-                if todo.template_todo_id == template_id and todo.user.user_id == user_id
-            ),
-            None,
-        )
+                if todo is None:
+                    return None
 
-    def mark_complete(self, *, todo_id: str, user: domain.User | None) -> None:
-        repo = adapter.DbTodoRepository(engine=self._engine)
+                if todo.last_completed:
+                    prior_completed = todo.last_completed
+                    prior_completed_by = todo.last_completed_by
+                else:
+                    prior_completed = None
+                    prior_completed_by = None
 
-        if todo := repo.get(todo_id=todo_id):
-            if todo.last_completed:
-                prior_completed = todo.last_completed
-                prior_completed_by = todo.last_completed_by
-            else:
-                prior_completed = None
-                prior_completed_by = None
+                updated_todo = dataclasses.replace(
+                    todo,
+                    last_completed=datetime.date.today(),
+                    prior_completed=prior_completed,
+                    last_completed_by=user,
+                    prior_completed_by=prior_completed_by,
+                )
 
-            updated_todo = dataclasses.replace(
-                todo,
-                last_completed=datetime.date.today(),
-                prior_completed=prior_completed,
-                last_completed_by=user,
-                prior_completed_by=prior_completed_by,
-            )
+                adapter.todo_repo.update(con=con, todo=updated_todo)
 
-            repo.update(todo=updated_todo)
-
-            if self._todos is not None:
-                self._todos[todo_id] = updated_todo
+            return None
+        except Exception as e:
+            return domain.Error.new(str(e), todo_id=todo_id, user=user)
 
     def where(
         self,
@@ -119,32 +148,42 @@ class TodoService(domain.TodoService):
         description_like: str,
         category_id_filter: str | None,
         user_id_filter: str | None,
-    ) -> list[domain.Todo]:
-        self._refresh()
+    ) -> list[domain.Todo] | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                todos = adapter.todo_repo.all_todos(con=con)
+                if isinstance(todos, domain.Error):
+                    return todos
 
-        todos = (todo for todo in self._todos.values())
+            if description := description_like.strip().lower():
+                todos = (todo for todo in todos if description in todo.description.lower())
 
-        if description := description_like.strip().lower():
-            todos = (todo for todo in self._todos.values() if description in todo.description.lower())
+            if due_filter:
+                todos = (todo for todo in todos if todo.should_display())
 
-        if due_filter:
-            todos = (todo for todo in todos if todo.should_display())
+            if user_id_filter:
+                assert not isinstance(user_id_filter, domain.User)
+                todos = (todo for todo in todos if todo.user.user_id == user_id_filter)
 
-        if user_id_filter:
-            assert not isinstance(user_id_filter, domain.User)
-            todos = (todo for todo in todos if todo.user.user_id == user_id_filter)
+            if category_id_filter:
+                todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
 
-        if category_id_filter:
-            todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
-
-        today = datetime.date.today()
-        return sorted(
-            todos,
-            key=(
-                lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today)
-                or datetime.date(1900, 1, 1)
-            ),
-        )
+            today = datetime.date.today()
+            return sorted(
+                todos,
+                key=(
+                    lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today)
+                    or datetime.date(1900, 1, 1)
+                ),
+            )
+        except Exception as e:
+            return domain.Error.new(
+                str(e),
+                due_filter=due_filter,
+                description_like=description_like,
+                category_id_filter=category_id_filter,
+                user_id_filter=user_id_filter,
+            )
 
     def mark_incomplete(self, *, todo_id: str) -> None:
         repo = adapter.DbTodoRepository(engine=self._engine)

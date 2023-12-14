@@ -27,12 +27,14 @@ def add(*, con: sa.Connection, user: User) -> None | domain.Error:
         return domain.Error.new(str(e), user=user)
 
 
-def all_users(*, con: sa.Connection) -> list[User] | domain.Error:
+def where(*, con: sa.Connection, active: bool) -> list[User] | domain.Error:
     try:
-        # noinspection PyComparisonWithNone
-        result = con.execute(
-            sa.select(db.user).where(db.user.c.date_deleted == None)  # noqa
-        )
+        qry = sa.select(db.user)
+
+        if active:
+            qry = qry.where(db.user.c.date_deleted == None)  # noqa
+
+        result = con.execute(qry.order_by(db.user.c.display_name))
 
         return [
             domain.User(
@@ -62,7 +64,7 @@ def delete_user(
         return domain.Error.new(str(e), user_id=user_id)
 
 
-def get_user_by_id(
+def get(
     *,
     con: sa.Connection,
     user_id: str,

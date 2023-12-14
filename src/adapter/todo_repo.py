@@ -5,7 +5,13 @@ import sqlalchemy as sa
 from src import domain
 from src.adapter import db, category_repo, user_repo
 
-__all__ = ("add",)
+__all__ = (
+    "add",
+    "delete",
+    "get",
+    "update",
+    "where",
+)
 
 
 FREQUENCY_LKP = {
@@ -34,100 +40,103 @@ FREQUENCY_NAME_LKP = {
 
 
 # noinspection PyComparisonWithNone
-def add(*, con: sa.Connection, todo: domain.Todo) -> None:
-    if todo.todo_id == "":
-        raise ValueError(f"Not a valid uuid: {todo.todo_id}")
-
-    if todo.frequency.week_day is None:
-        week_day = None
-    else:
-        week_day = todo.frequency.week_day.to_int()
-
-    if todo.frequency.month is None:
-        month = None
-    else:
-        month = todo.frequency.month.to_int()
-
-    if todo.last_completed_by:
-        last_completed_by_user_id = todo.last_completed_by.user_id
-    else:
-        last_completed_by_user_id = None
-
-    if todo.prior_completed_by:
-        prior_completed_by_user_id = todo.prior_completed_by.user_id
-    else:
-        prior_completed_by_user_id = None
-
-    con.execute(
-        sa.insert(db.todo).values(
-            todo_id=todo.todo_id,
-            template_todo_id=todo.template_todo_id,
-            expire_days=todo.frequency.expire_display_days,
-            advance_days=todo.frequency.advance_display_days,
-            user_id=todo.user.user_id,
-            category_id=todo.category.category_id,
-            description=todo.description,
-            note=todo.note,
-            start_date=todo.frequency.start_date,
-            date_added=todo.date_added,
-            date_updated=todo.date_updated,
-            date_deleted=None,
-            frequency=FREQUENCY_NAME_LKP[todo.frequency.name],
-            week_day=week_day,
-            week_number=todo.frequency.week_number,
-            month=month,
-            month_day=todo.frequency.month_day,
-            days=todo.frequency.days,
-            due_date=todo.frequency.due_date,
-            last_completed=todo.last_completed,
-            prior_completed=todo.prior_completed,
-            last_completed_by=last_completed_by_user_id,
-            prior_completed_by=prior_completed_by_user_id,
-        )
-    )
-
-
-def all_todos(*, con: sa.Connection) -> list[domain.Todo] | domain.Error:
+def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
     try:
-        category_lkp = {c.category_id: c for c in category_repo.get_active(con=con)}
+        if todo.todo_id == "":
+            return domain.Error.new(f"Not a valid uuid: {todo.todo_id}", todo=todo)
 
-        user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
+        if todo.frequency.week_day is None:
+            week_day = None
+        else:
+            week_day = todo.frequency.week_day.to_int()
 
-        result = con.execute(
-            sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
-        )
+        if todo.frequency.month is None:
+            month = None
+        else:
+            month = todo.frequency.month.to_int()
 
-        return [
-            domain.Todo(
-                todo_id=row.todo_id,
-                template_todo_id=row.template_todo_id,
-                category=category_lkp[row.category_id],
-                user=user_lkp.get(row.user_id, domain.DEFAULT_USER),
-                description=row.description,
-                frequency=_parse_frequency(
-                    advance_display_days=row.advance_days,
-                    days=row.days,
-                    due_date=row.due_date,
-                    expire_display_days=row.expire_days,
-                    frequency=row.frequency,
-                    month=row.month,
-                    month_day=row.month_day,
-                    start_date=row.start_date,
-                    week_day=row.week_day,
-                    week_number=row.week_number,
-                ),
-                note=row.note,
-                last_completed=row.last_completed,
-                last_completed_by=user_lkp.get(row.last_completed_by or ""),
-                prior_completed=row.prior_completed,
-                prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
-                date_added=row.date_added,
-                date_updated=row.date_updated,
+        if todo.last_completed_by:
+            last_completed_by_user_id = todo.last_completed_by.user_id
+        else:
+            last_completed_by_user_id = None
+
+        if todo.prior_completed_by:
+            prior_completed_by_user_id = todo.prior_completed_by.user_id
+        else:
+            prior_completed_by_user_id = None
+
+        con.execute(
+            sa.insert(db.todo).values(
+                todo_id=todo.todo_id,
+                template_todo_id=todo.template_todo_id,
+                expire_days=todo.frequency.expire_display_days,
+                advance_days=todo.frequency.advance_display_days,
+                user_id=todo.user.user_id,
+                category_id=todo.category.category_id,
+                description=todo.description,
+                note=todo.note,
+                start_date=todo.frequency.start_date,
+                date_added=todo.date_added,
+                date_updated=todo.date_updated,
+                date_deleted=None,
+                frequency=FREQUENCY_NAME_LKP[todo.frequency.name],
+                week_day=week_day,
+                week_number=todo.frequency.week_number,
+                month=month,
+                month_day=todo.frequency.month_day,
+                days=todo.frequency.days,
+                due_date=todo.frequency.due_date,
+                last_completed=todo.last_completed,
+                prior_completed=todo.prior_completed,
+                last_completed_by=last_completed_by_user_id,
+                prior_completed_by=prior_completed_by_user_id,
             )
-            for row in result.fetchall()
-        ]
+        )
     except Exception as e:
-        return domain.Error.new(str(e))
+        return domain.Error.new(str(e), todo=todo)
+
+
+# def all_todos(*, con: sa.Connection) -> list[domain.Todo] | domain.Error:
+#     try:
+#         category_lkp = {c.category_id: c for c in category_repo.get_active(con=con)}
+#
+#         user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
+#
+#         result = con.execute(
+#             sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
+#         )
+#
+#         return [
+#             domain.Todo(
+#                 todo_id=row.todo_id,
+#                 template_todo_id=row.template_todo_id,
+#                 category=category_lkp[row.category_id],
+#                 user=user_lkp.get(row.user_id, domain.DEFAULT_USER),
+#                 description=row.description,
+#                 frequency=_parse_frequency(
+#                     advance_display_days=row.advance_days,
+#                     days=row.days,
+#                     due_date=row.due_date,
+#                     expire_display_days=row.expire_days,
+#                     frequency=row.frequency,
+#                     month=row.month,
+#                     month_day=row.month_day,
+#                     start_date=row.start_date,
+#                     week_day=row.week_day,
+#                     week_number=row.week_number,
+#                 ),
+#                 note=row.note,
+#                 last_completed=row.last_completed,
+#                 last_completed_by=user_lkp.get(row.last_completed_by or ""),
+#                 prior_completed=row.prior_completed,
+#                 prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
+#                 date_added=row.date_added,
+#                 date_updated=row.date_updated,
+#             )
+#             for row in result.fetchall()
+#         ]
+#     except Exception as e:
+#         return domain.Error.new(str(e))
 
 
 def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:
@@ -139,7 +148,7 @@ def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
-def get_by_id(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Error:
+def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Error:
     try:
         result = con.execute(sa.select(db.todo).where(db.todo.c.todo_id == todo_id))
 
@@ -149,7 +158,7 @@ def get_by_id(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domai
             return None
 
         user = (
-            user_repo.get_user_by_id(
+            user_repo.get(
                 con=con,
                 user_id=row.user_id,
             )
@@ -157,7 +166,7 @@ def get_by_id(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domai
         )
 
         if row.last_completed_by:
-            last_completed_by = user_repo.get_user_by_id(
+            last_completed_by = user_repo.get(
                 con=con,
                 user_id=row.last_completed_by,
             )
@@ -165,7 +174,7 @@ def get_by_id(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domai
             last_completed_by = None
 
         if row.prior_completed_by:
-            prior_completed_by = user_repo.get_user_by_id(
+            prior_completed_by = user_repo.get(
                 con=con,
                 user_id=row.prior_completed_by,
             )
@@ -254,22 +263,52 @@ def update(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
         return domain.Error.new(str(e), todo=todo)
 
 
-def where_category(*, con: sa.Connection, category_id: str) -> list[domain.Todo] | domain.Error:
-    user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
+def where(
+    *,
+    con: sa.Connection,
+    category_id: str | domain.Unspecified,
+    user_id: str | domain.Unspecified,
+    description_starts_with: str | domain.Unspecified,
+) -> list[domain.Todo] | domain.Error:
+    try:
+        categories = category_repo.where(con=con, active=False)
+        if isinstance(categories, domain.Error):
+            return categories
 
-    if category := category_repo.get(con=con, category_id=category_id):
-        result = con.execute(
-            sa.select(db.todo)
-            .where(db.todo.c.date_deleted == None)  # noqa
-            .where(db.todo.c.category_id == category_id)
-        )
+        users = user_repo.where(con=con, active=False)
+        if isinstance(users, domain.Error):
+            return users
 
-        return [
-            domain.Todo(
+        qry = sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
+
+        if isinstance(category_id, str):
+            qry = qry.where(db.todo.c.category_id == category_id)
+
+        if isinstance(user_id, str):
+            qry = qry.where(db.todo.c.user_id == user_id)
+
+        if isinstance(description_starts_with, str):
+            qry = qry.where(db.todo.c.description.ilike(description_starts_with + "%"))
+
+        category_by_id = {category.category_id: category for category in categories}
+
+        user_by_id = {user.user_id: user for user in users}
+
+        todos: list[domain.Todo] = []
+        for row in con.execute(qry).fetchall():
+            category = category_by_id.get(row.category_id, domain.TODO_CATEGORY)
+
+            user = user_by_id.get(row.user_id, domain.DEFAULT_USER)
+
+            last_completed_by = user_by_id.get(row.last_completed_by)
+
+            prior_completed_by = user_by_id.get(row.prior_completed_by)
+
+            todo = domain.Todo(
                 todo_id=row.todo_id,
                 template_todo_id=row.template_todo_id,
                 category=category,
-                user=user_lkp[row.user_id],
+                user=user,
                 description=row.description,
                 frequency=_parse_frequency(
                     advance_display_days=row.advance_days,
@@ -285,16 +324,66 @@ def where_category(*, con: sa.Connection, category_id: str) -> list[domain.Todo]
                 ),
                 note=row.note,
                 last_completed=row.last_completed,
-                last_completed_by=user_lkp.get(row.last_completed_by or ""),
+                last_completed_by=last_completed_by,
                 prior_completed=row.prior_completed,
-                prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
+                prior_completed_by=prior_completed_by,
                 date_added=row.date_added,
                 date_updated=row.date_updated,
             )
-            for row in result.fetchall()
-        ]
 
-    return []
+            todos.append(todo)
+
+        return todos
+    except Exception as e:
+        return domain.Error.new(
+            str(e),
+            category_id=category_id,
+            user_id=user_id,
+            description_starts_with=description_starts_with,
+        )
+
+
+# def where_category(*, con: sa.Connection, category_id: str) -> list[domain.Todo] | domain.Error:
+#     user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
+#
+#     if category := category_repo.get(con=con, category_id=category_id):
+#         result = con.execute(
+#             sa.select(db.todo)
+#             .where(db.todo.c.date_deleted == None)  # noqa
+#             .where(db.todo.c.category_id == category_id)
+#         )
+#
+#         return [
+#             domain.Todo(
+#                 todo_id=row.todo_id,
+#                 template_todo_id=row.template_todo_id,
+#                 category=category,
+#                 user=user_lkp[row.user_id],
+#                 description=row.description,
+#                 frequency=_parse_frequency(
+#                     advance_display_days=row.advance_days,
+#                     days=row.days,
+#                     due_date=row.due_date,
+#                     expire_display_days=row.expire_days,
+#                     frequency=row.frequency,
+#                     month=row.month,
+#                     month_day=row.month_day,
+#                     start_date=row.start_date,
+#                     week_day=row.week_day,
+#                     week_number=row.week_number,
+#                 ),
+#                 note=row.note,
+#                 last_completed=row.last_completed,
+#                 last_completed_by=user_lkp.get(row.last_completed_by or ""),
+#                 prior_completed=row.prior_completed,
+#                 prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
+#                 date_added=row.date_added,
+#                 date_updated=row.date_updated,
+#             )
+#             for row in result.fetchall()
+#         ]
+#
+#     return []
 
 
 def _parse_frequency(
@@ -386,10 +475,3 @@ def _parse_frequency(
         )
     else:
         raise ValueError(f"Unrecognized frequency, {frequency!r}.")
-
-
-if __name__ == "__main__":
-    eng = db.create_engine()
-    with eng.begin() as cn:
-        for r in all_todos(con=cn):
-            print(r)

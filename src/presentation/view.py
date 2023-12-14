@@ -43,7 +43,7 @@ class MainView(qtw.QWidget):
         self._tabs_loaded: set[int] = set()
 
     def on_load(self) -> None:
-        self._todos.show_current_user_todos()
+        self._todos.dash.refresh()
         self._tabs_loaded.add(0)
 
     def _on_enter_key_pressed(self) -> None:
@@ -78,4 +78,4 @@ class MainView(qtw.QWidget):
                 self._categories.refresh_dash()
         else:
             if self._users.current_view() == "dash":
-                self._users.dash._refresh_btn.click()
+                self._users._dash._refresh_btn.click()

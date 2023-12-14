@@ -1,166 +1,153 @@
-import dataclasses
-import datetime
 import logging
+import typing
 
 from src import domain
-from src.presentation.category import requests
-from src.presentation.category.form.state import CategoryFormState
-from src.presentation.category.view import CategoryView
+from src.presentation.category import dash, form
+from src.presentation.category.state import CategoryState
 from src.presentation.shared.widgets import popup
+
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc
 
 __all__ = ("CategoryController",)
 
 logger = logging.getLogger()
 
 
-class CategoryController:
+class CategoryController(qtc.QObject):
+    states = qtc.pyqtSignal(CategoryState)
+
     def __init__(
         self,
         *,
         category_service: domain.CategoryService,
-        user_service: domain.UserService,
-        view: CategoryView,
+        dash_requests: dash.requests.CategoryDashRequests,
+        form_requests: form.requests.CategoryFormRequests,
+        parent: qtc.QObject,
     ):
-        self._category_service = category_service
-        self._user_service = user_service
-        self._view = view
+        super().__init__(parent=parent)
 
-        self._view.dash.add_requests.connect(self._on_dash_add_btn_clicked)
-        self._view.dash.refresh_requests.connect(self._on_dash_refresh_btn_clicked)
-        self._view.dash.delete_requests.connect(self._on_dash_delete_btn_clicked)
-        self._view.dash.edit_requests.connect(self._on_dash_edit_btn_clicked)
+        self._category_service: typing.Final[domain.CategoryService] = category_service
+        self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash_requests
+        self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form_requests
 
-        self._view.form.back_btn.clicked.connect(self._on_form_back_btn_clicked)
-        self._view.form.save_btn.clicked.connect(self._on_form_save_btn_clicked)
+        self._dash_requests.add.connect(self._on_add_request)
+        self._dash_requests.delete.connect(self._on_delete_request)
+        self._dash_requests.edit.connect(self._on_edit_request)
+        self._dash_requests.refresh.connect(self.refresh)
 
-    def _on_dash_add_btn_clicked(self) -> None:
-        state = self._view.get_state()
+        self._form_requests.back.connect(self._on_back_request)
+        self._form_requests.save.connect(self._on_save_request)
 
-        new_state = dataclasses.replace(
-            state,
-            form_state=CategoryFormState.initial(),
-            dash_active=False,
-        )
+    def refresh(self) -> None:
+        logger.debug(f"{self.__class__.__name__}.refresh()")
 
-        self._view.set_state(state=new_state)
+        try:
+            categories = self._category_service.all()
 
-    def _on_dash_delete_btn_clicked(self, /, request: requests.DeleteCategory) -> None:
-        state = self._view.get_state()
+            state = CategoryState(
+                dash_state=dash.CategoryDashState(
+                    categories=categories,
+                    status="Refreshed.",
+                ),
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.refresh() failed: {e!s}")
+
+            state = CategoryState.set_status(str(e))
+
+        self.states.emit(state)
+
+    def _on_add_request(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_add_request()")
+
+        try:
+            state = CategoryState(
+                form_state=form.CategoryFormState.initial(),
+                dash_active=False,
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}._on_add_request() failed: {e!s}")
+
+            state = CategoryState.set_status(str(e))
+
+        self.states.emit(state)
+
+    def _on_delete_request(self, /, request: dash.requests.Delete) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_delete_request({request=!r})")
 
         try:
             if popup.confirm(question=f"Are you sure you want to delete {request.category.name}?"):
                 self._category_service.delete(category_id=request.category.category_id)
-
-                categories = self._category_service.all()
-
-                new_state = dataclasses.replace(
-                    state,
-                    dash_state=dataclasses.replace(
-                        state.dash_state,
-                        categories=categories,
-                        status=_add_timestamp(message=f"Deleted {request.category.name}."),
-                    ),
+                state = CategoryState(
+                    dash_state=dash.CategoryDashState(
+                        category_deleted=request.category,
+                        status=f"Deleted {request.category.name}.",
+                    )
                 )
 
-                self._view.set_state(state=new_state)
+                self.states.emit(state)
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_delete_request({request=!r}) failed: {e!s}")
 
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                ),
-            )
+            state = CategoryState.set_status(str(e))
 
-            self._view.set_state(state=new_state)
+            self.states.emit(state)
 
-    def _on_dash_edit_btn_clicked(self, /, request: requests.EditCategory) -> None:
-        state = self._view.get_state()
-
-        new_state = dataclasses.replace(
-            state,
-            form_state=CategoryFormState.from_domain(category=request.category),
-            dash_active=False,
-        )
-
-        self._view.set_state(state=new_state)
-
-    def _on_dash_refresh_btn_clicked(self) -> None:
-        state = self._view.get_state()
+    def _on_edit_request(self, /, request: dash.requests.Edit) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_edit_request({request=!r})")
 
         try:
-            categories = self._category_service.all()
-
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    categories=categories,
-                    current_user=self._user_service.current_user(),
-                    status=_add_timestamp(message="Refreshed."),
-                ),
+            state = CategoryState(
+                form_state=form.CategoryFormState.from_domain(category=request.category),
+                dash_active=False,
             )
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_edit_request({request=!r}) failed: {e!s}")
 
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                ),
-            )
+            state = CategoryState.set_status(str(e))
 
-        self._view.set_state(state=new_state)
+        self.states.emit(state)
 
-    def _on_form_back_btn_clicked(self) -> None:
-        state = self._view.get_state()
-
-        new_state = dataclasses.replace(state, dash_active=True)
-
-        self._view.set_state(state=new_state)
-
-    def _on_form_save_btn_clicked(self) -> None:
-        state = self._view.get_state()
+    def _on_back_request(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_back_request()")
 
         try:
-            category = state.form_state.to_domain()
+            state = CategoryState(dash_active=True)
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}._on_back_request() failed: {e!s}")
 
-            if self._category_service.get(category_id=category.category_id):
-                self._category_service.update(category=category)
-                status = f"{category.name} updated."
+            state = CategoryState.set_status(str(e))
+
+        self.states.emit(state)
+
+    def _on_save_request(self, /, event: form.requests.Save) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_save_request({event=!r})")
+
+        try:
+            if self._category_service.get(category_id=event.category.category_id):
+                self._category_service.update(category=event.category)
+
+                state = CategoryState(
+                    dash_state=dash.CategoryDashState(
+                        category_edited=event.category,
+                        status=f"{event.category.name} updated.",
+                    ),
+                    dash_active=True,
+                )
             else:
-                self._category_service.add(category=category)
-                status = f"{category.name} added."
+                self._category_service.add(category=event.category)
 
-            categories = self._category_service.all()
-
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    categories=categories,
-                    status=_add_timestamp(message=status),
-                ),
-                dash_active=True,
-            )
+                state = CategoryState(
+                    dash_state=dash.CategoryDashState(
+                        category_added=event.category,
+                        status=f"{event.category.name} added.",
+                    ),
+                    dash_active=True,
+                )
         except Exception as e:
-            logger.exception(e)
+            logger.error(f"{self.__class__.__name__}._on_save_request({event=!r}) failed: {e!s}")
 
-            new_state = dataclasses.replace(
-                state,
-                dash_state=dataclasses.replace(
-                    state.dash_state,
-                    status=_add_timestamp(message=str(e)),
-                ),
-                dash_active=True,
-            )
+            state = CategoryState.set_status(str(e))
 
-        self._view.set_state(state=new_state)
-
-
-def _add_timestamp(*, message: str) -> str:
-    ts_str = datetime.datetime.now().strftime("%m/%d @ %I:%M %p")
-    return f"{ts_str}: {message}"
+        self.states.emit(state)

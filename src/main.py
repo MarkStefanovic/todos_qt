@@ -5,13 +5,14 @@ import types
 import typing
 
 from loguru import logger
+
+# noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src import adapter, domain, presentation, service
+from src.adapter import config
 
 __all__ = ("main",)
-
-from src.adapter import config
 
 
 def cobalt() -> qtg.QPalette:

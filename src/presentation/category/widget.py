@@ -2,7 +2,8 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src import service
+from src import service, domain
+from src.presentation.category import form, dash
 from src.presentation.category.controller import CategoryController
 from src.presentation.category.view import CategoryView
 
@@ -15,17 +16,28 @@ class CategoryWidget(qtw.QWidget):
         self,
         *,
         category_service: service.CategoryService,
-        user_service: service.UserService,
+        current_user: domain.User,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
-        self._view = CategoryView(parent=self)
+        self._dash_requests = dash.requests.CategoryDashRequests()
+
+        self._form_requests = form.requests.CategoryFormRequests()
 
         self._controller = CategoryController(
             category_service=category_service,
-            user_service=user_service,
-            view=self._view,
+            dash_requests=self._dash_requests,
+            form_requests=self._form_requests,
+            parent=self,
+        )
+
+        self._view = CategoryView(
+            current_user=current_user,
+            dash_requests=self._dash_requests,
+            form_requests=self._form_requests,
+            states=self._controller.states,
+            parent=self,
         )
 
         layout = qtw.QStackedLayout()
@@ -36,7 +48,7 @@ class CategoryWidget(qtw.QWidget):
         return self._view.current_view()
 
     def refresh_dash(self) -> None:
-        self._view.refresh_dash()
+        return self._controller.refresh()
 
     def save_form(self) -> None:
         return self._view.save_form()

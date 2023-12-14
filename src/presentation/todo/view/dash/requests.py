@@ -1,13 +1,22 @@
 import dataclasses
 
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc
+
 from src import domain
 
 __all__ = (
+    "AddTodo",
     "DeleteTodo",
     "EditTodo",
     "RefreshRequest",
     "ToggleCompleted",
 )
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class AddTodo:
+    todo: domain
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -29,10 +38,13 @@ class RefreshRequest:
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class SaveRequest:
-    todo: domain.Todo
-
-
-@dataclasses.dataclass(frozen=True, kw_only=True)
 class ToggleCompleted:
     todo: domain.Todo
+
+
+class TodoDashRequests(qtc.QObject):
+    add = qtc.pyqtSignal(AddTodo)
+    delete = qtc.pyqtSignal(DeleteTodo)
+    edit = qtc.pyqtSignal(EditTodo)
+    refresh = qtc.pyqtSignal(RefreshRequest)
+    toggle_completed = qtc.pyqtSignal(ToggleCompleted)

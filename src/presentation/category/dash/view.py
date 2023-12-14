@@ -1,31 +1,32 @@
 from __future__ import annotations
 
+import typing
 
+import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
-
 from loguru import logger
 
 from src import domain
-from src.presentation.category import requests
+from src.presentation.category.dash import requests
 from src.presentation.category.dash.state import CategoryDashState
 from src.presentation.shared import fonts, icons
-from src.presentation.shared.widgets import table_view
-
-import qtawesome as qta
+from src.presentation.shared.widgets import table_view, StatusBar
 
 __all__ = ("CategoryDash",)
 
 
-class CategoryDash(qtw.QWidget):
-    add_requests = qtc.pyqtSignal()
-    delete_requests = qtc.pyqtSignal(requests.DeleteCategory)
-    edit_requests = qtc.pyqtSignal(requests.EditCategory)
-    refresh_requests = qtc.pyqtSignal()
-
-    def __init__(self, *, parent: qtw.QWidget | None = None):
+class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
+    def __init__(
+        self,
+        *,
+        dash_requests: requests.CategoryDashRequests,
+        current_user: domain.User,
+        parent: qtw.QWidget | None = None,
+    ):
         super().__init__(parent=parent)
 
-        self._current_user = domain.DEFAULT_USER
+        self._dash_requests: typing.Final[requests.CategoryDashRequests] = dash_requests
+        self._current_user: typing.Final[domain.User] = current_user
 
         refresh_btn_icon = qta.icon(
             icons.refresh_btn_icon_name,
@@ -97,7 +98,7 @@ class CategoryDash(qtw.QWidget):
             parent=self,
         )
 
-        self._status_bar = qtw.QStatusBar()
+        self._status_bar = StatusBar(parent=self)
 
         layout = qtw.QVBoxLayout()
         layout.addLayout(toolbar_layout)
@@ -108,31 +109,54 @@ class CategoryDash(qtw.QWidget):
         self._table_view.button_clicked.connect(self._on_button_clicked)
         self._table_view.double_click.connect(self._on_double_click)
         # noinspection PyUnresolvedReferences
-        self._add_btn.clicked.connect(lambda _: self.add_requests.emit())
+        self._add_btn.clicked.connect(self._on_btn_clicked)
         # noinspection PyUnresolvedReferences
-        self._refresh_btn.clicked.connect(lambda _: self.refresh_requests.emit())
+        self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
 
-    # def get_state(self) -> CategoryDashState:
-    #     return CategoryDashState(
-    #         categories=self._table_view.items,
-    #         selected_category=self._table_view.selected_item,
-    #         status=self._status_bar.currentMessage(),
-    #         current_user=self._current_user,
-    #     )
-    #
-    # def refresh(self) -> None:
-    #     self.refresh_requests.emit()
-    #
-    # def set_state(self, *, state: CategoryDashState) -> None:
-    #     self._current_user = state.current_user
-    #     self._table_view.set_items(state.categories)
-    #     if state.selected_category is None:
-    #         self._table_view.clear_selection()
-    #     else:
-    #         self._table_view.select_item_by_key(key=state.selected_category.category_id)
-    #     self._status_bar.showMessage(state.status)
+    def get_state(self) -> CategoryDashState:
+        return CategoryDashState(
+            categories=self._table_view.items,
+            selected_category=self._table_view.selected_item,
+            status=self._status_bar.currentMessage(),
+        )
 
-    def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Category, str]) -> None:
+    def refresh(self) -> None:
+        logger.debug(f"{self.__class__.__name__}.refresh()")
+
+        self._dash_requests.refresh.emit()
+
+    def set_state(self, /, state: CategoryDashState) -> None:
+        if not isinstance(state.categories, domain.Unspecified):
+            self._table_view.set_items(state.categories)
+
+        if not isinstance(state.selected_category, domain.Unspecified):
+            if state.selected_category is None:
+                self._table_view.clear_selection()
+            else:
+                self._table_view.select_item_by_key(state.selected_category.category_id)
+
+        if not isinstance(state.status, domain.Unspecified):
+            self._status_bar.set_status(state.status)
+
+        if not isinstance(state.category_added, domain.Unspecified):
+            self._table_view.add_item(state.category_added)
+
+        if not isinstance(state.category_deleted, domain.Unspecified):
+            self._table_view.delete_item(key=state.category_deleted.category_id)
+
+        if not isinstance(state.category_edited, domain.Unspecified):
+            self._table_view.update_item(state.category_edited)
+
+    def _on_add_btn_clicked(self, /, _: bool) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_add_btn_clicked()")
+
+        self._dash_requests.add.emit()
+
+    def _on_button_clicked(
+        self,
+        /,
+        event: table_view.ButtonClickedEvent[domain.Category, str],
+    ) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         match event.attr.name:
@@ -141,28 +165,34 @@ class CategoryDash(qtw.QWidget):
                     user=self._current_user,
                     category=event.item,
                 ):
-                    request = requests.DeleteCategory(category=event.item)
+                    request = requests.Delete(category=event.item)
 
-                    self.delete_requests.emit(request)
+                    self._dash_requests.delete.emit(request)
             case "edit":
                 if domain.permissions.user_can_edit_category(
                     user=self._current_user,
                     category=event.item,
                 ):
-                    request = requests.EditCategory(category=event.item)
+                    request = requests.Edit(category=event.item)
 
-                    self.edit_requests.emit(request)
+                    self._dash_requests.edit.emit(request)
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
-    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Category, str]) -> None:
+    def _on_double_click(
+        self,
+        /,
+        event: table_view.DoubleClickEvent[domain.Category, str],
+    ) -> None:
         if domain.permissions.user_can_edit_category(
             user=self._current_user,
             category=self._table_view.selected_item,
         ):
-            delete_request = requests.DeleteCategory(category=event.item)
+            edit_request = requests.Edit(category=event.item)
 
-            self.delete_requests.emit(delete_request)
+            self._dash_requests.edit.emit(edit_request)
 
-    def set_status(self, /, status: str) -> None:
-        self._status_bar.showMessage()
+    def _on_refresh_btn_clicked(self, /, _: bool) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_refresh_btn_clicked()")
+
+        self._dash_requests.refresh.emit()

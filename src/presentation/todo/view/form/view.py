@@ -11,19 +11,13 @@ from src.presentation.category_selector import CategorySelectorWidget
 from src.presentation.shared import fonts, icons, widgets
 from src.presentation.shared.widgets import DateEditor
 from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
-from src.presentation.todo import requests
-from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
+from src.presentation.todo.view.form import requests
 from src.presentation.todo.view.form.irregular.view import IrregularFrequencyForm
-from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
 from src.presentation.todo.view.form.monthly.view import MonthlyFrequencyForm
-from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
 from src.presentation.todo.view.form.once.view import OnceFrequencyForm
 from src.presentation.todo.view.form.state import TodoFormState
-from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 from src.presentation.todo.view.form.weekly.view import WeeklyFrequencyForm
-from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
 from src.presentation.todo.view.form.xdays.view import XDaysFrequencyForm
-from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 from src.presentation.todo.view.form.yearly.view import YearlyFrequencyForm
 from src.presentation.user_selector.widget import UserSelectorWidget
 
@@ -33,18 +27,17 @@ __all__ = ("TodoForm",)
 
 
 class TodoForm(qtw.QWidget):
-    back_requests = qtc.pyqtSignal()
-    save_requests = qtc.pyqtSignal(requests.SaveRequest)
-
     def __init__(
         self,
         *,
+        todo_form_requests: requests.TodoRequests,
         category_selector: CategorySelectorWidget,
         user_selector: UserSelectorWidget,
         parent: qtw.QWidget | None = None,
     ):
         super().__init__(parent=parent)
 
+        self._requests: typing.Final[requests.TodoRequests] = todo_form_requests
         self._category_selector: typing.Final[CategorySelectorWidget] = category_selector
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
 
@@ -162,7 +155,7 @@ class TodoForm(qtw.QWidget):
             user=self._user_selector.get_selected_item(),
             advance_days=self._advance_days_sb.value(),
             expire_days=self._expire_days_sb.value(),
-            category=self._category_selector.get_selected_item(),
+            category=self._category_selector.selected_item(),
             description=self._description_txt.text(),
             frequency_name=self._frequency_cbo.get_value(),
             note=self._note_txt.get_value(),
@@ -184,42 +177,14 @@ class TodoForm(qtw.QWidget):
             focus_description=self._description_txt.hasFocus(),
         )
 
-    def set_state(
-        self,
-        *,
-        todo_id: str | domain.Unspecified = domain.Unspecified,
-        template_todo_id: str | None | domain.Unspecified = domain.Unspecified,
-        advance_days: int | domain.Unspecified = domain.Unspecified,
-        expire_days: int | domain.Unspecified = domain.Unspecified,
-        user: domain.User | domain.Unspecified = domain.Unspecified,
-        category: domain.Category | domain.Unspecified = domain.Unspecified,
-        description: str | domain.Unspecified = domain.Unspecified,
-        frequency_name: domain.FrequencyType | domain.Unspecified = domain.Unspecified,
-        note: str | domain.Unspecified = domain.Unspecified,
-        start_date: datetime.date | domain.Unspecified = domain.Unspecified,
-        date_added: datetime.datetime | domain.Unspecified = domain.Unspecified,
-        date_updated: datetime.datetime | None | domain.Unspecified = domain.Unspecified,
-        last_completed: datetime.date | None | domain.Unspecified = domain.Unspecified,
-        prior_completed: datetime.date | None | domain.Unspecified = domain.Unspecified,
-        last_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified,
-        prior_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified,
-        irregular_frequency_form_state: IrregularFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        monthly_frequency_form_state: MonthlyFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        once_frequency_form_state: OnceFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        weekly_frequency_form_state: WeeklyFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified = domain.Unspecified,
-        categories_stale: bool | domain.Unspecified | domain.Unspecified = domain.Unspecified,
-        users_stale: bool | domain.Unspecified | domain.Unspecified = domain.Unspecified,
-        focus_description: bool | domain.Unspecified = domain.Unspecified,
-    ) -> None:
-        if not isinstance(todo_id, domain.Unspecified):
-            self._todo_id = todo_id
+    def set_state(self, /, state: TodoFormState) -> None:
+        if not isinstance(state.todo_id, domain.Unspecified):
+            self._todo_id = state.todo_id
 
-        if not isinstance(template_todo_id, domain.Unspecified):
-            self._template_todo_id = template_todo_id
+        if not isinstance(state.template_todo_id, domain.Unspecified):
+            self._template_todo_id = state.template_todo_id
 
-        if not isinstance(date_added, domain.Unspecified):
+        if not isinstance(state.date_added, domain.Unspecified):
             self._date_added = date_added
 
         if not isinstance(date_updated, domain.Unspecified):
@@ -347,7 +312,7 @@ class TodoForm(qtw.QWidget):
     def _on_back_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_back_btn_clicked()")
 
-        self.back_requests.emit()
+        self._requests.back.emit()
 
     def _on_save_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_save_btn_clicked()")
@@ -358,4 +323,4 @@ class TodoForm(qtw.QWidget):
 
         request = requests.SaveRequest(todo=todo)
 
-        self.save_requests.emit(request)
+        self._requests.save.emit(request)
