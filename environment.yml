@@ -17,8 +17,9 @@ dependencies:
   - python-dateutil
   - qtawesome
   - psycopg2-binary
-  - ruff
   - pip
   - pip:
     - pyqt5-stubs
     - pip-audit
+    - ruff
+    - ruff-lsp
