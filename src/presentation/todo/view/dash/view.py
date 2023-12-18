@@ -163,7 +163,7 @@ class TodoDash(qtw.QWidget):
                     name="edit",
                     button_text="Edit",
                     width=fm.width(" Edit "),
-                    enabled_selector=lambda todo: domain.permissions.user_can_edit_todo(
+                    enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
                     ),
@@ -172,7 +172,7 @@ class TodoDash(qtw.QWidget):
                     name="delete",
                     button_text="Delete",
                     width=fm.width(" Delete "),
-                    enabled_selector=lambda todo: domain.permissions.user_can_edit_todo(
+                    enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
                     ),

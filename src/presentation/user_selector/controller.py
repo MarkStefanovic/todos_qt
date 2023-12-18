@@ -30,7 +30,7 @@ class UserSelectorController(qtc.QObject):
         try:
             self._user_service.refresh()
 
-            categories = self._user_service.all()
+            categories = self._user_service.where()
 
             if self._include_all_user:
                 categories.insert(0, domain.ALL_USER)

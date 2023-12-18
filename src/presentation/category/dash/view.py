@@ -73,7 +73,7 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
                     name="edit",
                     button_text="Edit",
                     width=fonts.BOLD_FONT_METRICS.width(" Edit "),
-                    enabled_selector=lambda category: domain.permissions.user_can_edit_category(
+                    enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
                     ),
@@ -82,7 +82,7 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
                     name="delete",
                     button_text="Delete",
                     width=fonts.BOLD_FONT_METRICS.width(" Delete "),
-                    enabled_selector=lambda category: domain.permissions.user_can_edit_category(
+                    enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
                     ),

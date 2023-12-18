@@ -37,7 +37,7 @@ class Attr(typing.Generic[Item, Value]):
         alignment: typing.Literal["center", "left", "right"],
         data_type: typing.Literal["button", "date", "datetime", "int", "text"],
         display_name: str,
-        enabled_selector: typing.Callable[[Item], bool] | None,
+        enabled_when: typing.Callable[[Item], bool] | None,
         key: bool,
         name: str,
         rich_text: bool,
@@ -47,7 +47,7 @@ class Attr(typing.Generic[Item, Value]):
         self.alignment: typing.Final[typing.Literal["center", "left", "right"]] = alignment
         self.data_type: typing.Final[typing.Literal["button", "date", "datetime", "int", "text"]] = data_type
         self.display_name: typing.Final[str] = display_name
-        self.enabled_selector: typing.Final[typing.Callable[[Item], bool] | None] = enabled_selector
+        self.enabled_selector: typing.Final[typing.Callable[[Item], bool] | None] = enabled_when
         self.key: typing.Final[bool] = key
         self.name: typing.Final[str] = name
         self.rich_text: typing.Final[bool] = rich_text
@@ -94,7 +94,7 @@ def text(
         key=key,
         alignment=alignment,
         width=width,
-        enabled_selector=None,
+        enabled_when=None,
         value_selector=value_selector,
         rich_text=rich_text,
     )
@@ -104,7 +104,7 @@ def button(
     name: str,
     button_text: str,
     width: int | None = None,
-    enabled_selector: typing.Callable[[Item], bool] | None = None,
+    enabled_when: typing.Callable[[Item], bool] | None = None,
     text_selector: typing.Callable[[Item], str] | None = None,
 ) -> Attr[Item, str]:
     return Attr(
@@ -114,7 +114,7 @@ def button(
         key=False,
         alignment="center",
         width=width,
-        enabled_selector=enabled_selector,
+        enabled_when=enabled_when,
         value_selector=text_selector,
         rich_text=False,
     )
@@ -133,7 +133,7 @@ def timestamp(
         key=False,
         alignment="center",
         width=width,
-        enabled_selector=None,
+        enabled_when=None,
         value_selector=value_selector,
         rich_text=False,
     )
@@ -152,7 +152,7 @@ def date(
         key=False,
         alignment="center",
         width=width,
-        enabled_selector=None,
+        enabled_when=None,
         value_selector=value_selector,
         rich_text=False,
     )
@@ -173,7 +173,7 @@ def integer(
         key=key,
         alignment=alignment,
         width=width,
-        enabled_selector=None,
+        enabled_when=None,
         value_selector=value_selector,
         rich_text=False,
     )

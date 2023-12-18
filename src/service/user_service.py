@@ -2,6 +2,7 @@ import datetime
 import typing
 
 import sqlalchemy as sa
+from loguru import logger
 
 from src import adapter, domain
 
@@ -14,94 +15,73 @@ class UserService(domain.UserService):
         *,
         engine: sa.engine.Engine,
         username: str,
-        min_seconds_between_refreshes: int = 300,
     ):
         self._engine: typing.Final[sa.engine.Engine] = engine
         self._username: typing.Final[str] = username.lower().strip()
-        self._min_seconds_between_refreshes: typing.Final[int] = min_seconds_between_refreshes
 
-        self._users: dict[str, domain.User] = {}
-        self._last_refresh: datetime.datetime | None = None
-        self._current_user: domain.User | None = None
-        self._last_current_user_scan: datetime.datetime | None = None
+    def add(self, *, user: domain.User) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                adapter.user_repo.add(con=con, user=user)
 
-    def add(self, *, user: domain.User) -> None:
-        self._refresh()
+            return None
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.add({user=!r}): {e!s}")
 
-        repo = adapter.DbUserRepository(engine=self._engine)
-        repo.add(user=user)
+            return domain.Error.new(str(e), user=user)
 
-        self._users[user.user_id] = user
+    def get_current_user(self) -> domain.User | domain.Error:
+        try:
+            def get_user_by_username(*, cn: sa.Connection) -> domain.User | None | domain.Error:
+                users = adapter.user_repo.where(con=cn, active=True)
+                if isinstance(users, domain.Error):
+                    return users
 
-    def all(self) -> list[domain.User]:
-        self._refresh()
-
-        return list(self._users.values())
-
-    def current_user(self) -> domain.User:
-        if self._current_user:
-            return self._current_user
-
-        self._refresh()
-
-        if self._last_current_user_scan is None:
-            time_to_scan = True
-        else:
-            if (datetime.datetime.now() - self._last_current_user_scan).seconds > self._min_seconds_between_refreshes:
-                time_to_scan = True
-            else:
-                time_to_scan = False
-
-        if time_to_scan:
-            for user in self._users.values():
-                if user.username.lower().strip() == self._username:
-                    self._current_user = user
-                    break
-
-            if self._current_user is None:
-                repo = adapter.DbUserRepository(engine=self._engine)
-
-                new_user = domain.User(
-                    user_id=domain.create_uuid(),
-                    username=self._username.lower().strip(),
-                    display_name=self._username.lower().strip(),
-                    is_admin=False,
-                    date_added=datetime.datetime.now(),
-                    date_updated=None,
+                return next(
+                    (user for user in users if user.username.lower().strip() == self._username),
+                    None,
                 )
 
-                repo.add(user=new_user)
+            with self._engine.begin() as con:
+                initial_current_user = get_user_by_username(cn=con)
+                if isinstance(initial_current_user, domain.Error):
+                    return initial_current_user
 
-                self._current_user = new_user
+                if initial_current_user:
+                    return initial_current_user
+                else:
+                    new_user = domain.User(
+                        user_id=domain.create_uuid(),
+                        username=self._username,
+                        display_name=self._username,
+                        is_admin=False,
+                        date_added=datetime.datetime.now(),
+                        date_updated=None,
+                    )
 
-        assert self._current_user is not None
+                    add_result = adapter.user_repo.add(con=con, user=new_user)
+                    if isinstance(add_result, domain.Error):
+                        return add_result
 
-        return self._current_user
+                    return new_user
+        except Exception as e:
+            return domain.Error.new(str(e))
 
-    def delete(self, *, user_id: str) -> None:
-        self._refresh()
+    def delete(self, *, user_id: str) -> None | domain.Error:
+        with self._engine.begin() as con:
+            delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
+            if isinstance(delete_result, domain.Error):
+                return delete_result
 
-        repo = adapter.DbUserRepository(engine=self._engine)
-        repo.delete(user_id=user_id)
+            return None
 
-        del self._users[user_id]
-
-    def get(self, *, user_id: str) -> domain.User | None:
-        self._refresh()
-
+    def get(self, *, user_id: str) -> domain.User | None | domain.Error:
         return self._users.get(user_id)
 
     def get_user_by_username(self, *, username: str) -> domain.User | None:
-        self._refresh()
-
         return next((user for user in self._users.values() if user.username.lower() == username.lower()), None)
 
-    def refresh(self) -> None:
-        repo = adapter.DbUserRepository(engine=self._engine)
-        self._users = {user.user_id: user for user in repo.all_todos()}
-        self._last_refresh = datetime.datetime.now()
-
-    def update(self, *, user: domain.User) -> None:
+    def update(self, *, user: domain.User) -> None | domain.Error:
         self._refresh()
 
         repo = adapter.DbUserRepository(engine=self._engine)
@@ -109,22 +89,12 @@ class UserService(domain.UserService):
 
         self._users[user.user_id] = user
 
-    def _refresh(self) -> None:
-        if self._last_refresh is None:
-            time_to_refresh = True
-        else:
-            seconds_since_last_refresh = (datetime.datetime.now() - self._last_refresh).total_seconds()
-            if seconds_since_last_refresh >= self._min_seconds_between_refreshes:
-                time_to_refresh = True
-            else:
-                time_to_refresh = False
-
-        if time_to_refresh:
-            self.refresh()
+    def where(self, *, active_only: bool) -> list[domain.User]:
+        return list(self._users.values())
 
 
 if __name__ == "__main__":
     eng = adapter.db.create_engine()
     svc = UserService(engine=eng, username="test")
-    for r in svc.all():
+    for r in svc.where():
         print(r)

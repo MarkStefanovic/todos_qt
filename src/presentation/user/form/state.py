@@ -10,12 +10,12 @@ __all__ = ("UserFormState",)
 
 @dataclasses.dataclass(frozen=True)
 class UserFormState:
-    user_id: str
-    username: str
-    display_name: str
-    is_admin: bool
-    date_added: datetime.datetime
-    date_updated: datetime.datetime | None
+    user_id: str | domain.Unspecified = domain.Unspecified()
+    username: str | domain.Unspecified = domain.Unspecified()
+    display_name: str | domain.Unspecified = domain.Unspecified()
+    is_admin: bool | domain.Unspecified = domain.Unspecified()
+    date_added: datetime.datetime | domain.Unspecified = domain.Unspecified()
+    date_updated: datetime.datetime | None | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
     def initial() -> UserFormState:
@@ -39,7 +39,25 @@ class UserFormState:
             date_updated=user.date_updated,
         )
 
-    def to_domain(self) -> domain.User:
+    def to_domain(self) -> domain.User | domain.Error:
+        if isinstance(self.user_id, domain.Unspecified):
+            return domain.Error.new("user_id is unspecified.")
+
+        if isinstance(self.username, domain.Unspecified):
+            return domain.Error.new("username is unspecified.")
+
+        if isinstance(self.display_name, domain.Unspecified):
+            return domain.Error.new("display_name is unspecified.")
+
+        if isinstance(self.is_admin, domain.Unspecified):
+            return domain.Error.new("is_admin is unspecified.")
+
+        if isinstance(self.date_added, domain.Unspecified):
+            return domain.Error.new("date_added is unspecified.")
+
+        if isinstance(self.date_updated, domain.Unspecified):
+            return domain.Error.new("date_updated is unspecified.")
+
         return domain.User(
             user_id=self.user_id,
             username=self.username,

@@ -52,7 +52,7 @@ def main() -> None | domain.Error:
         username=username,
     )
 
-    current_user = user_service.current_user()
+    current_user = user_service.get_current_user()
 
     todo_service = service.TodoService(engine=engine, username=username)
 
