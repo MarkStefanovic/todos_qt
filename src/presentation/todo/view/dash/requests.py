@@ -17,7 +17,7 @@ __all__ = (
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class AddTodo:
-    todo: domain
+    todo: domain.Todo
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)

@@ -72,7 +72,7 @@ class TodoForm(qtw.QWidget):
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.BOLD)
-        self._frequency_cbo = widgets.MapCBO()
+        self._frequency_cbo: typing.Final[widgets.MapCBO[domain.FrequencyType]] = widgets.MapCBO()
         self._frequency_cbo.set_values(
             {
                 domain.FrequencyType.Daily: "Daily",
@@ -322,6 +322,10 @@ class TodoForm(qtw.QWidget):
         todo_state = self.get_state()
 
         todo = todo_state.to_domain()
+        if isinstance(todo, domain.Error):
+            logger.error(f"{self.__class__.__name__}._on_save_btn_clicked() failed: {todo!s}")
+            self._requests.error.emit(str(todo))
+            return None
 
         request = requests.SaveRequest(todo=todo)
 

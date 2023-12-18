@@ -53,6 +53,8 @@ def main() -> None | domain.Error:
     )
 
     current_user = user_service.get_current_user()
+    if isinstance(current_user, domain.Error):
+        return current_user
 
     todo_service = service.TodoService(engine=engine, username=username)
 

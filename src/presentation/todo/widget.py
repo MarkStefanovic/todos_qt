@@ -69,6 +69,7 @@ class TodoWidget(qtw.QWidget):
             current_user=current_user,
             dash_requests=dash_requests,
             form_requests=form_requests,
+            parent=self,
         )
 
         layout = qtw.QStackedLayout()

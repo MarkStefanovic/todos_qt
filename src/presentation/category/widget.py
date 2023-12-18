@@ -21,9 +21,9 @@ class CategoryWidget(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
-        self._dash_requests = dash.requests.CategoryDashRequests()
+        self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash.requests.CategoryDashRequests()
 
-        self._form_requests = form.requests.CategoryFormRequests()
+        self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form.requests.CategoryFormRequests()
 
         self._controller = CategoryController(
             category_service=category_service,

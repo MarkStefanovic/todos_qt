@@ -7,7 +7,7 @@ from src import adapter, domain
 __all__ = ("CategoryService",)
 
 
-class CategoryService(domain.CategoryService):
+class CategoryService:
     def __init__(self, *, engine: sa.engine.Engine):
         self._engine: typing.Final[sa.engine.Engine] = engine
 
@@ -17,6 +17,8 @@ class CategoryService(domain.CategoryService):
                 add_result = adapter.category_repo.add(con=con, category=category)
                 if isinstance(add_result, domain.Error):
                     return add_result
+
+            return None
         except Exception as e:
             return domain.Error.new(str(e), category=category)
 
@@ -42,6 +44,7 @@ class CategoryService(domain.CategoryService):
                     category_id=category_id,
                     user_id=domain.Unspecified(),
                     description_starts_with=domain.Unspecified(),
+                    template_todo_id=domain.Unspecified(),
                 )
                 if isinstance(matching_todos, domain.Error):
                     return matching_todos
@@ -73,12 +76,17 @@ class CategoryService(domain.CategoryService):
                 update_result = adapter.category_repo.update(con=con, category=category)
                 if isinstance(update_result, domain.Error):
                     return update_result
+
+            return None
         except Exception as e:
             return domain.Error.new(str(e), category=category)
 
 
 if __name__ == "__main__":
     eng = adapter.db.create_engine()
+    assert not isinstance(eng, domain.Error)
     svc = CategoryService(engine=eng)
-    for r in svc.all():
+    rs = svc.all()
+    assert not isinstance(rs, domain.Error)
+    for r in rs:
         print(r)

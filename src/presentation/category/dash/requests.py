@@ -23,8 +23,8 @@ class Edit:
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class CategoryDashRequests:
-    add: qtc.pyqtBoundSignal = qtc.pyqtSignal()
-    delete: qtc.pyqtBoundSignal = qtc.pyqtSignal(Delete)
-    edit: qtc.pyqtBoundSignal = qtc.pyqtSignal(Edit)
-    refresh: qtc.pyqtBoundSignal = qtc.pyqtSignal()
+class CategoryDashRequests(qtc.QObject):
+    add = qtc.pyqtSignal()
+    delete = qtc.pyqtSignal(Delete)
+    edit = qtc.pyqtSignal(Edit)
+    refresh = qtc.pyqtSignal()

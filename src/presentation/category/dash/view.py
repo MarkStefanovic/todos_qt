@@ -14,13 +14,13 @@ from src.presentation.shared.widgets import table_view, StatusBar, popup
 __all__ = ("CategoryDash",)
 
 
-class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
+class CategoryDash(qtw.QWidget):
     def __init__(
         self,
         *,
         dash_requests: requests.CategoryDashRequests,
         current_user: domain.User,
-        parent: qtw.QWidget | None = None,
+        parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
@@ -159,17 +159,13 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
                     category=event.item,
                 ):
                     if popup.confirm(question=f"Are you sure you want to delete {event.item.name}?"):
-                        request = requests.Delete(category=event.item)
-
-                        self._dash_requests.delete.emit(request)
+                        self._dash_requests.delete.emit(requests.Delete(category=event.item))
             case "edit":
                 if domain.permissions.user_can_edit_category(
                     user=self._current_user,
                     category=event.item,
                 ):
-                    request = requests.Edit(category=event.item)
-
-                    self._dash_requests.edit.emit(request)
+                    self._dash_requests.edit.emit(requests.Edit(category=event.item))
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
@@ -182,9 +178,7 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
             user=self._current_user,
             category=self._table_view.selected_item,
         ):
-            edit_request = requests.Edit(category=event.item)
-
-            self._dash_requests.edit.emit(edit_request)
+            self._dash_requests.edit.emit(requests.Edit(category=event.item))
 
     def _on_refresh_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_refresh_btn_clicked()")

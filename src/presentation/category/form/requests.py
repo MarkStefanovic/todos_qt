@@ -17,6 +17,6 @@ class Save:
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class CategoryFormRequests:
-    back: qtc.pyqtBoundSignal = qtc.pyqtSignal()
-    save: qtc.pyqtBoundSignal = qtc.pyqtSignal(Save)
+class CategoryFormRequests(qtc.QObject):
+    back = qtc.pyqtSignal()
+    save = qtc.pyqtSignal(Save)

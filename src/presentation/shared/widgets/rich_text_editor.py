@@ -1,14 +1,11 @@
-from __future__ import annotations
-
 import sys
 
-import qtawesome as qta
+# noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src.presentation.shared import icons
 
 __all__ = ("RichTextEditor",)
-
 
 BTN_SIZE = qtc.QSize(20, 20)
 
@@ -18,27 +15,15 @@ class RichTextEditor(qtw.QWidget):
         super().__init__(parent=parent)
 
         if parent is None:
-            highlight_btn_icon = qta.icon(icons.highlight_btn_icon_name)
-            clear_highlight_btn_icon = qta.icon(icons.clear_highlight_btn_icon_name)
-            bold_btn_icon = qta.icon(icons.bold_btn_icon_name)
-            clear_bold_btn_icon = qta.icon(icons.clear_bold_btn_icon_name)
+            highlight_btn_icon = icons.highlight_btn_icon(parent=self)
+            clear_highlight_btn_icon = icons.clear_highlight_btn_icon(parent=self)
+            bold_btn_icon = icons.bold_btn_icon(parent=self)
+            clear_bold_btn_icon = icons.clear_bold_btn_icon(parent=self)
         else:
-            highlight_btn_icon = qta.icon(
-                icons.highlight_btn_icon_name,
-                color=parent.palette().text().color(),
-            )
-            clear_highlight_btn_icon = qta.icon(
-                icons.clear_highlight_btn_icon_name,
-                color=parent.palette().text().color(),
-            )
-            bold_btn_icon = qta.icon(
-                icons.bold_btn_icon_name,
-                color=parent.palette().text().color(),
-            )
-            clear_bold_btn_icon = qta.icon(
-                icons.clear_bold_btn_icon_name,
-                color=parent.palette().text().color(),
-            )
+            highlight_btn_icon = icons.highlight_btn_icon(parent=self)
+            clear_highlight_btn_icon = icons.clear_highlight_btn_icon(parent=self)
+            bold_btn_icon = icons.bold_btn_icon(parent=self)
+            clear_bold_btn_icon = icons.clear_bold_btn_icon(parent=self)
 
         self._highlight_btn = qtw.QPushButton(highlight_btn_icon, "", parent=self)
         # noinspection PyUnresolvedReferences
@@ -113,14 +98,9 @@ class RichTextEditor(qtw.QWidget):
         cursor.mergeCharFormat(fmt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     w = RichTextEditor(parent=None)
     w.set_value("<b>Te</b>st")
     w.show()
     app.exec()
-
-
-
-
-

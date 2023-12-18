@@ -61,4 +61,4 @@ class MapCBO(typing.Generic[Value], qtw.QComboBox):
         self.blockSignals(False)
 
     def _on_current_index_changed(self, /, _: int) -> None:
-        self.value_changed.emit(self._cbo.currentData())  # noqa
+        self.value_changed.emit(self.currentData())  # noqa

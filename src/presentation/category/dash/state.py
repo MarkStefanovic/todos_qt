@@ -5,7 +5,7 @@ from src import domain
 __all__ = ("CategoryDashState",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class CategoryDashState:
     categories: list[domain.Category] | domain.Unspecified = domain.Unspecified()
     selected_category: domain.Category | domain.Unspecified = domain.Unspecified()

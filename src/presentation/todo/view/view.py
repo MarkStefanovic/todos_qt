@@ -24,7 +24,7 @@ class TodoView(qtw.QWidget):
         dash_user_selector: UserSelectorWidget,
         form_user_selector: UserSelectorWidget,
         current_user: domain.User,
-        parent: qtw.QWidget | None = None,
+        parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
@@ -41,7 +41,7 @@ class TodoView(qtw.QWidget):
 
         self.form = form.TodoForm(
             parent=self,
-            todo_form_requests=self._form_requests,
+            form_requests=self._form_requests,
             category_selector=form_category_selector,
             user_selector=form_user_selector,
         )

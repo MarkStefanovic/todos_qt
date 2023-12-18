@@ -121,6 +121,9 @@ def update(*, con: sa.Connection, category: Category) -> None | domain.Error:
 
 if __name__ == "__main__":
     eng = db.create_engine()
+    if isinstance(eng, domain.Error):
+        raise Exception(str(eng))
+
     with eng.begin() as cn:
         cs = where(con=cn, active=True)
         if isinstance(cs, domain.Error):

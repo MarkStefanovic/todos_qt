@@ -6,7 +6,7 @@ from loguru import logger
 
 from src import domain
 from src.presentation.shared import fonts, icons, widgets
-from src.presentation.shared.widgets import table_view
+from src.presentation.shared.widgets import table_view, popup
 from src.presentation.user.dash import requests
 from src.presentation.user.dash.state import UserDashState
 
@@ -106,6 +106,9 @@ class UserDash(qtw.QWidget):
             status=self._status_bar.currentMessage(),
         )
 
+    def refresh(self) -> None:
+        self._refresh_btn.click()
+
     def set_state(self, /, state: UserDashState) -> None:
         if not isinstance(state.users, domain.Unspecified):
             self._table_view.set_items(state.users)
@@ -137,7 +140,11 @@ class UserDash(qtw.QWidget):
                     current_user=self._current_user,
                     user=event.item,
                 ):
-                    self._requests.delete.emit(requests.DeleteRequest(user=event.item))
+                    if popup.confirm(
+                        question=f"Are you sure you want to delete {event.item.display_name}?",
+                        title="Confirm Delete",
+                    ):
+                        self._requests.delete.emit(requests.DeleteRequest(user=event.item))
             case "edit":
                 if domain.permissions.user_can_edit_user(
                     current_user=self._current_user,

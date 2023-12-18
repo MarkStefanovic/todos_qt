@@ -10,7 +10,7 @@ from src import adapter, domain
 __all__ = ("TodoService",)
 
 
-class TodoService(domain.TodoService):
+class TodoService:
     def __init__(
         self,
         *,
@@ -158,10 +158,10 @@ class TodoService(domain.TodoService):
     def where(
         self,
         *,
-        due_filter: bool,
-        description_like: str,
-        category_id_filter: str | None,
-        user_id_filter: str | None,
+        due_filter: bool | domain.Unspecified,
+        description_like: str | domain.Unspecified,
+        category_id_filter: str | domain.Unspecified,
+        user_id_filter: str | domain.Unspecified,
     ) -> list[domain.Todo] | domain.Error:
         try:
             with self._engine.begin() as con:

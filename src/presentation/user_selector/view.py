@@ -4,15 +4,23 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.shared import fonts
+from src.presentation.user_selector.state import UserSelectorState
 
 __all__ = ("UserSelectorView",)
 
 
 class UserSelectorView(qtw.QComboBox):
-    item_selected = qtc.pyqtSignal(domain.User)
-
-    def __init__(self, *, parent: qtw.QWidget | None):
+    def __init__(
+        self,
+        *,
+        item_selected_requests: qtc.pyqtBoundSignal,
+        states: qtc.pyqtBoundSignal,
+        parent: qtw.QWidget | None,
+    ):
         super().__init__(parent=parent)
+
+        self._item_selected_requests: typing.Final[qtc.pyqtBoundSignal] = item_selected_requests
+        self._states: typing.Final[qtc.pyqtBoundSignal] = states
 
         self.setFont(fonts.NORMAL)
 
@@ -25,6 +33,8 @@ class UserSelectorView(qtw.QComboBox):
 
         self.addItem(fonts.NORMAL_FONT_METRICS.width(" " * 40))
         self.adjustSize()
+
+        self._states.connect(self._set_state)
 
     def get_selected_item(self) -> domain.User:
         return self.currentData()
@@ -54,4 +64,13 @@ class UserSelectorView(qtw.QComboBox):
 
     def _on_current_index_changed(self, ix: int) -> None:
         item = self.itemData(ix)
-        self.item_selected.emit(item)
+        self._item_selected_requests.emit(item)
+
+    def _set_state(self, /, state: UserSelectorState) -> None:
+        if not isinstance(state.users, domain.Unspecified):
+            self.set_items(state.users)
+
+        # if not isinstance(state.error)
+
+        if not isinstance(state.selected_category, domain.Unspecified):
+            self.select_item(state.selected_category)

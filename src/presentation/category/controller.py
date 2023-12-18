@@ -4,7 +4,7 @@ import typing
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc
 
-from src import domain
+from src import service, domain
 from src.presentation.category import dash, form
 from src.presentation.category.state import CategoryState
 
@@ -19,14 +19,14 @@ class CategoryController(qtc.QObject):
     def __init__(
         self,
         *,
-        category_service: domain.CategoryService,
+        category_service: service.CategoryService,
         dash_requests: dash.requests.CategoryDashRequests,
         form_requests: form.requests.CategoryFormRequests,
         parent: qtc.QObject,
     ):
         super().__init__(parent=parent)
 
-        self._category_service: typing.Final[domain.CategoryService] = category_service
+        self._category_service: typing.Final[service.CategoryService] = category_service
         self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form_requests
 
@@ -43,6 +43,9 @@ class CategoryController(qtc.QObject):
 
         try:
             categories = self._category_service.all()
+            if isinstance(categories, domain.Error):
+                self._set_status(str(categories))
+                return None
 
             state = CategoryState(
                 dash_state=dash.CategoryDashState(
@@ -61,63 +64,63 @@ class CategoryController(qtc.QObject):
         logger.debug(f"{self.__class__.__name__}._on_add_request()")
 
         try:
-            state = CategoryState(
-                form_state=form.CategoryFormState.initial(),
-                dash_active=False,
+            self.states.emit(
+                CategoryState(
+                    form_state=form.CategoryFormState.initial(),
+                    dash_active=False,
+                )
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_add_request() failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
-
-        self.states.emit(state)
+            self._set_status(str(e))
 
     def _on_delete_request(self, /, request: dash.requests.Delete) -> None:
         logger.debug(f"{self.__class__.__name__}._on_delete_request({request=!r})")
 
         try:
-            self._category_service.delete(category_id=request.category.category_id)
-            state = CategoryState(
-                dash_state=dash.CategoryDashState(
-                    category_deleted=request.category,
-                    status=f"Deleted {request.category.name}.",
+            delete_result = self._category_service.delete(category_id=request.category.category_id)
+            if isinstance(delete_result, domain.Error):
+                self._set_status(str(delete_result))
+                return None
+
+            self.states.emit(
+                CategoryState(
+                    dash_state=dash.CategoryDashState(
+                        category_deleted=request.category,
+                        status=f"Deleted {request.category.name}.",
+                    )
                 )
             )
-
-            self.states.emit(state)
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_delete_request({request=!r}) failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
-
-            self.states.emit(state)
+            self._set_status(str(e))
 
     def _on_edit_request(self, /, request: dash.requests.Edit) -> None:
         logger.debug(f"{self.__class__.__name__}._on_edit_request({request=!r})")
 
         try:
-            state = CategoryState(
-                form_state=form.CategoryFormState.from_domain(category=request.category),
-                dash_active=False,
+            self.states.emit(
+                CategoryState(
+                    form_state=form.CategoryFormState.from_domain(category=request.category),
+                    dash_active=False,
+                )
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_edit_request({request=!r}) failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
-
-        self.states.emit(state)
+            self._set_status(str(e))
 
     def _on_back_request(self) -> None:
         logger.debug(f"{self.__class__.__name__}._on_back_request()")
 
         try:
-            state = CategoryState(dash_active=True)
+            self.states.emit(CategoryState(dash_active=True))
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_back_request() failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
-
-        self.states.emit(state)
+            self._set_status(str(e))
 
     def _on_save_request(self, /, event: form.requests.Save) -> None:
         logger.debug(f"{self.__class__.__name__}._on_save_request({event=!r})")
@@ -143,9 +146,12 @@ class CategoryController(qtc.QObject):
                     ),
                     dash_active=True,
                 )
+
+            self.states.emit(state)
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_save_request({event=!r}) failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
+            self._set_status(str(e))
 
-        self.states.emit(state)
+    def _set_status(self, /, status: str) -> None:
+        self.states.emit(CategoryState(dash_state=dash.CategoryDashState(status=status)))

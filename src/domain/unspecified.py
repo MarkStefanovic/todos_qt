@@ -1,18 +1,22 @@
-from __future__ import annotations
-
+import dataclasses
 
 __all__ = ("Unspecified",)
 
 
-class Unspecified:
-    _instance: Unspecified | None = None
+class Singleton(type):
+    _instances = {}
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(Unspecified, cls).__new__(cls)
-        return cls._instance
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-    def __eq__(self, __value):
+
+@dataclasses.dataclass(frozen=True)
+class Unspecified(metaclass=Singleton):
+    ...
+
+    def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Unspecified):
             return True
         return False

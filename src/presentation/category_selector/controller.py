@@ -4,36 +4,33 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import service, domain
-from src.presentation.category_selector import requests
 from src.presentation.category_selector.state import CategorySelectorState
 
 __all__ = ("CategorySelectorController",)
 
 
 class CategorySelectorController(qtc.QObject):
-    states: qtc.pyqtBoundSignal = qtc.pyqtSignal(CategorySelectorState)
+    states = qtc.pyqtSignal(CategorySelectorState)
 
     def __init__(
         self,
         *,
-        category_selector_requests: requests.CategorySelectorRequests,
         category_service: service.CategoryService,
         include_all_category: bool,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
 
-        self._category_selector_requests = category_selector_requests
         self._category_service: typing.Final[service.CategoryService] = category_service
         self._include_all_category: typing.Final[bool] = include_all_category
-
-        self._category_selector_requests.refresh.connect(self.refresh)
 
     def refresh(self) -> None | domain.Error:
         logger.debug(f"{self.__class__.__name__}.refresh()")
 
         try:
             categories = self._category_service.all()
+            if isinstance(categories, domain.Error):
+                return categories
 
             if self._include_all_category:
                 categories.insert(0, domain.ALL_CATEGORY)

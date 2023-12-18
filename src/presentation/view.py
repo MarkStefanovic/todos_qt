@@ -1,4 +1,4 @@
-from __future__ import annotations
+import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
@@ -8,6 +8,8 @@ from src.presentation.todo.widget import TodoWidget
 
 __all__ = ("MainView",)
 
+from src.presentation.user.widget import UserWidget
+
 
 class MainView(qtw.QWidget):
     def __init__(
@@ -15,12 +17,13 @@ class MainView(qtw.QWidget):
         *,
         category_widget: CategoryWidget,
         todo_widget: TodoWidget,
+        user_widget: UserWidget,
     ):
         super().__init__()
 
-        self._todos = todo_widget
-        self._categories = category_widget
-        # self.users = UserView()
+        self._categories: typing.Final[CategoryWidget] = category_widget
+        self._todos: typing.Final[TodoWidget] = todo_widget
+        self._users: typing.Final[UserWidget] = user_widget
 
         self._tabs = qtw.QTabWidget()
         self._tabs.setFont(fonts.BOLD)
@@ -43,7 +46,7 @@ class MainView(qtw.QWidget):
         self._tabs_loaded: set[int] = set()
 
     def on_load(self) -> None:
-        self._todos.dash.refresh()
+        self._todos.refresh_dash()
         self._tabs_loaded.add(0)
 
     def _on_enter_key_pressed(self) -> None:
@@ -58,7 +61,7 @@ class MainView(qtw.QWidget):
             else:
                 self._categories.save_form()
         elif ix == 2:
-            if self._users.current_view == "dash":
+            if self._users.current_view() == "dash":
                 self._users.refresh_dash()
             else:
                 self._users.save_form()
@@ -78,4 +81,4 @@ class MainView(qtw.QWidget):
                 self._categories.refresh_dash()
         else:
             if self._users.current_view() == "dash":
-                self._users._dash._refresh_btn.click()
+                self._users.refresh_dash()

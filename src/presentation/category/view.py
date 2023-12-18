@@ -13,7 +13,7 @@ from src.presentation.category.state import CategoryState
 __all__ = ("CategoryView",)
 
 
-class CategoryView(qtw.QWidget, domain.View[CategoryState]):
+class CategoryView(qtw.QWidget):
     def __init__(
         self,
         *,

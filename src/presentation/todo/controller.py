@@ -15,7 +15,7 @@ __all__ = ("TodoController",)
 
 
 # noinspection DuplicatedCode
-class TodoController:
+class TodoController(qtc.QObject):
     states = qtc.pyqtSignal(TodoState)
 
     def __init__(
@@ -23,9 +23,12 @@ class TodoController:
         *,
         dash_requests: dash.requests.TodoDashRequests,
         form_requests: form.requests.TodoFormRequests,
-        todo_service: domain.TodoService,
+        todo_service: service.TodoService,
         current_user: domain.User,
+        parent: qtc.QObject | None,
     ):
+        super().__init__(parent=parent)
+
         self._todo_service: typing.Final[service.TodoService] = todo_service
         self._current_user: typing.Final[domain.User] = current_user
         self._dash_requests: typing.Final[dash.requests.TodoDashRequests] = dash_requests

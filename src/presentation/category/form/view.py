@@ -12,7 +12,7 @@ from src.presentation.shared import fonts, icons
 __all__ = ("CategoryForm",)
 
 
-class CategoryForm(qtw.QWidget, domain.View[CategoryFormState]):
+class CategoryForm(qtw.QWidget):
     def __init__(
         self,
         *,

@@ -4,6 +4,7 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 from src import service, domain
 from src.presentation.category.widget import CategoryWidget
 from src.presentation.todo.widget import TodoWidget
+from src.presentation.user.widget import UserWidget
 from src.presentation.view import MainView
 
 __all__ = ("MainWidget",)
@@ -40,14 +41,23 @@ class MainWidget(qtw.QMainWindow):
         )
 
         todo_widget = TodoWidget(
+            category_service=category_service,
             todo_service=todo_service,
+            user_service=user_service,
             current_user=current_user,
+            parent=self,
+        )
+
+        user_widget = UserWidget(
+            current_user=current_user,
+            user_service=user_service,
             parent=self,
         )
 
         self._view = MainView(
             category_widget=category_widget,
             todo_widget=todo_widget,
+            user_widget=user_widget,
         )
 
         self.setCentralWidget(self._view)

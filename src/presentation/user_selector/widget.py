@@ -19,22 +19,27 @@ class UserSelectorWidget(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
-        self._view = UserSelectorView(parent=self)
-
         self._controller = UserSelectorController(
-            view=self._view,
             user_service=user_service,
             include_all_user=include_all_user,
             parent=self,
         )
 
-        self._view.item_selected.connect(self.item_selected)
+        self._view = UserSelectorView(
+            item_selected_requests=self.item_selected,
+            states=self._controller.states,
+            parent=self,
+        )
+
+        layout = qtw.QStackedLayout()
+        layout.addWidget(self._view)
+        self.setLayout(layout)
 
     def get_selected_item(self) -> domain.User:
         return self._view.get_selected_item()
 
-    def refresh(self) -> None | domain.Error:
-        return self._controller.refresh()
+    def refresh(self) -> None:
+        self._controller.refresh()
 
     def select_item(self, /, item: domain.User) -> None:
         return self._view.select_item(item)

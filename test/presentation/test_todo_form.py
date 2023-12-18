@@ -1,12 +1,18 @@
 import datetime
 
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc
 from hypothesis import given, strategies as st
 from hypothesis.strategies import dates, integers
-from PyQt5 import QtCore as qtc
 
-from src import domain
-from src.presentation.todo.form.state import TodoFormState
+from src.presentation.category_selector import CategorySelectorWidget
+from src.presentation.todo.view.form.requests import TodoFormRequests
+from src.presentation.todo.view.form.state import TodoFormState
+
+from src import domain, service
 from src.presentation.todo.view.form.view import TodoForm
+from src.presentation.user_selector import UserSelectorWidget
+import sqlalchemy as sa
 
 
 @given(
@@ -15,20 +21,12 @@ from src.presentation.todo.view.form.view import TodoForm
         start_date=dates(min_value=datetime.date(1900, 1, 1)),  # enforced by ui
     )
 )
-def test_daily_todo_form_round_trip(todo: domain.Todo):
-    initial_state = TodoFormState.initial(
-        category_options=[domain.TODO_CATEGORY, todo.category],
-        user_options=[],
-    )
-    todo_form = TodoForm()
-    assert todo_form._start_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
-    assert todo_form.get_state() == initial_state
+def test_daily_todo_form_round_trip(todo: domain.Todo, engine: sa.Engine):
+    todo_form = _create_todo_form(engine=engine)
 
-    new_state = TodoFormState.from_domain(
-        todo=todo,
-        category_options=[domain.TODO_CATEGORY, todo.category],
-        user_options=[],
-    )
+    assert todo_form._start_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
+
+    new_state = TodoFormState.from_domain(todo=todo)
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -56,11 +54,7 @@ def test_irregular_todo_form_round_trip(todo: domain.Todo):
     assert todo_form._irregular_frequency_form._week_number_sb.maximum() == 5
     assert todo_form.get_state() == initial_state
 
-    new_state = TodoFormState.from_domain(
-        todo=todo,
-        category_options=[domain.TODO_CATEGORY, todo.category],
-        user_options=[],
-    )
+    new_state = TodoFormState.from_domain(todo=todo)
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
 
@@ -200,7 +194,13 @@ def test_yearly_todo_form_round_trip(todo: domain.Todo):
         category_options=[domain.TODO_CATEGORY, todo.category],
         user_options=[],
     )
-    todo_form = TodoForm()
+
+    todo_form = TodoForm(
+        form_requests=form_requests,
+        category_selector=category_selector,
+        user_selector=user_selector,
+        parent=None,
+    )
     assert todo_form._advance_days_sb.maximum() == 364
     assert todo_form._expire_days_sb.maximum() == 364
     assert todo_form._start_date_edit.minimumDate() == qtc.QDate(1900, 1, 1)
@@ -215,3 +215,29 @@ def test_yearly_todo_form_round_trip(todo: domain.Todo):
     )
     todo_form.set_state(state=new_state)
     assert todo_form.get_state() == new_state
+
+
+def _create_todo_form(*, engine: sa.Engine) -> TodoForm:
+    form_requests = TodoFormRequests(parent=None)
+
+    category_service = service.CategoryService(engine=engine)
+
+    user_service = service.UserService(engine=engine, username="test")
+
+    category_selector = CategorySelectorWidget(
+        category_service=category_service,
+        include_all_category=True,
+        parent=None,
+    )
+
+    user_selector = UserSelectorWidget(
+        user_service=user_service,
+        include_all_user=True,
+        parent=None,
+    )
+
+    return TodoForm(
+        form_requests=form_requests,
+        category_selector=category_selector,
+        user_selector=user_selector,
+    )

@@ -1,9 +1,10 @@
 import datetime
 import typing
 
-import qtawesome as qta
+
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from loguru import logger
 
 from src import domain
 from src.presentation.shared import fonts, icons
@@ -24,9 +25,9 @@ class UserForm(qtw.QWidget):
 
         self._requests: typing.Final[requests.UserFormRequests] = form_requests
 
-        back_btn_icon = qta.icon(icons.back_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
-        self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setMaximumWidth(100)
+        back_btn_icon = icons.back_btn_icon(parent=self)
+        self._back_btn = qtw.QPushButton(back_btn_icon, "Back")
+        self._back_btn.setMaximumWidth(100)
 
         display_name_lbl = qtw.QLabel("Name")
         display_name_lbl.setFont(fonts.BOLD)
@@ -42,14 +43,14 @@ class UserForm(qtw.QWidget):
         form_layout.addRow(display_name_lbl, self._display_name_txt)
         form_layout.addRow(username_lbl, self._username_txt)
 
-        save_btn_icon = qta.icon(icons.save_btn_icon_name, color=self.parent().palette().text().color())  # type: ignore
-        self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setMaximumWidth(100)
+        save_btn_icon = icons.save_btn_icon(parent=self)
+        self._save_btn = qtw.QPushButton(save_btn_icon, "Save")
+        self._save_btn.setMaximumWidth(100)
 
         layout = qtw.QVBoxLayout()
-        layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)
+        layout.addWidget(self._back_btn, alignment=qtc.Qt.AlignLeft)
         layout.addLayout(form_layout)
-        layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignRight)
+        layout.addWidget(self._save_btn, alignment=qtc.Qt.AlignRight)
 
         self.setLayout(layout)
 
@@ -57,6 +58,11 @@ class UserForm(qtw.QWidget):
         self._is_admin = False
         self._date_added = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
+
+        # noinspection PyUnresolvedReferences
+        self._back_btn.clicked.connect(self._on_back_btn_clicked)
+        # noinspection PyUnresolvedReferences
+        self._save_btn.clicked.connect(self._on_save_btn_clicked)
 
     def get_state(self) -> UserFormState:
         return UserFormState(
@@ -67,6 +73,9 @@ class UserForm(qtw.QWidget):
             date_added=self._date_added,
             date_updated=self._date_updated,
         )
+
+    def save(self) -> None:
+        self._save_btn.click()
 
     def set_state(self, *, state: UserFormState) -> None:
         if not isinstance(state.user_id, domain.Unspecified):
@@ -81,3 +90,24 @@ class UserForm(qtw.QWidget):
             self._date_added = state.date_added
         if not isinstance(state.date_updated, domain.Unspecified):
             self._date_updated = state.date_updated
+
+    def _on_back_btn_clicked(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_back_btn_clicked()")
+
+        self._requests.back.emit()
+
+    def _on_save_btn_clicked(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_save_btn_clicked()")
+
+        user = domain.User(
+            user_id=self._user_id,
+            username=self._username_txt.text(),
+            display_name=self._display_name_txt.text(),
+            is_admin=self._is_admin,
+            date_added=self._date_added,
+            date_updated=self._date_updated,
+        )
+
+        request = requests.SaveRequest(user=user)
+
+        self._requests.save.emit(request)

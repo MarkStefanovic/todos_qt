@@ -92,51 +92,10 @@ def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
                 prior_completed_by=prior_completed_by_user_id,
             )
         )
+
+        return None
     except Exception as e:
         return domain.Error.new(str(e), todo=todo)
-
-
-# def all_todos(*, con: sa.Connection) -> list[domain.Todo] | domain.Error:
-#     try:
-#         category_lkp = {c.category_id: c for c in category_repo.get_active(con=con)}
-#
-#         user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
-#
-#         result = con.execute(
-#             sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
-#         )
-#
-#         return [
-#             domain.Todo(
-#                 todo_id=row.todo_id,
-#                 template_todo_id=row.template_todo_id,
-#                 category=category_lkp[row.category_id],
-#                 user=user_lkp.get(row.user_id, domain.DEFAULT_USER),
-#                 description=row.description,
-#                 frequency=_parse_frequency(
-#                     advance_display_days=row.advance_days,
-#                     days=row.days,
-#                     due_date=row.due_date,
-#                     expire_display_days=row.expire_days,
-#                     frequency=row.frequency,
-#                     month=row.month,
-#                     month_day=row.month_day,
-#                     start_date=row.start_date,
-#                     week_day=row.week_day,
-#                     week_number=row.week_number,
-#                 ),
-#                 note=row.note,
-#                 last_completed=row.last_completed,
-#                 last_completed_by=user_lkp.get(row.last_completed_by or ""),
-#                 prior_completed=row.prior_completed,
-#                 prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
-#                 date_added=row.date_added,
-#                 date_updated=row.date_updated,
-#             )
-#             for row in result.fetchall()
-#         ]
-#     except Exception as e:
-#         return domain.Error.new(str(e))
 
 
 def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:

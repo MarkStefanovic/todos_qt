@@ -284,13 +284,9 @@ class TodoDash(qtw.QWidget):
                     user=self._current_user,
                     todo=event.item,
                 ):
-                    request = requests.EditTodo(todo=event.item)
-
-                    self._requests.edit.emit(request)
+                    self._requests.edit.emit(requests.EditTodo(todo=event.item))
             case "complete":
-                request = requests.ToggleCompleted(todo=event.item)
-
-                self._requests.toggle_completed.emit(request)
+                self._requests.toggle_completed.emit(requests.ToggleCompleted(todo=event.item))
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 

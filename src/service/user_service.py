@@ -9,7 +9,7 @@ from src import adapter, domain
 __all__ = ("UserService",)
 
 
-class UserService(domain.UserService):
+class UserService:
     def __init__(
         self,
         *,
@@ -26,29 +26,22 @@ class UserService(domain.UserService):
 
             return None
         except Exception as e:
-            logger.error(f"{self.__class__.__name__}.add({user=!r}): {e!s}")
+            logger.error(f"{self.__class__.__name__}.add({user=!r}) failed: {e!s}")
 
             return domain.Error.new(str(e), user=user)
 
     def get_current_user(self) -> domain.User | domain.Error:
         try:
-            def get_user_by_username(*, cn: sa.Connection) -> domain.User | None | domain.Error:
-                users = adapter.user_repo.where(con=cn, active=True)
+            with self._engine.begin() as con:
+                users = adapter.user_repo.where(con=con, active=True)
                 if isinstance(users, domain.Error):
                     return users
 
-                return next(
+                if user := next(
                     (user for user in users if user.username.lower().strip() == self._username),
                     None,
-                )
-
-            with self._engine.begin() as con:
-                initial_current_user = get_user_by_username(cn=con)
-                if isinstance(initial_current_user, domain.Error):
-                    return initial_current_user
-
-                if initial_current_user:
-                    return initial_current_user
+                ):
+                    return user
                 else:
                     new_user = domain.User(
                         user_id=domain.create_uuid(),
@@ -65,32 +58,50 @@ class UserService(domain.UserService):
 
                     return new_user
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get_current_user() failed: {e!s}")
+
             return domain.Error.new(str(e))
 
     def delete(self, *, user_id: str) -> None | domain.Error:
-        with self._engine.begin() as con:
-            delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
-            if isinstance(delete_result, domain.Error):
-                return delete_result
+        try:
+            with self._engine.begin() as con:
+                delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
+                if isinstance(delete_result, domain.Error):
+                    return delete_result
 
-            return None
+                return None
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.delete({user_id=!r}) failed: {e!s}")
+
+            return domain.Error.new(str(e), user_id=user_id)
 
     def get(self, *, user_id: str) -> domain.User | None | domain.Error:
-        return self._users.get(user_id)
+        try:
+            with self._engine.begin() as con:
+                user = adapter.user_repo.get(con=con, user_id=user_id)
+                return user
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get({user_id=!r}) failed: {e!s}")
 
-    def get_user_by_username(self, *, username: str) -> domain.User | None:
-        return next((user for user in self._users.values() if user.username.lower() == username.lower()), None)
+            return domain.Error.new(str(e), user_id=user_id)
 
     def update(self, *, user: domain.User) -> None | domain.Error:
-        self._refresh()
+        try:
+            with self._engine.begin() as con:
+                return adapter.user_repo.update(con=con, user=user)
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.update({user=!r}) failed: {e!s}")
 
-        repo = adapter.DbUserRepository(engine=self._engine)
-        repo.update(user=user)
+            return domain.Error.new(str(e), user=user)
 
-        self._users[user.user_id] = user
+    def where(self, *, active: bool) -> list[domain.User] | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                return adapter.user_repo.where(con=con, active=active)
+        except Exception as e:
+            logger.error(f"{self.__class__}.where({active=!r}) failed: {e!s}")
 
-    def where(self, *, active_only: bool) -> list[domain.User]:
-        return list(self._users.values())
+            return domain.Error.new(str(e), active=active)
 
 
 if __name__ == "__main__":

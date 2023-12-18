@@ -13,7 +13,7 @@ class TodoDashState:
     deleted_todo: domain.Todo | None = None
     description_filter: str | domain.Unspecified = domain.Unspecified()
     due_filter: bool | domain.Unspecified = domain.Unspecified()
-    selected_todo: domain.Todo | domain.Unspecified = domain.Unspecified()
+    selected_todo: domain.Todo | None | domain.Unspecified = domain.Unspecified()
     todos: tuple[domain.Todo, ...] | domain.Unspecified = domain.Unspecified()
     updated_todo: domain.Todo | None = None
     user_filter: domain.User | domain.Unspecified = domain.Unspecified()
