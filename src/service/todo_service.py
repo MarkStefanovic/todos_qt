@@ -27,34 +27,34 @@ class TodoService(domain.TodoService):
         except Exception as e:
             return domain.Error.new(str(e), todo=todo)
 
-    def add_default_holidays_for_all_users(self) -> None | domain.Error:
-        try:
-            with self._engine.begin() as con:
-                users = adapter.user_repo.where(con=con)
-                if isinstance(users, domain.Error):
-                    return users
-
-                for user in users:
-                    for holiday in domain.HOLIDAYS:
-                        todo = self.get_by_template_id_and_user_id(
-                            template_id=holiday.todo_id,
-                            user_id=user.user_id,
-                        )
-
-                        if todo is None:
-                            new_holiday = dataclasses.replace(
-                                holiday,
-                                todo_id=domain.create_uuid(),
-                                template_todo_id=holiday.todo_id,
-                                user=user,
-                            )
-
-                            add_result = adapter.todo_repo.add(con=con, todo=new_holiday)
-                            if isinstance(add_result, domain.Error):
-                                return add_result
-            return None
-        except Exception as e:
-            return domain.Error.new(str(e))
+    # def add_default_holidays_for_all_users(self) -> None | domain.Error:
+    #     try:
+    #         with self._engine.begin() as con:
+    #             users = adapter.user_repo.where(con=con)
+    #             if isinstance(users, domain.Error):
+    #                 return users
+    #
+    #             for user in users:
+    #                 for holiday in domain.HOLIDAYS:
+    #                     todo = self.get_by_template_id_and_user_id(
+    #                         template_id=holiday.todo_id,
+    #                         user_id=user.user_id,
+    #                     )
+    #
+    #                     if todo is None:
+    #                         new_holiday = dataclasses.replace(
+    #                             holiday,
+    #                             todo_id=domain.create_uuid(),
+    #                             template_todo_id=holiday.todo_id,
+    #                             user=user,
+    #                         )
+    #
+    #                         add_result = adapter.todo_repo.add(con=con, todo=new_holiday)
+    #                         if isinstance(add_result, domain.Error):
+    #                             return add_result
+    #         return None
+    #     except Exception as e:
+    #         return domain.Error.new(str(e))
 
     def cleanup(self) -> None | domain.Error:
         try:
@@ -82,28 +82,42 @@ class TodoService(domain.TodoService):
     def get(self, *, todo_id: str) -> domain.Todo | None | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.todo_repo.get_by_id(con=con, todo_id=todo_id)
+                return adapter.todo_repo.get(con=con, todo_id=todo_id)
         except Exception as e:
             return domain.Error.new(str(e), todo_id=todo_id)
 
     def get_by_template_id_and_user_id(
         self,
         *,
-        template_id: str,
+        template_todo_id: str,
         user_id: str,
     ) -> domain.Todo | None | domain.Error:
         try:
             with self._engine.begin() as con:
-                todos = adapter.todo_repo.all_todos(con=con)
+                todos = adapter.todo_repo.where(
+                    con=con,
+                    category_id=domain.Unspecified(),
+                    user_id=user_id,
+                    description_starts_with=domain.Unspecified(),
+                    template_todo_id=template_todo_id,
+                )
                 if isinstance(todos, domain.Error):
                     return todos
 
                 return next(
-                    (todo for todo in todos if todo.template_todo_id == template_id and todo.user.user_id == user_id),
+                    (
+                        todo
+                        for todo in todos
+                        if todo.template_todo_id == template_todo_id and todo.user.user_id == user_id
+                    ),
                     None,
                 )
         except Exception as e:
-            return domain.Error.new(str(e), template_id=template_id, user_id=user_id)
+            return domain.Error.new(
+                str(e),
+                template_todo_id=template_todo_id,
+                user_id=user_id,
+            )
 
     def mark_complete(
         self,
@@ -113,7 +127,7 @@ class TodoService(domain.TodoService):
     ) -> None | domain.Error:
         try:
             with self._engine.begin() as con:
-                todo = adapter.todo_repo.get_by_id(con=con, todo_id=todo_id)
+                todo = adapter.todo_repo.get(con=con, todo_id=todo_id)
                 if isinstance(todo, domain.Error):
                     return todo
 
@@ -151,28 +165,27 @@ class TodoService(domain.TodoService):
     ) -> list[domain.Todo] | domain.Error:
         try:
             with self._engine.begin() as con:
-                todos = adapter.todo_repo.all_todos(con=con)
+                todos = adapter.todo_repo.where(
+                    con=con,
+                    category_id=category_id_filter,
+                    user_id=user_id_filter,
+                    description_starts_with=description_like,
+                    template_todo_id=domain.Unspecified(),
+                )
                 if isinstance(todos, domain.Error):
                     return todos
 
-            if description := description_like.strip().lower():
-                todos = (todo for todo in todos if description in todo.description.lower())
-
             if due_filter:
                 todos = (todo for todo in todos if todo.should_display())
-
-            if user_id_filter:
-                assert not isinstance(user_id_filter, domain.User)
-                todos = (todo for todo in todos if todo.user.user_id == user_id_filter)
-
-            if category_id_filter:
-                todos = (todo for todo in todos if todo.category.category_id == category_id_filter)
 
             today = datetime.date.today()
             return sorted(
                 todos,
                 key=(
-                    lambda todo: domain.date_calc.due_date(frequency=todo.frequency, ref_date=today)
+                    lambda todo: domain.date_calc.due_date(
+                        frequency=todo.frequency,
+                        ref_date=today,
+                    )
                     or datetime.date(1900, 1, 1)
                 ),
             )
@@ -185,51 +198,45 @@ class TodoService(domain.TodoService):
                 user_id_filter=user_id_filter,
             )
 
-    def mark_incomplete(self, *, todo_id: str) -> None:
-        repo = adapter.DbTodoRepository(engine=self._engine)
+    def mark_incomplete(self, *, todo_id: str) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
+                todo = adapter.todo_repo.get(con=con, todo_id=todo_id)
+                if isinstance(todo, domain.Error):
+                    return todo
 
-        if todo := repo.get(todo_id=todo_id):
-            if todo.last_completed is not None:
-                if todo.prior_completed:
-                    last_completed = todo.prior_completed
-                else:
-                    last_completed = None
+                if todo is None:
+                    return None
 
+                if todo.last_completed is not None:
+                    if todo.prior_completed:
+                        last_completed: datetime.date | None = todo.prior_completed
+                    else:
+                        last_completed = None
+
+                    updated_todo = dataclasses.replace(
+                        todo,
+                        last_completed=last_completed,
+                        prior_completed=None,
+                    )
+
+                    return adapter.todo_repo.update(con=con, todo=updated_todo)
+        except Exception as e:
+            return domain.Error.new(str(e), todo_id=todo_id)
+
+    def update(self, *, todo: domain.Todo) -> None | domain.Error:
+        try:
+            with self._engine.begin() as con:
                 updated_todo = dataclasses.replace(
                     todo,
-                    last_completed=last_completed,
-                    prior_completed=None,
+                    date_updated=datetime.datetime.now(),
                 )
-
-                repo.update(todo=updated_todo)
-
-                if self._todos is not None:
-                    self._todos[todo_id] = updated_todo
-
-    def refresh(self) -> None:
-        repo = adapter.DbTodoRepository(engine=self._engine)
-        self._todos = {todo.todo_id: todo for todo in repo.all_todos()}
-        self._last_refresh = datetime.datetime.now()
-
-    def update(self, *, todo: domain.Todo) -> None:
-        repo = adapter.DbTodoRepository(engine=self._engine)
-        updated_todo = dataclasses.replace(todo, date_updated=datetime.datetime.now())
-        repo.update(todo=updated_todo)
-        if self._todos is not None:
-            self._todos[todo.todo_id] = updated_todo
-
-    def _refresh(self) -> None:
-        if self._last_refresh is None or self._todos is None:
-            time_to_refresh = True
-        else:
-            seconds_since_last_refresh = (datetime.datetime.now() - self._last_refresh).total_seconds()
-            if seconds_since_last_refresh >= self._min_seconds_between_refreshes:
-                time_to_refresh = True
-            else:
-                time_to_refresh = False
-
-        if time_to_refresh:
-            self.refresh()
+                return adapter.todo_repo.update(
+                    con=con,
+                    todo=updated_todo,
+                )
+        except Exception as e:
+            return domain.Error.new(str(e), todo=todo)
 
 
 if __name__ == "__main__":

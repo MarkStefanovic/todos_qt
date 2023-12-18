@@ -26,5 +26,5 @@ class MonthlyFrequencyForm(qtw.QWidget):
     def get_state(self) -> MonthlyFrequencyFormState:
         return MonthlyFrequencyFormState(month_day=self._month_day_sb.value())
 
-    def set_state(self, *, state: MonthlyFrequencyFormState) -> None:
+    def set_state(self, /, state: MonthlyFrequencyFormState) -> None:
         self._month_day_sb.setValue(state.month_day)

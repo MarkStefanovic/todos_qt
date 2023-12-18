@@ -3,15 +3,21 @@ import datetime
 
 from loguru import logger
 
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
+
 from src import domain
 from src.presentation.shared.widgets import popup
 from src.presentation.user.form.state import UserFormState
+from src.presentation.user.state import UserState
 from src.presentation.user.view import UserView
 
 __all__ = ("UserController",)
 
 
 class UserController:
+    states = qtc.pyqtSignal(UserState)
+
     def __init__(self, *, user_service: domain.UserService, view: UserView):
         self._user_service = user_service
         self._view = view

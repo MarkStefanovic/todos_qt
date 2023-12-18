@@ -1,13 +1,10 @@
-from __future__ import annotations
-
 import sys
 import types
 import typing
 
-from loguru import logger
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
+from loguru import logger
 
 from src import adapter, domain, presentation, service
 from src.adapter import config
@@ -40,34 +37,24 @@ def main() -> None | domain.Error:
 
     app = qtw.QApplication(sys.argv)
 
-    app.setStyle("Fusion")
-
-    app.setStyleSheet(presentation.theme.COBALT_STYLESHEET)
-
-    app.setPalette(presentation.theme.cobalt_palette())
+    presentation.theme.apply_theme(app=app)
 
     engine = adapter.db.create_engine(url=adapter.config.db_url(), echo=True)
+    if isinstance(engine, domain.Error):
+        return engine
 
     username: typing.Final[str] = config.current_user()
 
     category_service = service.CategoryService(engine=engine)
 
-    user_service = service.UserService(engine=engine, username=username)
+    user_service: typing.Final[service.UserService] = service.UserService(
+        engine=engine,
+        username=username,
+    )
 
     current_user = user_service.current_user()
 
     todo_service = service.TodoService(engine=engine, username=username)
-
-    if adapter.config.add_holidays():
-        for category in (domain.TODO_CATEGORY, domain.HOLIDAY_CATEGORY):
-            if category_service.get(category_id=category.category_id) is None:
-                category_service.add(category=category)
-    else:
-        if category_service.get(category_id=domain.TODO_CATEGORY.category_id) is None:
-            category_service.add(category=domain.TODO_CATEGORY)
-
-    if adapter.config.add_holidays():
-        todo_service.add_default_holidays_for_all_users()
 
     app_icon = presentation.icons.app_icon()
     if isinstance(app_icon, domain.Error):

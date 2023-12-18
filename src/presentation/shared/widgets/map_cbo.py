@@ -3,75 +3,62 @@ from __future__ import annotations
 import typing
 import warnings
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtWidgets as qtw  # noqa
+from src.presentation.shared import fonts
 
 __all__ = ("MapCBO",)
+
 
 Value = typing.TypeVar("Value")
 
 
-class MapCBO(typing.Generic[Value], qtw.QWidget):
+class MapCBO(typing.Generic[Value], qtw.QComboBox):
     value_changed = qtc.pyqtSignal(object)  # Value
 
-    def __init__(self, *, mapping: dict[Value, str] | None = None, value: Value | None = None):
-        super().__init__()
+    def __init__(self, *, parent: qtw.QWidget | None = None):
+        super().__init__(parent=parent)
 
-        self._cbo = qtw.QComboBox(parent=self)
+        self.setFont(fonts.NORMAL)
+        self.setFocusPolicy(qtc.Qt.StrongFocus)
+        self.setMouseTracking(False)
+        self.setStyleSheet("combobox-popup: 0;")
 
-        self._mapping: dict[Value, str] = {}
+        # noinspection PyUnresolvedReferences
+        self.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self._index_by_value: dict[Value, int] = {}
-
-        if mapping is not None:
-            self.set_values(mapping=mapping)
-
-            if value is not None:
-                self.set_value(value=value)
-
-        self._cbo.currentIndexChanged.connect(self._on_current_index_changed)
-
-        layout = qtw.QStackedLayout()
-        layout.addWidget(self._cbo)
-        self.setLayout(layout)
-
-        self.setMaximumHeight(self._cbo.height() + 8)
-
-    def get_value(self) -> Value:
-        return self._cbo.currentData()
+    def get_value(self) -> Value | None:
+        return self.currentData()
 
     def get_values(self) -> list[Value]:
-        return list(self._mapping.keys())
+        values: list[Value] = []
+        for index in range(self.count()):
+            if value := self.itemData(index):
+                values.append(value)
+        return values
 
-    def set_value(self, *, value: Value | None) -> None:
-        if value is None:
-            self._cbo.setCurrentIndex(-1)
-        else:
-            if value in self._index_by_value:
-                if self._cbo.currentIndex() != self._index_by_value[value]:
-                    self._cbo.setCurrentIndex(self._index_by_value[value])
-            else:
-                warnings.warn(
-                    f"The value, {value!r}, is not an option.  Available values include the "
-                    f"following: {', '.join(str(v) for v in self._index_by_value.keys())}"
-                )
-                self._cbo.setCurrentIndex(0)
+    def set_value(self, /, value: Value | None) -> None:
+        for i in range(self.count()):
+            data = self.itemData(i)
+            if data is not None:
+                if data == value:
+                    self.setCurrentIndex(i)
+                    return None
 
-    def set_values(self, *, mapping: dict[Value, str]) -> None:
-        if mapping != self._mapping:
-            self.blockSignals(True)
+        warnings.warn(f"The value, {value!r}, is not an option.")
 
-            self._mapping = mapping
+    def set_values(self, /, values: dict[Value, str]) -> None:
+        self.blockSignals(True)
 
-            self._index_by_value = {
-                value: ix
-                for ix, value in enumerate(mapping.keys())
-            }
+        previous_selection = self.currentData()
 
-            self._cbo.clear()
-            for value, display_value in mapping.items():
-                self._cbo.addItem(display_value, userData=value)
+        self.clear()
+        for value, display_value in values.items():
+            self.addItem(display_value, userData=value)
 
-            self.blockSignals(False)
+        if previous_selection:
+            self.set_value(previous_selection)
 
-    def _on_current_index_changed(self, index: int) -> None:
+        self.blockSignals(False)
+
+    def _on_current_index_changed(self, /, _: int) -> None:
         self.value_changed.emit(self._cbo.currentData())  # noqa

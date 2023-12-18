@@ -1,9 +1,11 @@
-from __future__ import annotations
+import typing
 
+# noinspection PyPep8Naming
 from PyQt5 import QtWidgets as qtw
 
 from src import domain
-from src.presentation.shared import fonts, widgets
+from src.presentation.shared import fonts
+from src.presentation.shared import widgets
 from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
 __all__ = ("YearlyFrequencyForm",)
@@ -15,8 +17,9 @@ class YearlyFrequencyForm(qtw.QWidget):
 
         month_lbl = qtw.QLabel("Month")
         month_lbl.setFont(fonts.BOLD)
-        self._month_cbo = widgets.MapCBO(
-            mapping={
+        self._month_cbo: typing.Final[widgets.MapCBO[domain.Month]] = widgets.MapCBO(parent=self)
+        self._month_cbo.set_values(
+            {
                 domain.Month.January: "Jan",
                 domain.Month.February: "Feb",
                 domain.Month.March: "Mar",
@@ -29,9 +32,9 @@ class YearlyFrequencyForm(qtw.QWidget):
                 domain.Month.October: "Oct",
                 domain.Month.November: "Nov",
                 domain.Month.December: "Dec",
-            },
-            value=domain.Month.January,
+            }
         )
+        self._month_cbo.set_value(domain.Month.January)
         self._month_cbo.setFixedWidth(100)
 
         month_day_lbl = qtw.QLabel("Month Day")
@@ -52,6 +55,6 @@ class YearlyFrequencyForm(qtw.QWidget):
             month_day=self._month_day_sb.value(),
         )
 
-    def set_state(self, *, state: YearlyFrequencyFormState) -> None:
+    def set_state(self, /, state: YearlyFrequencyFormState) -> None:
         self._month_cbo.set_value(value=state.month)
         self._month_day_sb.setValue(state.month_day)

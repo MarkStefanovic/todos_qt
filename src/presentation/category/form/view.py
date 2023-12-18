@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 
 # noinspection PyPep8Naming
@@ -10,8 +8,6 @@ from src import domain
 from src.presentation.category.form import requests
 from src.presentation.category.form.state import CategoryFormState
 from src.presentation.shared import fonts, icons
-
-import qtawesome as qta
 
 __all__ = ("CategoryForm",)
 
@@ -27,10 +23,7 @@ class CategoryForm(qtw.QWidget, domain.View[CategoryFormState]):
 
         self._form_requests = form_requests
 
-        back_btn_icon = qta.icon(
-            icons.back_btn_icon_name,
-            color=self.parent().palette().text().color(),
-        )
+        back_btn_icon = icons.back_btn_icon(parent=self)
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
         self.back_btn.setFont(fonts.BOLD)
         self.back_btn.setMaximumWidth(100)
@@ -52,10 +45,7 @@ class CategoryForm(qtw.QWidget, domain.View[CategoryFormState]):
         self._date_added: datetime.datetime = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
 
-        save_btn_icon = qta.icon(
-            icons.save_btn_icon_name,
-            color=self.parent().palette().text().color(),
-        )
+        save_btn_icon = icons.save_btn_icon(parent=self)
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         self.save_btn.setFont(fonts.BOLD)
         self.save_btn.setFixedWidth(100)

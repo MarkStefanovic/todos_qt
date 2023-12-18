@@ -35,6 +35,10 @@ class CategorySelectorWidget(qtw.QWidget):
             states=self._controller.states,
         )
 
+        layout = qtw.QStackedLayout()
+        layout.addWidget(self._view)
+        self.setLayout(layout)
+
         self._view.item_selected.connect(self.item_selected)
 
     def selected_item(self) -> domain.Category:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import typing
 
-import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
@@ -10,7 +9,7 @@ from src import domain
 from src.presentation.category.dash import requests
 from src.presentation.category.dash.state import CategoryDashState
 from src.presentation.shared import fonts, icons
-from src.presentation.shared.widgets import table_view, StatusBar
+from src.presentation.shared.widgets import table_view, StatusBar, popup
 
 __all__ = ("CategoryDash",)
 
@@ -28,19 +27,13 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
         self._dash_requests: typing.Final[requests.CategoryDashRequests] = dash_requests
         self._current_user: typing.Final[domain.User] = current_user
 
-        refresh_btn_icon = qta.icon(
-            icons.refresh_btn_icon_name,
-            color=self.parent().palette().text().color(),  # type: ignore
-        )
+        refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self._refresh_btn.setFont(fonts.BOLD)
         self._refresh_btn.setMaximumWidth(100)
         self._refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon(
-            icons.add_btn_icon_name,
-            color=self.parent().palette().text().color(),  # type: ignore
-        )
+        add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self._add_btn.setFont(fonts.BOLD)
         self._add_btn.setMaximumWidth(100)
@@ -165,9 +158,10 @@ class CategoryDash(qtw.QWidget, domain.View[CategoryDashState]):
                     user=self._current_user,
                     category=event.item,
                 ):
-                    request = requests.Delete(category=event.item)
+                    if popup.confirm(question=f"Are you sure you want to delete {event.item.name}?"):
+                        request = requests.Delete(category=event.item)
 
-                    self._dash_requests.delete.emit(request)
+                        self._dash_requests.delete.emit(request)
             case "edit":
                 if domain.permissions.user_can_edit_category(
                     user=self._current_user,

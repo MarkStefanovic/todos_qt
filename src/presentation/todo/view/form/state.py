@@ -16,31 +16,31 @@ __all__ = ("TodoFormState",)
 
 @dataclasses.dataclass(frozen=True)
 class TodoFormState:
-    todo_id: str
-    template_todo_id: str | None
-    advance_days: int
-    expire_days: int
-    user: domain.User
-    category: domain.Category
-    description: str
-    frequency_name: domain.FrequencyType
-    note: str
-    start_date: datetime.date
-    date_added: datetime.datetime
-    date_updated: datetime.datetime | None
-    last_completed: datetime.date | None
-    prior_completed: datetime.date | None
-    last_completed_by: domain.User | None
-    prior_completed_by: domain.User | None
-    irregular_frequency_form_state: IrregularFrequencyFormState
-    monthly_frequency_form_state: MonthlyFrequencyFormState
-    once_frequency_form_state: OnceFrequencyFormState
-    weekly_frequency_form_state: WeeklyFrequencyFormState
-    xdays_frequency_form_state: XDaysFrequencyFormState
-    yearly_frequency_form_state: YearlyFrequencyFormState
-    categories_stale: bool | domain.Unspecified
-    users_stale: bool | domain.Unspecified
-    focus_description: bool
+    todo_id: str | domain.Unspecified = domain.Unspecified()
+    template_todo_id: str | None | domain.Unspecified = domain.Unspecified()
+    advance_days: int | domain.Unspecified = domain.Unspecified()
+    expire_days: int | domain.Unspecified = domain.Unspecified()
+    user: domain.User | domain.Unspecified = domain.Unspecified()
+    category: domain.Category | domain.Unspecified = domain.Unspecified()
+    description: str | domain.Unspecified = domain.Unspecified()
+    frequency_name: domain.FrequencyType | domain.Unspecified = domain.Unspecified()
+    note: str | domain.Unspecified = domain.Unspecified()
+    start_date: datetime.date | domain.Unspecified = domain.Unspecified()
+    date_added: datetime.datetime | domain.Unspecified = domain.Unspecified()
+    date_updated: datetime.datetime | None | domain.Unspecified = domain.Unspecified()
+    last_completed: datetime.date | None | domain.Unspecified = domain.Unspecified()
+    prior_completed: datetime.date | None | domain.Unspecified = domain.Unspecified()
+    last_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified()
+    prior_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified()
+    irregular_frequency_form_state: IrregularFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    monthly_frequency_form_state: MonthlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    once_frequency_form_state: OnceFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    weekly_frequency_form_state: WeeklyFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
+    categories_stale: bool | domain.Unspecified = domain.Unspecified()
+    users_stale: bool | domain.Unspecified = domain.Unspecified()
+    focus_description: bool | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
     def initial(
@@ -75,69 +75,117 @@ class TodoFormState:
             focus_description=True,
         )
 
-    def to_domain(self) -> domain.Todo:
-        if self.frequency_name == domain.FrequencyType.Daily:
-            frequency: domain.Frequency = domain.Frequency.daily(start_date=self.start_date)
-        elif self.frequency_name == domain.FrequencyType.Easter:
-            frequency = domain.Frequency.easter(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.Irregular:
-            frequency = self.irregular_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.Monthly:
-            frequency = self.monthly_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.Once:
-            frequency = self.once_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.Weekly:
-            frequency = self.weekly_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.XDays:
-            frequency = self.xdays_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        elif self.frequency_name == domain.FrequencyType.Yearly:
-            frequency = self.yearly_frequency_form_state.to_domain(
-                advance_display_days=self.advance_days,
-                expire_display_days=self.expire_days,
-                start_date=self.start_date,
-            )
-        else:
-            raise ValueError(f"Unrecognized [frequency_name], {self.frequency_name!r}.")
+    def to_domain(self) -> domain.Todo | domain.Error:
+        try:
+            if isinstance(self.todo_id, domain.Unspecified):
+                return domain.Error.new(f"{self.todo_id} is unspecified.")
 
-        return domain.Todo(
-            todo_id=self.todo_id,
-            template_todo_id=self.template_todo_id,
-            frequency=frequency,
-            user=self.user,
-            category=self.category,
-            description=self.description,
-            note=self.note,
-            date_added=self.date_added,
-            date_updated=self.date_updated,
-            last_completed=self.last_completed,
-            prior_completed=self.prior_completed,
-            last_completed_by=self.last_completed_by,
-            prior_completed_by=self.prior_completed_by,
-        )
+            if isinstance(self.template_todo_id, domain.Unspecified):
+                return domain.Error.new(f"{self.template_todo_id} is unspecified.")
+
+            if isinstance(self.user, domain.Unspecified):
+                return domain.Error.new(f"{self.user} is unspecified.")
+
+            if isinstance(self.category, domain.Unspecified):
+                return domain.Error.new(f"{self.category} is unspecified.")
+
+            if isinstance(self.description, domain.Unspecified):
+                return domain.Error.new(f"{self.description} is unspecified.")
+
+            if isinstance(self.note, domain.Unspecified):
+                return domain.Error.new(f"{self.note} is unspecified.")
+
+            if isinstance(self.date_added, domain.Unspecified):
+                return domain.Error.new(f"{self.date_added} is unspecified.")
+
+            if isinstance(self.date_updated, domain.Unspecified):
+                return domain.Error.new(f"{self.date_updated} is unspecified.")
+
+            if isinstance(self.last_completed, domain.Unspecified):
+                return domain.Error.new(f"{self.last_completed} is unspecified.")
+
+            if isinstance(self.prior_completed, domain.Unspecified):
+                return domain.Error.new(f"{self.prior_completed} is unspecified.")
+
+            if isinstance(self.last_completed_by, domain.Unspecified):
+                return domain.Error.new(f"{self.last_completed_by} is unspecified.")
+
+            if isinstance(self.prior_completed_by, domain.Unspecified):
+                return domain.Error.new(f"{self.prior_completed_by} is unspecified.")
+
+            if isinstance(self.advance_days, domain.Unspecified):
+                return domain.Error.new(f"{self.advance_days} is unspecified.")
+
+            if isinstance(self.expire_days, domain.Unspecified):
+                return domain.Error.new(f"{self.expire_days} is unspecified.")
+
+            if isinstance(self.start_date, domain.Unspecified):
+                return domain.Error.new(f"{self.start_date} is unspecified.")
+
+            if self.frequency_name == domain.FrequencyType.Daily:
+                frequency: domain.Frequency = domain.Frequency.daily(start_date=self.start_date)
+            elif self.frequency_name == domain.FrequencyType.Easter:
+                frequency = domain.Frequency.easter(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.Irregular:
+                frequency = self.irregular_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.Monthly:
+                frequency = self.monthly_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.Once:
+                frequency = self.once_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.Weekly:
+                frequency = self.weekly_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.XDays:
+                frequency = self.xdays_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            elif self.frequency_name == domain.FrequencyType.Yearly:
+                frequency = self.yearly_frequency_form_state.to_domain(
+                    advance_display_days=self.advance_days,
+                    expire_display_days=self.expire_days,
+                    start_date=self.start_date,
+                )
+            else:
+                return domain.Error.new(f"Unrecognized [frequency_name], {self.frequency_name!r}.")
+
+            return domain.Todo(
+                todo_id=self.todo_id,
+                template_todo_id=self.template_todo_id,
+                frequency=frequency,
+                user=self.user,
+                category=self.category,
+                description=self.description,
+                note=self.note,
+                date_added=self.date_added,
+                date_updated=self.date_updated,
+                last_completed=self.last_completed,
+                prior_completed=self.prior_completed,
+                last_completed_by=self.last_completed_by,
+                prior_completed_by=self.prior_completed_by,
+            )
+        except Exception as e:
+            return domain.Error.new(str(e))
 
     @staticmethod
     def from_domain(*, todo: domain.Todo) -> TodoFormState:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import typing
 
+import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
@@ -21,8 +22,6 @@ from src.presentation.todo.view.form.xdays.view import XDaysFrequencyForm
 from src.presentation.todo.view.form.yearly.view import YearlyFrequencyForm
 from src.presentation.user_selector.widget import UserSelectorWidget
 
-import qtawesome as qta
-
 __all__ = ("TodoForm",)
 
 
@@ -30,14 +29,14 @@ class TodoForm(qtw.QWidget):
     def __init__(
         self,
         *,
-        todo_form_requests: requests.TodoRequests,
+        form_requests: requests.TodoFormRequests,
         category_selector: CategorySelectorWidget,
         user_selector: UserSelectorWidget,
         parent: qtw.QWidget | None = None,
     ):
         super().__init__(parent=parent)
 
-        self._requests: typing.Final[requests.TodoRequests] = todo_form_requests
+        self._requests: typing.Final[requests.TodoFormRequests] = form_requests
         self._category_selector: typing.Final[CategorySelectorWidget] = category_selector
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
 
@@ -73,8 +72,9 @@ class TodoForm(qtw.QWidget):
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(fonts.BOLD)
-        self._frequency_cbo = widgets.MapCBO(
-            mapping={
+        self._frequency_cbo = widgets.MapCBO()
+        self._frequency_cbo.set_values(
+            {
                 domain.FrequencyType.Daily: "Daily",
                 domain.FrequencyType.Irregular: "Irregular",
                 domain.FrequencyType.Monthly: "Monthly",
@@ -82,9 +82,9 @@ class TodoForm(qtw.QWidget):
                 domain.FrequencyType.Weekly: "Weekly",
                 domain.FrequencyType.XDays: "XDays",
                 domain.FrequencyType.Yearly: "Yearly",
-            },
-            value=domain.FrequencyType.Daily,
+            }
         )
+        self._frequency_cbo.set_value(domain.FrequencyType.Daily)
         self._frequency_cbo.value_changed.connect(self._frequency_changed)
         self._frequency_cbo.setFixedWidth(150)
 
@@ -185,77 +185,79 @@ class TodoForm(qtw.QWidget):
             self._template_todo_id = state.template_todo_id
 
         if not isinstance(state.date_added, domain.Unspecified):
-            self._date_added = date_added
+            self._date_added = state.date_added
 
-        if not isinstance(date_updated, domain.Unspecified):
-            self._date_updated = date_updated
+        if not isinstance(state.date_updated, domain.Unspecified):
+            self._date_updated = state.date_updated
 
-        if not isinstance(last_completed, domain.Unspecified):
-            self._last_completed = last_completed
+        if not isinstance(state.last_completed, domain.Unspecified):
+            self._last_completed = state.last_completed
 
-        if not isinstance(prior_completed, domain.Unspecified):
-            self._prior_completed = prior_completed
+        if not isinstance(state.prior_completed, domain.Unspecified):
+            self._prior_completed = state.prior_completed
 
-        if not isinstance(users_stale, domain.Unspecified):
-            self._user_selector.refresh()
+        if not isinstance(state.users_stale, domain.Unspecified):
+            if state.users_stale:
+                self._user_selector.refresh()
 
-        if not isinstance(user, domain.Unspecified):
-            self._user_selector.select_item(user)
+        if not isinstance(state.user, domain.Unspecified):
+            self._user_selector.select_item(state.user)
 
-        if not isinstance(description, domain.Unspecified):
-            self._description_txt.setText(description)
+        if not isinstance(state.description, domain.Unspecified):
+            self._description_txt.setText(state.description)
 
-        if not isinstance(advance_days, domain.Unspecified):
-            self._advance_days_sb.setValue(advance_days)
+        if not isinstance(state.advance_days, domain.Unspecified):
+            self._advance_days_sb.setValue(state.advance_days)
 
-        if not isinstance(expire_days, domain.Unspecified):
-            self._expire_days_sb.setValue(expire_days)
+        if not isinstance(state.expire_days, domain.Unspecified):
+            self._expire_days_sb.setValue(state.expire_days)
 
-        if not isinstance(frequency_name, domain.Unspecified):
-            self._advance_days_sb.setEnabled(frequency_name != domain.FrequencyType.Daily)
-            self._expire_days_sb.setEnabled(frequency_name != domain.FrequencyType.Daily)
+        if not isinstance(state.frequency_name, domain.Unspecified):
+            self._advance_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
+            self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
 
-        if not isinstance(categories_stale, domain.Unspecified):
-            self._category_selector.refresh()
+        if not isinstance(state.categories_stale, domain.Unspecified):
+            if state.categories_stale:
+                self._category_selector.refresh()
 
-        if not isinstance(category, domain.Unspecified):
-            self._category_selector.select_item(category)
+        if not isinstance(state.category, domain.Unspecified):
+            self._category_selector.select_item(state.category)
 
-        if not isinstance(note, domain.Unspecified):
-            self._note_txt.set_value(note)
+        if not isinstance(state.note, domain.Unspecified):
+            self._note_txt.set_value(state.note)
 
-        if not isinstance(start_date, domain.Unspecified):
-            self._start_date_edit.set_value(start_date)
+        if not isinstance(state.start_date, domain.Unspecified):
+            self._start_date_edit.set_value(state.start_date)
 
-        if not isinstance(frequency_name, domain.Unspecified):
-            self._frequency_cbo.set_value(value=frequency_name)
+        if not isinstance(state.frequency_name, domain.Unspecified):
+            self._frequency_cbo.set_value(state.frequency_name)
 
-        if not isinstance(irregular_frequency_form_state, domain.Unspecified):
-            self._irregular_frequency_form.set_state(state=irregular_frequency_form_state)
+        if not isinstance(state.irregular_frequency_form_state, domain.Unspecified):
+            self._irregular_frequency_form.set_state(state.irregular_frequency_form_state)
 
-        if not isinstance(monthly_frequency_form_state, domain.Unspecified):
-            self._monthly_frequency_form.set_state(state=monthly_frequency_form_state)
+        if not isinstance(state.monthly_frequency_form_state, domain.Unspecified):
+            self._monthly_frequency_form.set_state(state.monthly_frequency_form_state)
 
-        if not isinstance(once_frequency_form_state, domain.Unspecified):
-            self._one_off_frequency_form.set_state(state=once_frequency_form_state)
+        if not isinstance(state.once_frequency_form_state, domain.Unspecified):
+            self._one_off_frequency_form.set_state(state.once_frequency_form_state)
 
-        if not isinstance(weekly_frequency_form_state, domain.Unspecified):
-            self._weekly_frequency_form.set_state(state=weekly_frequency_form_state)
+        if not isinstance(state.weekly_frequency_form_state, domain.Unspecified):
+            self._weekly_frequency_form.set_state(state.weekly_frequency_form_state)
 
-        if not isinstance(xdays_frequency_form_state, domain.Unspecified):
-            self._xdays_frequency_form.set_state(state=xdays_frequency_form_state)
+        if not isinstance(state.xdays_frequency_form_state, domain.Unspecified):
+            self._xdays_frequency_form.set_state(state.xdays_frequency_form_state)
 
-        if not isinstance(yearly_frequency_form_state, domain.Unspecified):
-            self._yearly_frequency_form.set_state(state=yearly_frequency_form_state)
+        if not isinstance(state.yearly_frequency_form_state, domain.Unspecified):
+            self._yearly_frequency_form.set_state(state.yearly_frequency_form_state)
 
-        if not isinstance(last_completed_by, domain.Unspecified):
-            self._last_completed_by = last_completed_by
+        if not isinstance(state.last_completed_by, domain.Unspecified):
+            self._last_completed_by = state.last_completed_by
 
-        if not isinstance(prior_completed_by, domain.Unspecified):
-            self._prior_completed_by = prior_completed_by
+        if not isinstance(state.prior_completed_by, domain.Unspecified):
+            self._prior_completed_by = state.prior_completed_by
 
-        if not isinstance(focus_description, domain.Unspecified):
-            if focus_description and not self._description_txt.hasFocus():
+        if not isinstance(state.focus_description, domain.Unspecified):
+            if state.focus_description and not self._description_txt.hasFocus():
                 self._description_txt.setFocus()
 
     def _frequency_changed(self) -> None:

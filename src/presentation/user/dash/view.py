@@ -1,10 +1,10 @@
-from __future__ import annotations
-
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+# noinspection PyPep8Naming
+from PyQt5 import QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import fonts, icons
-from src.presentation.shared.widgets import table
+from src.presentation.shared.widgets import table_view
+from src.presentation.user.dash import requests
 from src.presentation.user.dash.state import UserDashState
 
 import qtawesome as qta
@@ -13,18 +13,17 @@ __all__ = ("UserDash",)
 
 
 class UserDash(qtw.QWidget):
-    delete_btn_clicked = qtc.pyqtSignal()
-    edit_btn_clicked = qtc.pyqtSignal()
-
-    def __init__(self, *, parent: qtw.QWidget | None = None):
+    def __init__(
+        self,
+        *,
+        user_requests: requests.UserDashRequests,
+        parent: qtw.QWidget | None = None,
+    ):
         super().__init__(parent=parent)
 
         self._current_user = domain.DEFAULT_USER
 
-        refresh_btn_icon = qta.icon(
-            icons.refresh_btn_icon_name,
-            color=self.parent().palette().text().color(),  # type: ignore
-        )
+        refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self.refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self.refresh_btn.setFont(fonts.BOLD)
         self.refresh_btn.setMaximumWidth(100)
@@ -39,42 +38,37 @@ class UserDash(qtw.QWidget):
         toolbar.addWidget(self.add_btn)
         toolbar.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Minimum))
 
-        self._table: table.Table[domain.User, str] = table.Table(
-            col_specs=[
-                table.text_col(
+        self._table: table_view.TableView[domain.User, str] = table_view.TableView(
+            attrs=(
+                table_view.text(
+                    name="user_id",
                     display_name="ID",
-                    attr_name="user_id",
-                    hidden=True,
+                    key=True,
                 ),
-                table.text_col(
+                table_view.text(
+                    name="username",
                     display_name="Username",
-                    attr_name="username",
-                    column_width=200,
+                    width=200,
                 ),
-                table.text_col(
+                table_view.text(
+                    name="display_name",
                     display_name="Name",
-                    attr_name="display_name",
-                    column_width=200,
+                    width=200,
                 ),
-                table.timestamp_col(
+                table_view.timestamp(
+                    name="date_added",
                     display_name="Added",
-                    attr_name="date_added",
-                    display_format="%m/%d/%y",
-                    column_width=100,
-                    alignment=table.ColAlignment.Center,
                 ),
-                table.timestamp_col(
+                table_view.timestamp(
+                    name="date_updated",
                     display_name="Updated",
-                    attr_name="date_updated",
-                    display_format="%m/%d/%y",
-                    column_width=100,
-                    alignment=table.ColAlignment.Center,
+                    width=100,
                 ),
-                table.button_col(
+                table_view.button(
+                    name="edit",
                     button_text="Edit",
-                    on_click=lambda _: self.edit_btn_clicked.emit(),  # noqa
-                    column_width=60,
-                    enable_when=lambda user: domain.permissions.user_can_edit_user(
+                    width=60,
+                    enabled_selector=lambda user: domain.permissions.user_can_edit_user(
                         current_user=self._current_user,
                         user=user,
                     ),
@@ -88,9 +82,12 @@ class UserDash(qtw.QWidget):
                         user=user,
                     ),
                 ),
-            ],
-            key_attr="user_id",
+            ),
+            parent=self,
         )
+
+        self._table.button_clicked.connect(self._on_table_btn_clicked)
+
         self._table.double_click.connect(
             lambda: self.edit_btn_clicked.emit()
             if domain.permissions.user_can_edit_user(  # noqa

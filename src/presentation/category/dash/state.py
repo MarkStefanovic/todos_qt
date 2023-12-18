@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import dataclasses
 
 from src import domain
@@ -15,7 +13,3 @@ class CategoryDashState:
     category_added: domain.Category | domain.Unspecified = domain.Unspecified()
     category_deleted: domain.Category | domain.Unspecified = domain.Unspecified()
     category_edited: domain.Category | domain.Unspecified = domain.Unspecified()
-
-
-if __name__ == "__main__":
-    print(CategoryDashState())

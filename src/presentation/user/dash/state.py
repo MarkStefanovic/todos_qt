@@ -7,12 +7,12 @@ from src import domain
 __all__ = ("UserDashState",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class UserDashState:
-    users: list[domain.User]
-    current_user: domain.User
-    selected_user: domain.User | None
-    status: str
+    users: list[domain.User] | domain.Unspecified = domain.Unspecified()
+    current_user: domain.User | domain.Unspecified = domain.Unspecified()
+    selected_user: domain.User | None | domain.Unspecified = domain.Unspecified()
+    status: str | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
     def initial() -> UserDashState:

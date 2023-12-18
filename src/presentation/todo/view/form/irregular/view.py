@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing
+
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
@@ -15,8 +17,9 @@ class IrregularFrequencyForm(qtw.QWidget):
 
         month_lbl = qtw.QLabel("Month")
         month_lbl.setFont(fonts.BOLD)
-        self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO(
-            mapping={
+        self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO()
+        self._month_cbo.set_values(
+            {
                 domain.Month.January: "Jan",
                 domain.Month.February: "Feb",
                 domain.Month.March: "Mar",
@@ -29,9 +32,9 @@ class IrregularFrequencyForm(qtw.QWidget):
                 domain.Month.October: "Oct",
                 domain.Month.November: "Nov",
                 domain.Month.December: "Dec",
-            },
-            value=domain.Month.January,
+            }
         )
+        self._month_cbo.set_value(domain.Month.January)
         self._month_cbo.setFixedWidth(150)
 
         week_number_lbl = qtw.QLabel("Week #")
@@ -42,8 +45,9 @@ class IrregularFrequencyForm(qtw.QWidget):
 
         weekday_lbl = qtw.QLabel("Weekday")
         weekday_lbl.setFont(fonts.BOLD)
-        self._weekday_cbo = widgets.MapCBO(
-            mapping={
+        self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
+        self._weekday_cbo.set_values(
+            {
                 domain.Weekday.Monday: "Monday",
                 domain.Weekday.Tuesday: "Tuesday",
                 domain.Weekday.Wednesday: "Wednesday",
@@ -52,8 +56,8 @@ class IrregularFrequencyForm(qtw.QWidget):
                 domain.Weekday.Saturday: "Saturday",
                 domain.Weekday.Sunday: "Sunday",
             },
-            value=domain.Weekday.Monday,
         )
+        self._weekday_cbo.set_value(domain.Weekday.Monday)
         self._weekday_cbo.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
@@ -71,7 +75,7 @@ class IrregularFrequencyForm(qtw.QWidget):
             week_day=self._weekday_cbo.get_value(),
         )
 
-    def set_state(self, *, state: IrregularFrequencyFormState) -> None:
+    def set_state(self, /, state: IrregularFrequencyFormState) -> None:
         self._month_cbo.set_value(value=state.month)
         self._week_number_sb.setValue(state.week_number)
         self._weekday_cbo.set_value(value=state.week_day)

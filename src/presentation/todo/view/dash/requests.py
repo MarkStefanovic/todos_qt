@@ -11,6 +11,7 @@ __all__ = (
     "EditTodo",
     "RefreshRequest",
     "ToggleCompleted",
+    "TodoDashRequests",
 )
 
 

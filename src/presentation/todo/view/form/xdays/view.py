@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+# noinspection PyPep8Naming
 from PyQt5 import QtWidgets as qtw
 
 from src.presentation.shared import fonts
@@ -26,5 +25,5 @@ class XDaysFrequencyForm(qtw.QWidget):
     def get_state(self) -> XDaysFrequencyFormState:
         return XDaysFrequencyFormState(days=self._days_sb.value())
 
-    def set_state(self, *, state: XDaysFrequencyFormState) -> None:
+    def set_state(self, /, state: XDaysFrequencyFormState) -> None:
         self._days_sb.setValue(state.days)

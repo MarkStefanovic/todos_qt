@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 
+from src import domain
 from src.adapter import config
 
 __all__ = (
@@ -68,14 +69,35 @@ user = sa.Table(
 )
 
 
-def create_tables(*, engine: sa.engine.Engine) -> None:
-    meta.create_all(bind=engine, tables=[todo, category, user], checkfirst=True)
+def create_tables(*, engine: sa.engine.Engine) -> None | domain.Error:
+    try:
+        meta.create_all(
+            bind=engine,
+            tables=[todo, category, user],
+            checkfirst=True,
+        )
+        return None
+    except Exception as e:
+        return domain.Error.new(str(e))
 
 
-def create_engine(*, url: str = config.db_url(), echo: bool = False) -> sa.engine.Engine:
-    return sa.create_engine(url=url, echo=echo)
+def create_engine(
+    *,
+    url: str = config.db_url(),
+    echo: bool = False,
+) -> sa.engine.Engine | domain.Error:
+    # noinspection PyBroadException
+    try:
+        return sa.create_engine(url=url, echo=echo)
+    except:  # noqa: E722
+        return domain.Error.new("An error occurred while creating engine.", echo=echo)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     eng = create_engine()
-    create_tables(engine=eng)
+    if isinstance(eng, sa.Engine):
+        ctr = create_tables(engine=eng)
+        if ctr is not None:
+            print(ctr)
+    else:
+        print(eng)

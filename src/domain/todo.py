@@ -365,6 +365,37 @@ class Todo:
             date_updated=date_updated,
         )
 
+    def validation_errors(self) -> list[str]:
+        error_messages: list[str] = []
+        if self.frequency.name == FrequencyType.Daily:
+            if self.frequency.advance_display_days > 0:
+                error_messages.append("Advance display days must be 0.")
+            if self.frequency.expire_display_days > 1:
+                error_messages.append("Expire days must be less than 1.")
+        elif self.frequency.name == FrequencyType.Irregular:
+            if self.frequency.advance_display_days > 363:
+                error_messages.append("Advance display days must be less than 364.")
+            if self.frequency.expire_display_days > 363:
+                error_messages.append("Expire days must be less than 364.")
+        elif self.frequency.name == FrequencyType.Monthly:
+            if self.frequency.advance_display_days > 27:
+                error_messages.append("Advance display days must be less than 28.")
+            if self.frequency.expire_display_days > 27:
+                error_messages.append("Expire days must be less than 28.")
+        elif self.frequency.name == FrequencyType.XDays:
+            assert self.frequency.days is not None
+            if self.frequency.advance_display_days > self.frequency.days:
+                error_messages.append("Advance display days must be less than the number of days between.")
+            if self.frequency.expire_display_days > self.frequency.days:
+                error_messages.append("Expire days must be less than the days between.")
+        elif self.frequency.name == FrequencyType.Yearly:
+            if self.frequency.advance_display_days > 363:
+                error_messages.append("Advance display days must be less than 364.")
+            if self.frequency.expire_display_days > 363:
+                error_messages.append("Expire days must be less than 364.")
+
+        return error_messages
+
 
 DEFAULT_TODO = Todo.daily(
     todo_id="",

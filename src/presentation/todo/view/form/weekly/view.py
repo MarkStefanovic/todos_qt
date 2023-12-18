@@ -1,4 +1,4 @@
-from __future__ import annotations
+import typing
 
 from PyQt5 import QtWidgets as qtw  # noqa
 
@@ -15,8 +15,9 @@ class WeeklyFrequencyForm(qtw.QWidget):
 
         weekday_lbl = qtw.QLabel("Weekday")
         weekday_lbl.setFont(fonts.BOLD)
-        self._weekday_cbo = widgets.MapCBO(
-            mapping={
+        self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
+        self._weekday_cbo.set_values(
+            {
                 domain.Weekday.Monday: "Monday",
                 domain.Weekday.Tuesday: "Tuesday",
                 domain.Weekday.Wednesday: "Wednesday",
@@ -24,9 +25,9 @@ class WeeklyFrequencyForm(qtw.QWidget):
                 domain.Weekday.Friday: "Friday",
                 domain.Weekday.Saturday: "Saturday",
                 domain.Weekday.Sunday: "Sunday",
-            },
-            value=domain.Weekday.Monday,
+            }
         )
+        self._weekday_cbo.set_value(domain.Weekday.Monday)
         self._weekday_cbo.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
@@ -37,5 +38,5 @@ class WeeklyFrequencyForm(qtw.QWidget):
     def get_state(self) -> WeeklyFrequencyFormState:
         return WeeklyFrequencyFormState(week_day=self._weekday_cbo.get_value())
 
-    def set_state(self, *, state: WeeklyFrequencyFormState) -> None:
+    def set_state(self, /, state: WeeklyFrequencyFormState) -> None:
         self._weekday_cbo.set_value(value=state.week_day)

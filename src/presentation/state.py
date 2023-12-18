@@ -10,33 +10,8 @@ from src.presentation.todo.state import TodoState
 __all__ = ("MainState",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class MainState:
-    active_tab: typing.Union[
-        typing.Literal["todo"],
-        typing.Literal["category"],
-        typing.Literal["user"],
-    ]
-    category_state: CategoryState
-    todo_state: TodoState
-
-    @staticmethod
-    def initial(
-        *,
-        todos: list[domain.Todo],
-        category_options: list[domain.Category],
-        user_options: list[domain.User],
-        current_user: domain.User,
-    ) -> MainState:
-        return MainState(
-            active_tab="todo",
-            todo_state=TodoState.initial(
-                todos=todos,
-                category_options=category_options,
-                user_options=user_options,
-                current_user=current_user,
-            ),
-            category_state=CategoryState.initial(
-                current_user=current_user,
-            ),
-        )
+    active_tab: typing.Literal["todo", "category", "user"] | domain.Unspecified = domain.Unspecified()
+    category_state: CategoryState | domain.Unspecified = domain.Unspecified()
+    todo_state: TodoState | domain.Unspecified = domain.Unspecified()

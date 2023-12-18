@@ -29,7 +29,7 @@ class UserView(qtw.QWidget):
             dash_active=self.stacked_layout.currentIndex() == 0,
         )
 
-    def set_state(self, *, state: UserState) -> None:
+    def set_state(self, /, state: UserState) -> None:
         self.dash.set_state(state=state.dash_state)
         self.form.set_state(state=state.form_state)
         if state.dash_active:

@@ -269,6 +269,7 @@ def where(
     category_id: str | domain.Unspecified,
     user_id: str | domain.Unspecified,
     description_starts_with: str | domain.Unspecified,
+    template_todo_id: str | domain.Unspecified,
 ) -> list[domain.Todo] | domain.Error:
     try:
         categories = category_repo.where(con=con, active=False)
@@ -289,6 +290,9 @@ def where(
 
         if isinstance(description_starts_with, str):
             qry = qry.where(db.todo.c.description.ilike(description_starts_with + "%"))
+
+        if isinstance(template_todo_id, str):
+            qry = qry.where(db.todo.c.template_todo_id == template_todo_id)
 
         category_by_id = {category.category_id: category for category in categories}
 

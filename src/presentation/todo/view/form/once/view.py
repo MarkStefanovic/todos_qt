@@ -29,5 +29,5 @@ class OnceFrequencyForm(qtw.QWidget):
             due_date=self._due_date_edit.get_value() or datetime.date.today(),
         )
 
-    def set_state(self, *, state: OnceFrequencyFormState) -> None:
+    def set_state(self, /, state: OnceFrequencyFormState) -> None:
         self._due_date_edit.set_value(state.due_date)

@@ -1,13 +1,12 @@
 import logging
 import typing
 
+# noinspection PyPep8Naming
+from PyQt5 import QtCore as qtc
+
 from src import domain
 from src.presentation.category import dash, form
 from src.presentation.category.state import CategoryState
-from src.presentation.shared.widgets import popup
-
-# noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc
 
 __all__ = ("CategoryController",)
 
@@ -77,16 +76,15 @@ class CategoryController(qtc.QObject):
         logger.debug(f"{self.__class__.__name__}._on_delete_request({request=!r})")
 
         try:
-            if popup.confirm(question=f"Are you sure you want to delete {request.category.name}?"):
-                self._category_service.delete(category_id=request.category.category_id)
-                state = CategoryState(
-                    dash_state=dash.CategoryDashState(
-                        category_deleted=request.category,
-                        status=f"Deleted {request.category.name}.",
-                    )
+            self._category_service.delete(category_id=request.category.category_id)
+            state = CategoryState(
+                dash_state=dash.CategoryDashState(
+                    category_deleted=request.category,
+                    status=f"Deleted {request.category.name}.",
                 )
+            )
 
-                self.states.emit(state)
+            self.states.emit(state)
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_delete_request({request=!r}) failed: {e!s}")
 

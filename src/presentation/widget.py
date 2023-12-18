@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 

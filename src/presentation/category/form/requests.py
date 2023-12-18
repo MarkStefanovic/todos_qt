@@ -5,7 +5,10 @@ from PyQt5 import QtCore as qtc
 
 from src import domain
 
-__all__ = ("CategoryFormRequests",)
+__all__ = (
+    "CategoryFormRequests",
+    "Save",
+)
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
