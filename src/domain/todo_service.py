@@ -1,21 +1,24 @@
 import abc
 
-from src import domain
+from src.domain.error import Error
+from src.domain.todo import Todo
+from src.domain.unspecified import Unspecified
+from src.domain.user import User
 
 __all__ = ("TodoService",)
 
 
 class TodoService(abc.ABC):
     @abc.abstractmethod
-    def add(self, *, todo: domain.Todo) -> None | domain.Error:
+    def add(self, *, todo: Todo) -> None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, *, todo_id: str) -> None | domain.Error:
+    def delete(self, *, todo_id: str) -> None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, *, todo_id: str) -> domain.Todo | None | domain.Error:
+    def get(self, *, todo_id: str) -> Todo | None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -24,7 +27,7 @@ class TodoService(abc.ABC):
         *,
         template_todo_id: str,
         user_id: str,
-    ) -> domain.Todo | None | domain.Error:
+    ) -> Todo | None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -32,25 +35,25 @@ class TodoService(abc.ABC):
         self,
         *,
         todo_id: str,
-        user: domain.User | None,
-    ) -> None | domain.Error:
+        user: User | None,
+    ) -> None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
     def where(
         self,
         *,
-        due_filter: bool | domain.Unspecified,
-        description_like: str | domain.Unspecified,
-        category_id_filter: str | domain.Unspecified,
-        user_id_filter: str | domain.Unspecified,
-    ) -> list[domain.Todo] | domain.Error:
+        due_filter: bool | Unspecified,
+        description_like: str | Unspecified,
+        category_id_filter: str | Unspecified,
+        user_id_filter: str | Unspecified,
+    ) -> list[Todo] | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def mark_incomplete(self, *, todo_id: str) -> None | domain.Error:
+    def mark_incomplete(self, *, todo_id: str) -> None | Error:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, *, todo: domain.Todo) -> None | domain.Error:
+    def update(self, *, todo: Todo) -> None | Error:
         raise NotImplementedError
