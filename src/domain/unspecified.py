@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import dataclasses
+import typing
 
 __all__ = ("Unspecified",)
 
 
 class Singleton(type):
-    _instances = {}
+    _instances: dict[Singleton, Singleton] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: typing.Any, **kwargs: typing.Any) -> Singleton:
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
@@ -14,8 +17,6 @@ class Singleton(type):
 
 @dataclasses.dataclass(frozen=True)
 class Unspecified(metaclass=Singleton):
-    ...
-
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Unspecified):
             return True

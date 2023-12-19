@@ -23,6 +23,8 @@ def add(*, con: sa.Connection, user: User) -> None | domain.Error:
                 date_deleted=None,
             )
         )
+
+        return None
     except Exception as e:
         return domain.Error.new(str(e), user=user)
 
@@ -60,6 +62,8 @@ def delete_user(
         con.execute(sa.update(db.todo).where(db.todo.c.user_id == user_id).values(date_deleted=datetime.datetime.now()))
 
         con.execute(sa.update(db.user).where(db.user.c.user_id == user_id).values(date_deleted=datetime.datetime.now()))
+
+        return None
     except Exception as e:
         return domain.Error.new(str(e), user_id=user_id)
 
@@ -81,10 +85,10 @@ def get(
                 date_added=row.date_added,
                 date_updated=row.date_updated,
             )
+
+        return None
     except Exception as e:
         return domain.Error.new(str(e))
-
-    return None
 
 
 def update(
@@ -104,5 +108,7 @@ def update(
                 is_admin=user.is_admin,
             )
         )
+
+        return None
     except Exception as e:
         return domain.Error.new(str(e), user=user)

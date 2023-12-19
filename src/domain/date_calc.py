@@ -60,11 +60,11 @@ def next_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.date
             return cy
         return calculate_easter(ref_date.year + 1)
     elif frequency.name == FrequencyType.Irregular:
-        assert frequency.month is not None, \
-            f"The frequency was 'irregular', but [month] was {frequency.month!r}."
+        assert frequency.month is not None, f"The frequency was 'irregular', but [month] was {frequency.month!r}."
 
-        assert frequency.week_day is not None, \
-            f"The frequency was 'irregular', but [week_day] was {frequency.week_day!r}."
+        assert (
+            frequency.week_day is not None
+        ), f"The frequency was 'irregular', but [week_day] was {frequency.week_day!r}."
 
         cy = x_weekday_of_month(
             year=ref_date.year,
@@ -86,8 +86,9 @@ def next_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.date
             return cy
         return calculate_memorial_day(year=ref_date.year + 1)
     elif frequency.name == FrequencyType.Monthly:
-        assert frequency.month_day is not None, \
-            f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
+        assert (
+            frequency.month_day is not None
+        ), f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
 
         return _monthly_next(
             year=ref_date.year,
@@ -95,15 +96,13 @@ def next_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.date
             month_day=frequency.month_day,
         )
     elif frequency.name == FrequencyType.Once:
-        assert frequency.due_date is not None, \
-            f"The frequency was 'once' but [due_date] was {frequency.due_date!r}."
+        assert frequency.due_date is not None, f"The frequency was 'once' but [due_date] was {frequency.due_date!r}."
 
         if frequency.due_date > ref_date:
             return frequency.due_date
         return None
     elif frequency.name == FrequencyType.Weekly:
-        assert frequency.week_day is not None, \
-            f"The frequency was 'weekly' but [week_day] was {frequency.week_day!r}."
+        assert frequency.week_day is not None, f"The frequency was 'weekly' but [week_day] was {frequency.week_day!r}."
 
         day_offset = {
             1: {1: 7, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6},
@@ -117,23 +116,22 @@ def next_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.date
 
         return ref_date + datetime.timedelta(days=day_offset)
     elif frequency.name == FrequencyType.XDays:
-        assert frequency.days is not None, \
-            f"The frequency was 'xdays' but [days] was {frequency.days!r}."
+        assert frequency.days is not None, f"The frequency was 'xdays' but [days] was {frequency.days!r}."
 
         days_since_start = (ref_date - frequency.start_date).days
         if days_since_start < 0:
             return frequency.start_date
 
-        factor = math.ceil(days_since_start/frequency.days)
+        factor = math.ceil(days_since_start / frequency.days)
         next_due_date = frequency.start_date + datetime.timedelta(days=factor * frequency.days)
         if next_due_date > ref_date:
             return next_due_date
         return next_due_date + datetime.timedelta(days=frequency.days)
     elif frequency.name == FrequencyType.Yearly:
-        assert frequency.month is not None, \
-            f"The frequency was 'yearly' but [month] was {frequency.month!r}."
-        assert frequency.month_day is not None, \
-            f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
+        assert frequency.month is not None, f"The frequency was 'yearly' but [month] was {frequency.month!r}."
+        assert (
+            frequency.month_day is not None
+        ), f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
 
         cy = datetime.date(ref_date.year, month=frequency.month.value, day=frequency.month_day)
         if cy > ref_date:
@@ -152,11 +150,11 @@ def prior_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.dat
             return cy
         return calculate_easter(ref_date.year - 1)
     elif frequency.name == FrequencyType.Irregular:
-        assert frequency.month is not None, \
-            f"The frequency was 'irregular', but [month] was {frequency.month!r}."
+        assert frequency.month is not None, f"The frequency was 'irregular', but [month] was {frequency.month!r}."
 
-        assert frequency.week_day is not None, \
-            f"The frequency was 'irregular', but [week_day] was {frequency.week_day!r}."
+        assert (
+            frequency.week_day is not None
+        ), f"The frequency was 'irregular', but [week_day] was {frequency.week_day!r}."
 
         cy = x_weekday_of_month(
             year=ref_date.year,
@@ -178,8 +176,9 @@ def prior_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.dat
             return cy
         return calculate_memorial_day(year=ref_date.year - 1)
     elif frequency.name == FrequencyType.Monthly:
-        assert frequency.month_day is not None, \
-            f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
+        assert (
+            frequency.month_day is not None
+        ), f"The frequency was 'monthly' but [month_day] was {frequency.month_day!r}."
 
         cy = _monthly_prior(
             year=ref_date.year,
@@ -194,15 +193,13 @@ def prior_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.dat
             month_day=frequency.month_day,
         )
     elif frequency.name == FrequencyType.Once:
-        assert frequency.due_date is not None, \
-            f"The frequency was 'once' but [due_date] was {frequency.due_date!r}."
+        assert frequency.due_date is not None, f"The frequency was 'once' but [due_date] was {frequency.due_date!r}."
 
         if frequency.due_date < ref_date:
             return None
         return frequency.due_date
     elif frequency.name == FrequencyType.Weekly:
-        assert frequency.week_day is not None, \
-            f"The frequency was 'weekly' but [week_day] was {frequency.week_day!r}."
+        assert frequency.week_day is not None, f"The frequency was 'weekly' but [week_day] was {frequency.week_day!r}."
 
         day_offset = {
             1: {1: -7, 2: -6, 3: -5, 4: -4, 5: -3, 6: -2, 7: -1},
@@ -217,29 +214,36 @@ def prior_date(*, frequency: Frequency, ref_date: datetime.date) -> datetime.dat
         return ref_date + datetime.timedelta(days=day_offset)
 
     elif frequency.name == FrequencyType.XDays:
-        assert frequency.days is not None, \
-            f"The frequency was 'xdays' but [days] was {frequency.days!r}."
+        assert frequency.days is not None, f"The frequency was 'xdays' but [days] was {frequency.days!r}."
 
         days_since_start = (ref_date - frequency.start_date).days
         if days_since_start < 0:
             return frequency.start_date
 
-        factor = math.floor(days_since_start/frequency.days)
+        factor = math.floor(days_since_start / frequency.days)
         prior_due_date = frequency.start_date + datetime.timedelta(days=factor * frequency.days)
         if prior_due_date < ref_date:
             return prior_due_date
         return prior_due_date - datetime.timedelta(days=frequency.days)
     elif frequency.name == FrequencyType.Yearly:
-        assert frequency.month is not None, \
-            f"The frequency was 'yearly' but [month] was {frequency.month!r}."
+        assert frequency.month is not None, f"The frequency was 'yearly' but [month] was {frequency.month!r}."
 
-        assert frequency.month_day is not None, \
-            f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
+        assert (
+            frequency.month_day is not None
+        ), f"The frequency was 'yearly' but [month_day] was {frequency.month_day!r}."
 
-        cy = datetime.date(ref_date.year, month=frequency.month.value, day=frequency.month_day)
+        cy = datetime.date(
+            ref_date.year,
+            month=frequency.month.value,
+            day=frequency.month_day,
+        )
         if cy < ref_date:
             return cy
-        return datetime.date(ref_date.year - 1, month=frequency.month.value, day=frequency.month_day)
+        return datetime.date(
+            ref_date.year - 1,
+            month=frequency.month.value,
+            day=frequency.month_day,
+        )
     else:
         raise ValueError(f"Unrecognized frequency name, {frequency!r}")
 
@@ -300,7 +304,7 @@ def _monthly_prior(
     month_day: int,
 ) -> datetime.date:
     mo, yr = {
-        1: (12, year-1),
+        1: (12, year - 1),
         2: (1, year),
         3: (2, year),
         4: (3, year),

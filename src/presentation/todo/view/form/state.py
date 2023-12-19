@@ -43,10 +43,7 @@ class TodoFormState:
     focus_description: bool | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
-    def initial(
-        *,
-        current_user: domain.User | None,
-    ) -> TodoFormState:
+    def initial(*, current_user: domain.User | None) -> TodoFormState:
         return TodoFormState(
             todo_id=domain.create_uuid(),
             template_todo_id=None,
@@ -258,15 +255,3 @@ class TodoFormState:
             users_stale=domain.Unspecified(),
             focus_description=True,
         )
-
-    def __eq__(self, other: object) -> bool:
-        assert isinstance(other, TodoFormState)
-
-        mod_self = dataclasses.replace(self, note=_standardize_str(self.note))
-        mod_other = dataclasses.replace(other, note=_standardize_str(other.note))
-
-        return dataclasses.astuple(mod_self) == dataclasses.astuple(mod_other)
-
-
-def _standardize_str(s: str) -> str:
-    return s.replace("\xa0", " ").replace("\r", "\n").strip("\xef\xbb\xbf ")

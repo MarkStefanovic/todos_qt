@@ -28,7 +28,7 @@ def add(
                 note=category.note,
                 date_added=category.date_added,
                 date_updated=category.date_updated,
-                date_deleted=None,
+                date_deleted=category.date_deleted,
             )
         )
 
@@ -82,7 +82,8 @@ def where(*, con: sa.Connection, active: bool) -> list[Category] | domain.Error:
         qry = sa.select(db.category)
 
         if active:
-            qry = qry.where(db.category.c.date_deleted == None)  # noqa
+            # noinspection PyComparisonWithNone,PyTypeChecker
+            qry = qry.where(db.category.c.date_deleted == None)  # noqa: E711
 
         result = con.execute(qry.order_by(db.category.c.name))
 

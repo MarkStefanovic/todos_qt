@@ -3,7 +3,8 @@ import datetime
 
 from src import adapter, domain
 
-import sqlmodel as sm
+import sqlalchemy as sa
+
 
 CATEGORY_1 = domain.Category(
     category_id="1" * 32,
@@ -33,35 +34,33 @@ CATEGORY_3 = domain.Category(
 )
 
 
-def test_round_trip(session: sm.Session):
-    repo = adapter.DbCategoryRepository(session=session)
+def test_round_trip(engine: sa.Engine) -> None:
+    with engine.begin() as con:  # type: sa.Connection
+        assert adapter.category_repo.add(con=con, category=CATEGORY_1) is None
+        assert adapter.category_repo.add(con=con, category=CATEGORY_2) is None
+        assert adapter.category_repo.add(con=con, category=CATEGORY_3) is None
 
-    repo.add(category=CATEGORY_1)
-    repo.add(category=CATEGORY_2)
-    repo.add(category=CATEGORY_3)
+        categories = adapter.category_repo.where(con=con, active=True)
+        assert not isinstance(categories, domain.Error)
 
-    session.commit()
+        assert len(categories) == 2  # 1 has already been deleted
 
-    assert len(repo.get_active()) == 2  # 1 is deleted
+        updated_category = dataclasses.replace(CATEGORY_1, note="Updated note 1.")
 
-    updated_category = dataclasses.replace(
-        CATEGORY_1,
-        note="Updated note 1."
-    )
+        adapter.category_repo.update(con=con, category=updated_category)
 
-    repo.update(category=updated_category)
+        category = adapter.category_repo.get(con=con, category_id=CATEGORY_1.category_id)
+        assert isinstance(category, domain.Category)
 
-    session.commit()
+        assert category.note == "Updated note 1."
 
-    assert repo.get(category_id=CATEGORY_1.category_id).note == "Updated note 1."
+        categories = adapter.category_repo.where(con=con, active=True)
+        assert isinstance(categories, list)
 
-    assert len(repo.get_active()) == 2
+        assert len(categories) == 2
 
-    print(f"{repo.get_active()=}")
+        assert adapter.category_repo.delete(con=con, category_id=CATEGORY_3.category_id)
 
-    repo.delete(category_id=CATEGORY_3.category_id)
-
-    session.commit()
-
-    assert len(repo.get_active()) == 1
-
+        categories = adapter.category_repo.where(con=con, active=True)
+        assert isinstance(categories, list)
+        assert len(categories) == 1

@@ -9,6 +9,7 @@ from src.domain.frequency import *
 from src.domain.frequency_type import *
 from src.domain.holidays import *
 from src.domain.month import *
+from src.domain.standardize_str import *
 from src.domain.todo import *
 from src.domain.unspecified import *
 from src.domain.user import *

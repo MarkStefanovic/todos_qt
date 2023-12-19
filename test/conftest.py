@@ -6,6 +6,8 @@ import sqlalchemy as sa
 from PyQt5 import QtWidgets as qtw  # noqa
 from sqlalchemy.orm import Session
 
+from src import adapter, domain
+
 logger = logging.getLogger("test")
 
 QT_APP = qtw.QApplication([])
@@ -14,6 +16,10 @@ QT_APP = qtw.QApplication([])
 @pytest.fixture(scope="function")
 def engine() -> sa.engine.Engine:
     eng = sa.create_engine("sqlite://", echo=True)
+    create_tables_result = adapter.db.create_tables(engine=eng)
+    if isinstance(create_tables_result, domain.Error):
+        raise Exception(f"Error creating tables: {create_tables_result!s}")
+
     return eng
 
 
