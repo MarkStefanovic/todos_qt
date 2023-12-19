@@ -131,6 +131,9 @@ class UserDash(qtw.QWidget):
 
         self._requests.add.emit()
 
+    def _on_refresh_btn_clicked(self, /, _: bool) -> None:
+        self._requests.refresh.emit()
+
     def _on_table_btn_clicked(self, /, event: table_view.ButtonClickedEvent[domain.User, str]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_table_btn_clicked({event=!r})")
 

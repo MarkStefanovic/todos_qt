@@ -116,19 +116,20 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
         if row is None:
             return None
 
-        user = (
-            user_repo.get(
-                con=con,
-                user_id=row.user_id,
-            )
-            or domain.DEFAULT_USER
+        user = user_repo.get(
+            con=con,
+            user_id=row.user_id,
         )
+        if isinstance(user, domain.Error):
+            return user
 
         if row.last_completed_by:
             last_completed_by = user_repo.get(
                 con=con,
                 user_id=row.last_completed_by,
             )
+            if isinstance(last_completed_by, domain.Error):
+                return last_completed_by
         else:
             last_completed_by = None
 
@@ -137,39 +138,47 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
                 con=con,
                 user_id=row.prior_completed_by,
             )
+            if isinstance(prior_completed_by, domain.Error):
+                return prior_completed_by
         else:
             prior_completed_by = None
 
-        if category := category_repo.get(
+        category = category_repo.get(
             con=con,
             category_id=row.category_id,
-        ):
-            return domain.Todo(
-                todo_id=row.todo_id,
-                template_todo_id=row.template_todo_id,
-                category=category,
-                user=user,
-                description=row.description,
-                frequency=_parse_frequency(
-                    advance_display_days=row.advance_days,
-                    days=row.days,
-                    due_date=row.due_date,
-                    expire_display_days=row.expire_days,
-                    frequency=row.frequency,
-                    month=row.month,
-                    month_day=row.month_day,
-                    start_date=row.start_date,
-                    week_day=row.week_day,
-                    week_number=row.week_number,
-                ),
-                note=row.note,
-                last_completed=row.last_completed,
-                last_completed_by=last_completed_by,
-                prior_completed=row.prior_completed,
-                prior_completed_by=prior_completed_by,
-                date_added=row.date_added,
-                date_updated=row.date_updated,
-            )
+        )
+        if isinstance(category, domain.Error):
+            return category
+
+        if category is None:
+            return domain.Error.new(f"category_id, {row.category_id}, not found.")
+
+        return domain.Todo(
+            todo_id=row.todo_id,
+            template_todo_id=row.template_todo_id,
+            category=category,
+            user=user or domain.DEFAULT_USER,
+            description=row.description,
+            frequency=_parse_frequency(
+                advance_display_days=row.advance_days,
+                days=row.days,
+                due_date=row.due_date,
+                expire_display_days=row.expire_days,
+                frequency=row.frequency,
+                month=row.month,
+                month_day=row.month_day,
+                start_date=row.start_date,
+                week_day=row.week_day,
+                week_number=row.week_number,
+            ),
+            note=row.note,
+            last_completed=row.last_completed,
+            last_completed_by=last_completed_by,
+            prior_completed=row.prior_completed,
+            prior_completed_by=prior_completed_by,
+            date_added=row.date_added,
+            date_updated=row.date_updated,
+        )
 
         return None
     except Exception as e:
@@ -242,10 +251,12 @@ def where(
         qry = sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
 
         if isinstance(category_id, str):
-            qry = qry.where(db.todo.c.category_id == category_id)
+            if category_id:
+                qry = qry.where(db.todo.c.category_id == category_id)
 
         if isinstance(user_id, str):
-            qry = qry.where(db.todo.c.user_id == user_id)
+            if user_id:
+                qry = qry.where(db.todo.c.user_id == user_id)
 
         if isinstance(description_starts_with, str):
             qry = qry.where(db.todo.c.description.ilike(description_starts_with + "%"))

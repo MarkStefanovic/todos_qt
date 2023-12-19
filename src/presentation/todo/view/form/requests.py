@@ -19,3 +19,4 @@ class SaveRequest:
 class TodoFormRequests(qtc.QObject):
     back = qtc.pyqtSignal()
     save = qtc.pyqtSignal(SaveRequest)
+    error = qtc.pyqtSignal(domain.Error)

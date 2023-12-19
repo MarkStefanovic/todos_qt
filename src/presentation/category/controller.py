@@ -4,7 +4,7 @@ import typing
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc
 
-from src import service, domain
+from src import domain
 from src.presentation.category import dash, form
 from src.presentation.category.state import CategoryState
 
@@ -19,14 +19,14 @@ class CategoryController(qtc.QObject):
     def __init__(
         self,
         *,
-        category_service: service.CategoryService,
+        category_service: domain.CategoryService,
         dash_requests: dash.requests.CategoryDashRequests,
         form_requests: form.requests.CategoryFormRequests,
         parent: qtc.QObject,
     ):
         super().__init__(parent=parent)
 
-        self._category_service: typing.Final[service.CategoryService] = category_service
+        self._category_service: typing.Final[domain.CategoryService] = category_service
         self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form_requests
 
@@ -42,6 +42,8 @@ class CategoryController(qtc.QObject):
         logger.debug(f"{self.__class__.__name__}.refresh()")
 
         try:
+            self._set_status("Refreshing categories...")
+
             categories = self._category_service.all()
             if isinstance(categories, domain.Error):
                 self._set_status(str(categories))
@@ -50,7 +52,7 @@ class CategoryController(qtc.QObject):
             state = CategoryState(
                 dash_state=dash.CategoryDashState(
                     categories=categories,
-                    status="Refreshed.",
+                    status="Categories refreshed.",
                 ),
             )
         except Exception as e:

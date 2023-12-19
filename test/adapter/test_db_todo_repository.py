@@ -61,27 +61,52 @@ TODO_3 = domain.Todo.yearly(
 )
 
 
-def test_round_trip(engine: sa.Engine):
-    category_repo = adapter.DbCategoryRepository(engine=sa.engine)
+def test_round_trip(engine: sa.Engine) -> None:
+    with engine.begin() as con:
+        adapter.category_repo.add(con=con, category=domain.TODO_CATEGORY)
 
-    category_repo.add(category=domain.TODO_CATEGORY)
+        assert adapter.todo_repo.add(con=con, todo=TODO_1)
+        assert adapter.todo_repo.add(con=con, todo=TODO_2)
+        assert adapter.todo_repo.add(con=con, todo=TODO_3)
 
-    todo_repo = adapter.DbTodoRepository(engine=engine)
+        todos = adapter.todo_repo.where(
+            con=con,
+            category_id=domain.Unspecified(),
+            user_id=domain.Unspecified(),
+            description_starts_with=domain.Unspecified(),
+            template_todo_id=domain.Unspecified(),
+        )
+        assert isinstance(todos, list)
+        assert len(todos) == 3
 
-    todo_repo.add(todo=TODO_1)
-    todo_repo.add(todo=TODO_2)
-    todo_repo.add(todo=TODO_3)
+        updated_todo_1 = dataclasses.replace(TODO_1, note="Updated note 1.")
 
-    assert len(todo_repo.all_todos()) == 3
+        assert adapter.todo_repo.update(con=con, todo=updated_todo_1) is None
 
-    updated_todo_1 = dataclasses.replace(TODO_1, note="Updated note 1.")
+        todo = adapter.todo_repo.get(con=con, todo_id=TODO_1.todo_id)
+        assert isinstance(todo, domain.Todo)
+        assert todo.note == "Updated note 1."
 
-    todo_repo.update(todo=updated_todo_1)
+        todos = adapter.todo_repo.where(
+            con=con,
+            category_id=domain.Unspecified(),
+            user_id=domain.Unspecified(),
+            description_starts_with=domain.Unspecified(),
+            template_todo_id=domain.Unspecified(),
+        )
+        assert isinstance(todos, list)
+        assert len(todos) == 3
 
-    assert todo_repo.get(todo_id=TODO_1.todo_id).note == "Updated note 1."
+        assert adapter.todo_repo.delete(con=con, todo_id=TODO_2.todo_id) is None
 
-    assert len(todo_repo.all_todos()) == 3
+        todos = adapter.todo_repo.where(
+            con=con,
+            category_id=domain.Unspecified(),
+            user_id=domain.Unspecified(),
+            description_starts_with=domain.Unspecified(),
+            template_todo_id=domain.Unspecified(),
+        )
+        assert isinstance(todos, list)
+        assert len(todos) == 2
 
-    todo_repo.delete(todo_id=TODO_2.todo_id)
-
-    assert len(todo_repo.all_todos()) == 2
+    return None

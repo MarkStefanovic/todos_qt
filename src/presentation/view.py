@@ -5,10 +5,9 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from src.presentation.category.widget import CategoryWidget
 from src.presentation.shared import fonts
 from src.presentation.todo.widget import TodoWidget
+from src.presentation.user.widget import UserWidget
 
 __all__ = ("MainView",)
-
-from src.presentation.user.widget import UserWidget
 
 
 class MainView(qtw.QWidget):
@@ -25,12 +24,11 @@ class MainView(qtw.QWidget):
         self._todos: typing.Final[TodoWidget] = todo_widget
         self._users: typing.Final[UserWidget] = user_widget
 
-        self._tabs = qtw.QTabWidget()
+        self._tabs: typing.Final[qtw.QTabWidget] = qtw.QTabWidget()
         self._tabs.setFont(fonts.BOLD)
         self._tabs.addTab(self._todos, "Todo")
         self._tabs.addTab(self._categories, "Category")
-        # self._tabs.addTab(self.users, "Users")
-        # noinspection PyUnresolvedReferences
+        self._tabs.addTab(self._users, "Users")
 
         layout = qtw.QVBoxLayout()
         layout.addWidget(self._tabs)

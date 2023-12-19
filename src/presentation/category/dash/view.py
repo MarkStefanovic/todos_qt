@@ -102,14 +102,14 @@ class CategoryDash(qtw.QWidget):
         self._table_view.button_clicked.connect(self._on_button_clicked)
         self._table_view.double_click.connect(self._on_double_click)
         # noinspection PyUnresolvedReferences
-        self._add_btn.clicked.connect(self._on_btn_clicked)
+        self._add_btn.clicked.connect(self._on_add_btn_clicked)
         # noinspection PyUnresolvedReferences
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
 
-    def get_state(self) -> CategoryDashState:
+    def get_state(self) -> CategoryDashState | domain.Error:
         return CategoryDashState(
             categories=self._table_view.items,
-            selected_category=self._table_view.selected_item,
+            selected_category=self._table_view.selected_item or domain.Unspecified(),
             status=self._status_bar.currentMessage(),
         )
 

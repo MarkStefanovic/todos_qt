@@ -3,7 +3,7 @@ import typing
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
-from src import domain, service
+from src import domain
 from src.presentation.user_selector.state import UserSelectorState
 
 __all__ = ("UserSelectorController",)
@@ -15,13 +15,13 @@ class UserSelectorController(qtc.QObject):
     def __init__(
         self,
         *,
-        user_service: service.UserService,
+        user_service: domain.UserService,
         include_all_user: bool,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
 
-        self._user_service: typing.Final[service.UserService] = user_service
+        self._user_service: typing.Final[domain.UserService] = user_service
         self._include_all_user: typing.Final[bool] = include_all_user
 
     def refresh(self) -> None:

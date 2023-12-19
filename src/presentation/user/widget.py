@@ -1,9 +1,9 @@
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
-from src import domain, service
+from src import domain
 from src.presentation.user.controller import UserController
 from src.presentation.user.dash.requests import UserDashRequests
 from src.presentation.user.form.requests import UserFormRequests
@@ -17,7 +17,7 @@ class UserWidget(qtw.QWidget):
         self,
         *,
         current_user: domain.User,
-        user_service: service.UserService,
+        user_service: domain.UserService,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
@@ -25,6 +25,8 @@ class UserWidget(qtw.QWidget):
         dash_requests: typing.Final[UserDashRequests] = UserDashRequests()
 
         form_requests: typing.Final[UserFormRequests] = UserFormRequests()
+
+        self._controller_thread = qtc.QThread(parent=self)
 
         self._controller = UserController(
             dash_requests=dash_requests,
@@ -34,8 +36,12 @@ class UserWidget(qtw.QWidget):
             parent=self,
         )
 
+        self._controller.moveToThread(self._controller_thread)
+
         self._view = UserView(
             states=self._controller.states,
+            dash_requests=dash_requests,
+            form_requests=form_requests,
             current_user=current_user,
             parent=self,
         )

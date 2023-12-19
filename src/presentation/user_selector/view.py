@@ -31,8 +31,9 @@ class UserSelectorView(qtw.QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self.addItem(fonts.NORMAL_FONT_METRICS.width(" " * 40))
-        self.adjustSize()
+        self.setMaximumHeight(fonts.NORMAL_FONT_METRICS.height() + 8)
+        self.setFixedWidth(fonts.NORMAL_FONT_METRICS.width(" " * 30))
+        # self.adjustSize()
 
         self._states.connect(self._set_state)
 
@@ -59,8 +60,8 @@ class UserSelectorView(qtw.QComboBox):
                     self.setCurrentIndex(index)
         finally:
             self.blockSignals(False)
-
-        self.adjustSize()
+        #
+        # self.adjustSize()
 
     def _on_current_index_changed(self, ix: int) -> None:
         item = self.itemData(ix)

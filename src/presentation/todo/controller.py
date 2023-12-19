@@ -1,15 +1,14 @@
 import typing
 
-from loguru import logger
-
-from src import domain, service
-from src.presentation.shared.widgets import popup
-from src.presentation.todo.view import dash, form
-from src.presentation.todo.state import TodoState
-from src.presentation.todo.view.form.state import TodoFormState
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc
+from loguru import logger
+
+from src import domain
+from src.presentation.shared.widgets import popup
+from src.presentation.todo.state import TodoState
+from src.presentation.todo.view import dash, form
+from src.presentation.todo.view.form.state import TodoFormState
 
 __all__ = ("TodoController",)
 
@@ -23,13 +22,13 @@ class TodoController(qtc.QObject):
         *,
         dash_requests: dash.requests.TodoDashRequests,
         form_requests: form.requests.TodoFormRequests,
-        todo_service: service.TodoService,
+        todo_service: domain.TodoService,
         current_user: domain.User,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
 
-        self._todo_service: typing.Final[service.TodoService] = todo_service
+        self._todo_service: typing.Final[domain.TodoService] = todo_service
         self._current_user: typing.Final[domain.User] = current_user
         self._dash_requests: typing.Final[dash.requests.TodoDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.TodoFormRequests] = form_requests
@@ -131,12 +130,25 @@ class TodoController(qtc.QObject):
         logger.debug(f"{self.__class__.__name__}._on_refresh_request({request=!r})")
 
         try:
+            self._set_status("Refreshing Todos...")
+
+            if request.category:
+                category_id: str | domain.Unspecified = request.category.category_id
+            else:
+                category_id = domain.Unspecified()
+
+            if request.user:
+                user_id: str | domain.Unspecified = request.user.user_id
+            else:
+                user_id = domain.Unspecified()
+
             todos = self._todo_service.where(
                 description_like=request.description,
                 due_filter=request.is_due,
-                category_id_filter=request.category.category_id,
-                user_id_filter=request.user.user_id,
+                category_id_filter=category_id,
+                user_id_filter=user_id,
             )
+            # logger.info(f"{todos=!r}")
             if isinstance(todos, domain.Error):
                 logger.error(f"{self.__class__.__name__}._on_refresh_request({request=!r}): {todos!s}")
                 self._set_status(str(todos))

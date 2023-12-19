@@ -1,7 +1,7 @@
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
-from src import service, domain
+from src import domain
 from src.presentation.category.widget import CategoryWidget
 from src.presentation.todo.widget import TodoWidget
 from src.presentation.user.widget import UserWidget
@@ -16,9 +16,9 @@ class MainWidget(qtw.QMainWindow):
         *,
         window_icon: qtg.QIcon,
         current_user: domain.User,
-        category_service: service.CategoryService,
-        todo_service: service.TodoService,
-        user_service: service.UserService,
+        category_service: domain.CategoryService,
+        todo_service: domain.TodoService,
+        user_service: domain.UserService,
     ):
         super().__init__()
 

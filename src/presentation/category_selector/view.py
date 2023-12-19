@@ -26,8 +26,9 @@ class CategorySelectorView(qtw.QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self.addItem(" " * 40)
-        self.adjustSize()
+        self.setMaximumHeight(fonts.NORMAL_FONT_METRICS.height() + 8)
+        self.setFixedWidth(fonts.NORMAL_FONT_METRICS.width(" " * 30))
+        self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
 
         self._states.connect(self._set_state)
 
@@ -50,8 +51,6 @@ class CategorySelectorView(qtw.QComboBox):
             finally:
                 self.blockSignals(False)
 
-            self.adjustSize()
-
         if isinstance(state.selected_category, domain.Category):
             for ix in range(self.count()):
                 category: domain.Category = self.itemData(ix)
@@ -60,5 +59,5 @@ class CategorySelectorView(qtw.QComboBox):
                     return None
 
     def _on_current_index_changed(self, ix: int) -> None:
-        item = self.itemData(ix)
-        self.item_selected.emit(item)
+        if item := self.itemData(ix):
+            self.item_selected.emit(item)

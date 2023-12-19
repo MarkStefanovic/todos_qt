@@ -17,6 +17,7 @@ class DateEditor(qtw.QWidget):
         self._fmt = fmt
 
         self._text_edit = qtw.QLineEdit("", parent=self)
+        # noinspection PyUnresolvedReferences
         self._text_edit.textChanged.connect(self._on_text_changed)
         self._text_edit.setFixedWidth(100)
         self._text_edit.setAlignment(qtc.Qt.AlignCenter)

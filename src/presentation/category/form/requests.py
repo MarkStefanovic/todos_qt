@@ -20,3 +20,6 @@ class Save:
 class CategoryFormRequests(qtc.QObject):
     back = qtc.pyqtSignal()
     save = qtc.pyqtSignal(Save)
+
+    def __init__(self, *, parent: qtc.QObject | None):
+        super().__init__(parent=parent)

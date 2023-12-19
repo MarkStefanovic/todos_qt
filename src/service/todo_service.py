@@ -1,4 +1,3 @@
-import copy
 import dataclasses
 import datetime
 import typing
@@ -10,7 +9,7 @@ from src import adapter, domain
 __all__ = ("TodoService",)
 
 
-class TodoService:
+class TodoService(domain.TodoService):
     def __init__(
         self,
         *,
@@ -56,21 +55,21 @@ class TodoService:
     #     except Exception as e:
     #         return domain.Error.new(str(e))
 
-    def cleanup(self) -> None | domain.Error:
-        try:
-            cutoff_date = datetime.date.today() - datetime.timedelta(days=5)
-
-            with self._engine.begin() as con:
-                for todo_id, todo in copy.copy(self._todos).items():
-                    if todo.frequency.name == domain.FrequencyType.Once:
-                        if todo.last_completed and todo.last_completed < cutoff_date:
-                            delete_result = adapter.todo_repo.delete(con=con, todo_id=todo_id)
-                            if isinstance(delete_result, domain.Error):
-                                return delete_result
-
-            return None
-        except Exception as e:
-            return domain.Error.new(str(e))
+    # def cleanup(self) -> None | domain.Error:
+    #     try:
+    #         cutoff_date = datetime.date.today() - datetime.timedelta(days=5)
+    #
+    #         with self._engine.begin() as con:
+    #             for todo_id, todo in copy.copy(self._todos).items():
+    #                 if todo.frequency.name == domain.FrequencyType.Once:
+    #                     if todo.last_completed and todo.last_completed < cutoff_date:
+    #                         delete_result = adapter.todo_repo.delete(con=con, todo_id=todo_id)
+    #                         if isinstance(delete_result, domain.Error):
+    #                             return delete_result
+    #
+    #         return None
+    #     except Exception as e:
+    #         return domain.Error.new(str(e))
 
     def delete(self, *, todo_id: str) -> None | domain.Error:
         try:
@@ -165,7 +164,7 @@ class TodoService:
     ) -> list[domain.Todo] | domain.Error:
         try:
             with self._engine.begin() as con:
-                todos = adapter.todo_repo.where(
+                todos: typing.Iterable[domain.Todo] | domain.Error = adapter.todo_repo.where(
                     con=con,
                     category_id=category_id_filter,
                     user_id=user_id_filter,
@@ -221,6 +220,8 @@ class TodoService:
                     )
 
                     return adapter.todo_repo.update(con=con, todo=updated_todo)
+
+            return None
         except Exception as e:
             return domain.Error.new(str(e), todo_id=todo_id)
 
@@ -241,11 +242,14 @@ class TodoService:
 
 if __name__ == "__main__":
     eng = adapter.db.create_engine()
+    assert not isinstance(eng, domain.Error)
     svc = TodoService(engine=eng, username="test")
-    for r in svc.where(
+    rs = svc.where(
         due_filter=True,
         description_like="",
-        category_id_filter=None,
-        user_id_filter=None,
-    ):
+        category_id_filter=domain.Unspecified(),
+        user_id_filter=domain.Unspecified(),
+    )
+    assert not isinstance(rs, domain.Error)
+    for r in rs:
         print(r)

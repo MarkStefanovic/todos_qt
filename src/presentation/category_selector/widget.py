@@ -1,9 +1,8 @@
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src import service, domain
+from src import domain
 from src.presentation.category_selector.controller import CategorySelectorController
 from src.presentation.category_selector.view import CategorySelectorView
-
 
 __all__ = ("CategorySelectorWidget",)
 
@@ -14,7 +13,7 @@ class CategorySelectorWidget(qtw.QWidget):
     def __init__(
         self,
         *,
-        category_service: service.CategoryService,
+        category_service: domain.CategoryService,
         include_all_category: bool,
         parent: qtw.QWidget | None,
     ):

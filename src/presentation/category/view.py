@@ -4,7 +4,7 @@ import typing
 
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
-
+from loguru import logger
 
 from src import domain
 from src.presentation.category import dash, form
@@ -53,12 +53,24 @@ class CategoryView(qtw.QWidget):
             return "dash"
         return "form"
 
-    def get_state(self) -> CategoryState:
-        return CategoryState(
-            dash_state=self._dash.get_state(),
-            form_state=self._form.get_state(),
-            dash_active=self.stacked_layout.currentIndex() == 0,
-        )
+    def get_state(self) -> CategoryState | domain.Error:
+        try:
+            dash_state = self._dash.get_state()
+            if isinstance(dash_state, domain.Error):
+                return dash_state
+
+            form_state = self._form.get_state()
+            if isinstance(form_state, domain.Error):
+                return form_state
+
+            return CategoryState(
+                dash_state=dash_state,
+                form_state=form_state,
+                dash_active=self.stacked_layout.currentIndex() == 0,
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get_state() failed: {e!s}")
+            return domain.Error.new(str(e))
 
     def refresh_dash(self) -> None:
         self._dash.refresh()
@@ -66,15 +78,21 @@ class CategoryView(qtw.QWidget):
     def save_form(self) -> None:
         self._form.save()
 
-    def set_state(self, /, state: CategoryState) -> None:
-        if isinstance(state.dash_state, dash.CategoryDashState):
-            self._dash.set_state(state.dash_state)
+    def set_state(self, /, state: CategoryState) -> None | domain.Error:
+        try:
+            if isinstance(state.dash_state, dash.CategoryDashState):
+                self._dash.set_state(state.dash_state)
 
-        if isinstance(state.form_state, form.CategoryFormState):
-            self._form.set_state(state.form_state)
+            if isinstance(state.form_state, form.CategoryFormState):
+                self._form.set_state(state.form_state)
 
-        if isinstance(state.dash_active, bool):
-            if state.dash_active:
-                self.stacked_layout.setCurrentIndex(0)
-            else:
-                self.stacked_layout.setCurrentIndex(1)
+            if isinstance(state.dash_active, bool):
+                if state.dash_active:
+                    self.stacked_layout.setCurrentIndex(0)
+                else:
+                    self.stacked_layout.setCurrentIndex(1)
+
+            return None
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.set_state({state=!r}) failed: {e!s}")
+            return domain.Error.new(str(e), state=state)

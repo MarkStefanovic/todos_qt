@@ -69,11 +69,19 @@ class IrregularFrequencyForm(qtw.QWidget):
 
         self.setLayout(form_layout)
 
-    def get_state(self) -> IrregularFrequencyFormState:
+    def get_state(self) -> IrregularFrequencyFormState | domain.Error:
+        month = self._month_cbo.get_value()
+        if month is None:
+            return domain.Error.new("month is required.")
+
+        weekday = self._weekday_cbo.get_value()
+        if weekday is None:
+            return domain.Error.new("weekday is required.")
+        
         return IrregularFrequencyFormState(
-            month=self._month_cbo.get_value(),
+            month=month,
             week_number=self._week_number_sb.value(),
-            week_day=self._weekday_cbo.get_value(),
+            week_day=weekday,
         )
 
     def set_state(self, /, state: IrregularFrequencyFormState) -> None:

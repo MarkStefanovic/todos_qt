@@ -7,7 +7,7 @@ from src import adapter, domain
 __all__ = ("CategoryService",)
 
 
-class CategoryService:
+class CategoryService(domain.CategoryService):
     def __init__(self, *, engine: sa.engine.Engine):
         self._engine: typing.Final[sa.engine.Engine] = engine
 

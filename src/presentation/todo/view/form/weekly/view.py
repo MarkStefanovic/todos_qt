@@ -1,6 +1,7 @@
 import typing
 
 from PyQt5 import QtWidgets as qtw  # noqa
+from loguru import logger
 
 from src import domain
 from src.presentation.shared import fonts, widgets
@@ -35,8 +36,16 @@ class WeeklyFrequencyForm(qtw.QWidget):
 
         self.setLayout(form_layout)
 
-    def get_state(self) -> WeeklyFrequencyFormState:
-        return WeeklyFrequencyFormState(week_day=self._weekday_cbo.get_value())
+    def get_state(self) -> WeeklyFrequencyFormState | domain.Error:
+        try:
+            weekday = self._weekday_cbo.get_value()
+            if weekday is None:
+                return domain.Error.new("weekday is required.")
+
+            return WeeklyFrequencyFormState(week_day=weekday)
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get_state() failed: {e!s}")
+            return domain.Error.new(str(e))
 
     def set_state(self, /, state: WeeklyFrequencyFormState) -> None:
         self._weekday_cbo.set_value(value=state.week_day)

@@ -28,3 +28,6 @@ class CategoryDashRequests(qtc.QObject):
     delete = qtc.pyqtSignal(Delete)
     edit = qtc.pyqtSignal(Edit)
     refresh = qtc.pyqtSignal()
+
+    def __init__(self, parent: qtc.QObject | None):
+        super().__init__(parent=parent)

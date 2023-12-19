@@ -1,11 +1,10 @@
 import typing
 
-from loguru import logger
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
+from loguru import logger
 
-from src import domain, service
+from src import domain
 from src.presentation.user import dash, form
 from src.presentation.user.form.state import UserFormState
 from src.presentation.user.state import UserState
@@ -22,7 +21,7 @@ class UserController(qtc.QObject):
         dash_requests: dash.requests.UserDashRequests,
         form_requests: form.requests.UserFormRequests,
         current_user: domain.User,
-        user_service: service.UserService,
+        user_service: domain.UserService,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
@@ -30,7 +29,7 @@ class UserController(qtc.QObject):
         self._dash_requests: typing.Final[dash.requests.UserDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.UserFormRequests] = form_requests
         self._current_user: typing.Final[domain.User] = current_user
-        self._user_service: typing.Final[service.UserService] = user_service
+        self._user_service: typing.Final[domain.UserService] = user_service
 
         self._dash_requests.add.connect(self._on_dash_add_btn_clicked)
         self._dash_requests.delete.connect(self._on_dash_delete_btn_clicked)
@@ -40,11 +39,17 @@ class UserController(qtc.QObject):
         self._form_requests.save.connect(self._on_form_save_btn_clicked)
 
     def refresh(self) -> None:
+        logger.debug(f"{self.__class__.__name__}.refresh()")
+
         try:
+            self._set_status("Refreshing Users...")
+
             users = self._user_service.where(active=True)
             if isinstance(users, domain.Error):
                 self._set_status(str(users))
                 return None
+
+            logger.info(f"{users=!r}")
 
             self.states.emit(
                 UserState(

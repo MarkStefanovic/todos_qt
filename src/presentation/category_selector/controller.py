@@ -3,7 +3,7 @@ import typing
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
-from src import service, domain
+from src import domain
 from src.presentation.category_selector.state import CategorySelectorState
 
 __all__ = ("CategorySelectorController",)
@@ -15,13 +15,13 @@ class CategorySelectorController(qtc.QObject):
     def __init__(
         self,
         *,
-        category_service: service.CategoryService,
+        category_service: domain.CategoryService,
         include_all_category: bool,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
 
-        self._category_service: typing.Final[service.CategoryService] = category_service
+        self._category_service: typing.Final[domain.CategoryService] = category_service
         self._include_all_category: typing.Final[bool] = include_all_category
 
     def refresh(self) -> None | domain.Error:

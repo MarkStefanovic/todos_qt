@@ -17,6 +17,8 @@ class UserView(qtw.QWidget):
         self,
         *,
         states: qtc.pyqtBoundSignal,
+        dash_requests: dash.requests.UserDashRequests,
+        form_requests: form.requests.UserFormRequests,
         current_user: domain.User,
         parent: qtw.QWidget | None,
     ):
@@ -24,10 +26,6 @@ class UserView(qtw.QWidget):
 
         self._states: typing.Final[qtc.pyqtBoundSignal] = states
         self._current_user: typing.Final[domain.User] = current_user
-
-        dash_requests = dash.requests.UserDashRequests()
-
-        form_requests = form.requests.UserFormRequests()
 
         self._dash = UserDash(
             parent=self,

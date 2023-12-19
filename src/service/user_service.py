@@ -9,7 +9,7 @@ from src import adapter, domain
 __all__ = ("UserService",)
 
 
-class UserService:
+class UserService(domain.UserService):
     def __init__(
         self,
         *,
@@ -106,6 +106,9 @@ class UserService:
 
 if __name__ == "__main__":
     eng = adapter.db.create_engine()
+    assert not isinstance(eng, domain.Error)
     svc = UserService(engine=eng, username="test")
-    for r in svc.where():
+    rs = svc.where(active=True)
+    assert not isinstance(rs, domain.Error)
+    for r in rs:
         print(r)

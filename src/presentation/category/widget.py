@@ -2,11 +2,10 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src import service, domain
+from src import domain
 from src.presentation.category import form, dash
 from src.presentation.category.controller import CategoryController
 from src.presentation.category.view import CategoryView
-
 
 __all__ = ("CategoryWidget",)
 
@@ -15,15 +14,21 @@ class CategoryWidget(qtw.QWidget):
     def __init__(
         self,
         *,
-        category_service: service.CategoryService,
+        category_service: domain.CategoryService,
         current_user: domain.User,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
-        self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash.requests.CategoryDashRequests()
+        self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash.requests.CategoryDashRequests(
+            parent=self
+        )
 
-        self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form.requests.CategoryFormRequests()
+        self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form.requests.CategoryFormRequests(
+            parent=self
+        )
+
+        self._controller_thread = qtc.QThread(parent=self)
 
         self._controller = CategoryController(
             category_service=category_service,
@@ -31,6 +36,8 @@ class CategoryWidget(qtw.QWidget):
             form_requests=self._form_requests,
             parent=self,
         )
+
+        self._controller.moveToThread(self._controller_thread)
 
         self._view = CategoryView(
             current_user=current_user,

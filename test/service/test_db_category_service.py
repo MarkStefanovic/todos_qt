@@ -34,27 +34,31 @@ CATEGORY_3 = domain.Category(
 )
 
 
-def test_round_trip(engine: sa.engine.Engine):
+def test_round_trip(engine: sa.Engine) -> None:
     category_service = service.CategoryService(engine=engine)
 
-    category_service.add(category=CATEGORY_1)
-    category_service.add(category=CATEGORY_2)
-    category_service.add(category=CATEGORY_3)
+    assert category_service.add(category=CATEGORY_1) is None
+    assert category_service.add(category=CATEGORY_2) is None
+    assert category_service.add(category=CATEGORY_3) is None
 
-    assert len(category_service.all()) == 3
+    categories = category_service.all()
+    assert isinstance(categories, list)
+    assert len(categories) == 3
 
-    updated_category = dataclasses.replace(
-        CATEGORY_1,
-        note="Updated note 1."
-    )
+    updated_category = dataclasses.replace(CATEGORY_1, note="Updated note 1.")
 
-    category_service.update(category=updated_category)
+    assert category_service.update(category=updated_category) is None
 
-    assert category_service.get(category_id=CATEGORY_1.category_id).note == "Updated note 1."
+    category = category_service.get(category_id=CATEGORY_1.category_id)
+    assert isinstance(category, domain.Category)
+    assert category.note == "Updated note 1."
 
-    assert len(category_service.all()) == 3
+    categories = category_service.all()
+    assert isinstance(categories, list)
+    assert len(categories) == 3
 
-    category_service.delete(category_id=CATEGORY_3.category_id)
+    assert category_service.delete(category_id=CATEGORY_3.category_id) is None
 
-    assert len(category_service.all()) == 2
-
+    categories = category_service.all()
+    assert isinstance(categories, list)
+    assert len(categories) == 2

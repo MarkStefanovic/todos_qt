@@ -1,6 +1,5 @@
 import typing
 
-import qtawesome as qta
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
@@ -9,15 +8,13 @@ from src.presentation.category_selector import CategorySelectorWidget
 from src.presentation.shared import fonts, icons
 from src.presentation.shared.widgets import table_view, StatusBar
 from src.presentation.todo.view.dash import requests
-
 from src.presentation.todo.view.dash.state import TodoDashState
-
 from src.presentation.user_selector import UserSelectorWidget
 
-__all__ = ("TodoDash",)
+__all__ = ("TodoDashView",)
 
 
-class TodoDash(qtw.QWidget):
+class TodoDashView(qtw.QWidget):
     def __init__(
         self,
         *,
@@ -34,19 +31,13 @@ class TodoDash(qtw.QWidget):
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
         self._current_user: typing.Final[domain.User] = current_user
 
-        refresh_btn_icon = qta.icon(
-            icons.refresh_btn_icon_name,
-            color=self.parent().palette().text().color(),  # type: ignore
-        )
+        refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self._refresh_btn.setFont(fonts.BOLD)
         self._refresh_btn.setMaximumWidth(100)
         self._refresh_btn.setDefault(True)
 
-        add_btn_icon = qta.icon(
-            icons.add_btn_icon_name,
-            color=self.parent().palette().text().color(),  # type: ignore
-        )
+        add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
         self._add_btn.setFont(fonts.BOLD)
         self._add_btn.setMaximumWidth(100)
@@ -135,7 +126,7 @@ class TodoDash(qtw.QWidget):
                 table_view.text(
                     name="note",
                     display_name="Note",
-                    width=400,
+                    width=200,
                     rich_text=True,
                 ),
                 table_view.date(
@@ -185,14 +176,14 @@ class TodoDash(qtw.QWidget):
 
         layout = qtw.QVBoxLayout()
         layout.addLayout(toolbar_layout)
-        layout.addWidget(self._table)
+        layout.addWidget(self._table, stretch=2)
         layout.addWidget(self._status_bar)
         self.setLayout(layout)
 
         self._table.button_clicked.connect(self._on_button_clicked)
         self._table.double_click.connect(self._on_double_click)
         # noinspection PyUnresolvedReferences
-        self._add_btn.clicked.connect(lambda _: self.add_requests.emit())
+        self._add_btn.clicked.connect(self._on_add_btn_clicked)
         # noinspection PyUnresolvedReferences
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
         self._category_selector.item_selected.connect(self._refresh_btn.click)
@@ -259,13 +250,17 @@ class TodoDash(qtw.QWidget):
                     self._table.clear_selection()
 
             if isinstance(state.status, str):
-                self._status_bar.showMessage(state.status)
+                self._status_bar.set_status(state.status)
 
             self.repaint()
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.set_state(...) failed: {e}")
 
             self._status_bar.set_status(str(e))
+
+    def _on_add_btn_clicked(self, /, _: bool) -> None:
+        logger.debug(f"{self.__class__.__name__}.on_add_btn_clicked()")
+        self._requests.add.emit()
 
     def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")

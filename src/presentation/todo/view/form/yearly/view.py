@@ -2,6 +2,7 @@ import typing
 
 # noinspection PyPep8Naming
 from PyQt5 import QtWidgets as qtw
+from loguru import logger
 
 from src import domain
 from src.presentation.shared import fonts
@@ -42,6 +43,7 @@ class YearlyFrequencyForm(qtw.QWidget):
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 31)
         self._month_day_sb.setFixedWidth(100)
+        self._month_day_sb.setValue(1)
 
         form_layout = qtw.QFormLayout()
         form_layout.addRow(month_lbl, self._month_cbo)
@@ -49,11 +51,19 @@ class YearlyFrequencyForm(qtw.QWidget):
 
         self.setLayout(form_layout)
 
-    def get_state(self) -> YearlyFrequencyFormState:
-        return YearlyFrequencyFormState(
-            month=self._month_cbo.get_value(),
-            month_day=self._month_day_sb.value(),
-        )
+    def get_state(self) -> YearlyFrequencyFormState | domain.Error:
+        try:
+            month = self._month_cbo.get_value()
+            if month is None:
+                return domain.Error.new("month is required.")
+
+            return YearlyFrequencyFormState(
+                month=month,
+                month_day=self._month_day_sb.value(),
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get_state() failed: {e!s}")
+            return domain.Error.new(str(e))
 
     def set_state(self, /, state: YearlyFrequencyFormState) -> None:
         self._month_cbo.set_value(value=state.month)

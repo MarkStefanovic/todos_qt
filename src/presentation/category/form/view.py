@@ -62,24 +62,49 @@ class CategoryForm(qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self.save_btn.clicked.connect(self._on_save_btn_clicked)
 
-    def get_state(self) -> CategoryFormState:
-        return CategoryFormState(
-            category_id=self._category_id,
-            name=self._name_txt.text(),
-            note=self._note_txt.toPlainText(),
-            date_added=self._date_added,
-            date_updated=self._date_updated,
-        )
+    def get_state(self) -> CategoryFormState | domain.Error:
+        try:
+            return CategoryFormState(
+                category_id=self._category_id,
+                name=self._name_txt.text(),
+                note=self._note_txt.toPlainText(),
+                date_added=self._date_added,
+                date_updated=self._date_updated,
+            )
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get_state() failed: {e!s}")
 
-    def save(self) -> None:
-        return self.save()
+            return domain.Error.new(str(e))
 
-    def set_state(self, /, state: CategoryFormState) -> None:
-        self._category_id = state.category_id
-        self._name_txt.setText(state.name)
-        self._note_txt.setText(state.note)
-        self._date_added = state.date_added
-        self._date_updated = state.date_updated
+    def save(self) -> None | domain.Error:
+        try:
+            state = self.get_state()
+            if isinstance(state, domain.Error):
+                return state
+
+            category = state.to_domain()
+
+            self._form_requests.save.emit(requests.Save(category=category))
+
+            return None
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.save() failed: {e!s}")
+
+            return domain.Error.new(str(e))
+
+    def set_state(self, /, state: CategoryFormState) -> None | domain.Error:
+        try:
+            self._category_id = state.category_id
+            self._name_txt.setText(state.name)
+            self._note_txt.setText(state.note)
+            self._date_added = state.date_added
+            self._date_updated = state.date_updated
+
+            return None
+        except Exception as e:
+            logger.error(f"{self.__class__.__name__}.set_state({state=!r}) failed: {e!s}")
+
+            return domain.Error.new(str(e), state=state)
 
     def _on_back_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_back_btn_clicked()")
