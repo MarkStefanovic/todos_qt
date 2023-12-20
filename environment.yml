@@ -23,3 +23,4 @@ dependencies:
     - pip-audit
     - ruff
     - ruff-lsp
+#    - "pyqtdarktheme>=2.1.0"

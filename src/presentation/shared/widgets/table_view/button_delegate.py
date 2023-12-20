@@ -9,6 +9,7 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
+
 __all__ = ("ButtonDelegate",)
 
 
@@ -83,13 +84,17 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
             min(option.fontMetrics.height() + 8, option.rect.height()),
         )
 
-        btn.state = qtw.QStyle.State_Raised if option.state & qtw.QStyle.State_MouseOver else qtw.QStyle.State_Sunken
+        # if option.state & qtw.QStyle.State_MouseOver:
+        #     btn.state = qtw.QStyle.State_MouseOver
+        # else:
+        #     btn.state = qtw.QStyle.State_Enabled
+
+        if option.state & qtw.QStyle.State_MouseOver:
+            btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken
+        else:
+            btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Raised
 
         self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
-        # else:
-        #     btn.state = qtw.QStyle.State_Off
-        #
-        # self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
 
     def _on_click(self, *, index: qtc.QModelIndex) -> None:
         self.clicked.emit(index)

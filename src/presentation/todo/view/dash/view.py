@@ -35,7 +35,8 @@ class TodoDashView(qtw.QWidget):
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self._refresh_btn.setFont(fonts.BOLD)
         self._refresh_btn.setMaximumWidth(100)
-        self._refresh_btn.setDefault(True)
+        # self._refresh_btn.setDefault(True)
+        self._refresh_btn.setAutoFillBackground(True)
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
@@ -86,7 +87,7 @@ class TodoDashView(qtw.QWidget):
                     name="complete",
                     button_text="Complete",
                     text_selector=lambda todo: "Complete" if todo.should_display() else "Incomplete",
-                    width=fm.width(" Incomplete "),
+                    width=fm.width("  Incomplete  "),
                 ),
                 table_view.text(
                     name="description",
@@ -153,7 +154,7 @@ class TodoDashView(qtw.QWidget):
                 table_view.button(
                     name="edit",
                     button_text="Edit",
-                    width=fm.width(" Edit "),
+                    width=fm.width("  Edit  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -162,7 +163,7 @@ class TodoDashView(qtw.QWidget):
                 table_view.button(
                     name="delete",
                     button_text="Delete",
-                    width=fm.width(" Delete "),
+                    width=fm.width("  Delete  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,

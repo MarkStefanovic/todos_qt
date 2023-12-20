@@ -1,6 +1,7 @@
 import datetime
 
 import sqlalchemy as sa
+from loguru import logger
 
 from src import domain
 from src.adapter import db
@@ -26,6 +27,8 @@ def add(*, con: sa.Connection, user: User) -> None | domain.Error:
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.add({user=!r}) failed: {e}")
+
         return domain.Error.new(str(e), user=user)
 
 
@@ -50,6 +53,8 @@ def where(*, con: sa.Connection, active: bool) -> list[User] | domain.Error:
             for row in result.fetchall()
         ]
     except Exception as e:
+        logger.error(f"{__file__}.where({active=!r}) failed: {e}")
+
         return domain.Error.new(str(e))
 
 
@@ -65,6 +70,8 @@ def delete_user(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.delete({user_id=!r}) failed: {e}")
+
         return domain.Error.new(str(e), user_id=user_id)
 
 
@@ -88,6 +95,8 @@ def get(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.get({user_id=!r}) failed: {e}")
+
         return domain.Error.new(str(e))
 
 
@@ -111,4 +120,6 @@ def update(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.get({user=!r}) failed: {e}")
+
         return domain.Error.new(str(e), user=user)

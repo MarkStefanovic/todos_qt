@@ -1,6 +1,7 @@
 import datetime
 
 import sqlalchemy as sa
+from loguru import logger
 
 from src import domain
 from src.adapter import db, category_repo, user_repo
@@ -95,6 +96,8 @@ def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.add({todo=!r}) failed: {e}")
+
         return domain.Error.new(str(e), todo=todo)
 
 
@@ -104,6 +107,8 @@ def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.delete({todo_id=!r}) failed: {e}")
+
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
@@ -179,9 +184,9 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
             date_added=row.date_added,
             date_updated=row.date_updated,
         )
-
-        return None
     except Exception as e:
+        logger.error(f"{__file__}.get({todo_id=!r}) failed: {e}")
+
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
@@ -228,6 +233,8 @@ def update(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.update({todo=!r}) failed: {e}")
+
         return domain.Error.new(str(e), todo=todo)
 
 
@@ -309,6 +316,8 @@ def where(
 
         return todos
     except Exception as e:
+        logger.error(f"{__file__}.where({category_id=!r}, {user_id=!r}, {description_starts_with=!r}) failed: {e}")
+
         return domain.Error.new(
             str(e),
             category_id=category_id,

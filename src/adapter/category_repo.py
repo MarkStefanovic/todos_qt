@@ -1,5 +1,7 @@
 import datetime
 
+from loguru import logger
+
 from src import domain
 from src.adapter import db
 from src.domain import Category
@@ -34,6 +36,8 @@ def add(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.add({category=!r}) failed: {e!s}")
+
         return domain.Error.new(str(e), category=category)
 
 
@@ -74,6 +78,8 @@ def get(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.get({category_id=!r}) failed: {e!s}")
+
         return domain.Error.new(str(e), category_id=category_id)
 
 
@@ -99,6 +105,8 @@ def where(*, con: sa.Connection, active: bool) -> list[Category] | domain.Error:
             for row in result.fetchall()
         ]
     except Exception as e:
+        logger.error(f"{__file__}.where({active=!r}) failed: {e!s}")
+
         return domain.Error.new(str(e), active=active)
 
 
@@ -117,6 +125,8 @@ def update(*, con: sa.Connection, category: Category) -> None | domain.Error:
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.update({category=!r}) failed: {e}")
+
         return domain.Error.new(str(e), category=category)
 
 

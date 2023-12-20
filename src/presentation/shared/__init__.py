@@ -1,1 +1,1 @@
-from src.presentation.shared import widgets, theme, fonts, icons  # noqa: F401
+from src.presentation.shared import widgets, fonts, icons  # noqa: F401
