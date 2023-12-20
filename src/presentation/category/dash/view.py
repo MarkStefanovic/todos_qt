@@ -8,7 +8,7 @@ from loguru import logger
 from src import domain
 from src.presentation.category.dash import requests
 from src.presentation.category.dash.state import CategoryDashState
-from src.presentation.shared import fonts, icons
+from src.presentation.shared import icons, font
 from src.presentation.shared.widgets import table_view, StatusBar, popup
 
 __all__ = ("CategoryDash",)
@@ -29,13 +29,10 @@ class CategoryDash(qtw.QWidget):
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setFont(fonts.BOLD)
         self._refresh_btn.setMaximumWidth(100)
-        self._refresh_btn.setDefault(True)
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self._add_btn.setFont(fonts.BOLD)
         self._add_btn.setMaximumWidth(100)
 
         toolbar_layout = qtw.QHBoxLayout()
@@ -72,7 +69,7 @@ class CategoryDash(qtw.QWidget):
                 table_view.button(
                     name="edit",
                     button_text="Edit",
-                    width=fonts.BOLD_FONT_METRICS.width(" Edit "),
+                    width=font.BOLD_FONT_METRICS.width(" Edit "),
                     enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
@@ -81,7 +78,7 @@ class CategoryDash(qtw.QWidget):
                 table_view.button(
                     name="delete",
                     button_text="Delete",
-                    width=fonts.BOLD_FONT_METRICS.width(" Delete "),
+                    width=font.BOLD_FONT_METRICS.width(" Delete "),
                     enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,

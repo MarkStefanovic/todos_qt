@@ -2,15 +2,15 @@ import sys
 import types
 import typing
 
+import qdarktheme
+
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 from loguru import logger
 
 from src import adapter, domain, presentation, service
 from src.adapter import config
-
-import qdarktheme
-
+from src.presentation.shared import font
 
 __all__ = ("main",)
 
@@ -19,18 +19,23 @@ __all__ = ("main",)
 def main() -> None | domain.Error:
     app = qtw.QApplication(sys.argv)
 
-    qdarktheme.enable_hi_dpi()
+    # qdarktheme.enable_hi_dpi()
     qdarktheme.setup_theme(
         "auto",
         additional_qss="""
-            QWidget { font-size: 12pt; }
             QHeaderView { font-weight: bold; }
             QPushButton { font-weight: bold; }
+            QTabBar { font-weight: bold; }
+            QTableView::item {
+              padding: 4px;
+            }
         """,
         # custom_colors={"primary": "#a0a0a0"},
         custom_colors={"primary": "#00fbff"},
     )  # https://github.com/5yutan5/PyQtDarkTheme
     # qdarktheme.setup_theme(custom_colors={"primary": "#04EECC"})
+
+    app.setFont(font.DEFAULT_FONT)
 
     # app.setStyle("Fusion")
 

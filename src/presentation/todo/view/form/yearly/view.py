@@ -5,7 +5,6 @@ from PyQt5 import QtWidgets as qtw
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import fonts
 from src.presentation.shared import widgets
 from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
@@ -17,7 +16,7 @@ class YearlyFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
-        month_lbl.setFont(fonts.BOLD)
+        month_lbl.font().setBold(True)
         self._month_cbo: typing.Final[widgets.MapCBO[domain.Month]] = widgets.MapCBO(parent=self)
         self._month_cbo.set_values(
             {
@@ -39,7 +38,7 @@ class YearlyFrequencyForm(qtw.QWidget):
         self._month_cbo.setFixedWidth(100)
 
         month_day_lbl = qtw.QLabel("Month Day")
-        month_day_lbl.setFont(fonts.BOLD)
+        month_day_lbl.font().setBold(True)
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 31)
         self._month_day_sb.setFixedWidth(100)

@@ -7,7 +7,7 @@ from loguru import logger
 from src import domain
 from src.presentation.category.form import requests
 from src.presentation.category.form.state import CategoryFormState
-from src.presentation.shared import fonts, icons
+from src.presentation.shared import icons, font
 
 __all__ = ("CategoryForm",)
 
@@ -25,16 +25,15 @@ class CategoryForm(qtw.QWidget):
 
         back_btn_icon = icons.back_btn_icon(parent=self)
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setFont(fonts.BOLD)
         self.back_btn.setMaximumWidth(100)
 
         name_lbl = qtw.QLabel("Name")
-        name_lbl.setFont(fonts.BOLD)
+        name_lbl.font().setBold(True)
         self._name_txt = qtw.QLineEdit()
         self._name_txt.setMaximumWidth(400)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.setFont(fonts.BOLD)
+        note_lbl.font().setBold(True)
         self._note_txt = qtw.QTextEdit()
 
         form_layout = qtw.QFormLayout()
@@ -47,8 +46,7 @@ class CategoryForm(qtw.QWidget):
 
         save_btn_icon = icons.save_btn_icon(parent=self)
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setFont(fonts.BOLD)
-        self.save_btn.setFixedWidth(100)
+        self.save_btn.setFixedWidth(font.BOLD_FONT_METRICS.width(" Save "))
 
         layout = qtw.QVBoxLayout()
         layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)

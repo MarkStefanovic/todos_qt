@@ -1,7 +1,6 @@
 # noinspection PyPep8Naming
 from PyQt5 import QtWidgets as qtw
 
-from src.presentation.shared import fonts
 from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
 
 __all__ = ("XDaysFrequencyForm",)
@@ -12,7 +11,7 @@ class XDaysFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         days_lbl = qtw.QLabel("Days Between")
-        days_lbl.setFont(fonts.BOLD)
+        days_lbl.font().setBold(True)
         self._days_sb = qtw.QSpinBox()
         self._days_sb.setRange(1, 364)
         self._days_sb.setFixedWidth(100)

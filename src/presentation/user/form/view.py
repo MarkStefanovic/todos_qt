@@ -7,7 +7,7 @@ from PyQt5 import QtCore as qtc, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import fonts, icons
+from src.presentation.shared import icons
 from src.presentation.user.form import requests
 from src.presentation.user.form.state import UserFormState
 
@@ -30,12 +30,12 @@ class UserForm(qtw.QWidget):
         self._back_btn.setMaximumWidth(100)
 
         display_name_lbl = qtw.QLabel("Name")
-        display_name_lbl.setFont(fonts.BOLD)
+        display_name_lbl.font().setBold(True)
         self._display_name_txt = qtw.QLineEdit()
         self._display_name_txt.setMaximumWidth(400)
 
         username_lbl = qtw.QLabel("Username")
-        username_lbl.setFont(fonts.BOLD)
+        username_lbl.font().setBold(True)
         self._username_txt = qtw.QLineEdit()
         self._username_txt.setMaximumWidth(400)
 

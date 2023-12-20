@@ -4,7 +4,7 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.category_selector.state import CategorySelectorState
-from src.presentation.shared import fonts
+from src.presentation.shared import font
 
 __all__ = ("CategorySelectorView",)
 
@@ -17,8 +17,6 @@ class CategorySelectorView(qtw.QComboBox):
 
         self._states: typing.Final[qtc.pyqtBoundSignal] = states
 
-        self.setFont(fonts.NORMAL)
-
         self.setFocusPolicy(qtc.Qt.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")
@@ -26,8 +24,8 @@ class CategorySelectorView(qtw.QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self.setMaximumHeight(fonts.NORMAL_FONT_METRICS.height() + 8)
-        self.setFixedWidth(fonts.NORMAL_FONT_METRICS.width(" " * 30))
+        self.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() + 8)
+        self.setFixedWidth(font.DEFAULT_FONT_METRICS.width(" " * 30))
         self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
 
         self._states.connect(self._set_state)

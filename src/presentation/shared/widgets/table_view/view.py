@@ -4,7 +4,7 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src.presentation.shared import fonts
+from src.presentation.shared import font
 from src.presentation.shared.widgets.table_view.attr import Attr, Value
 from src.presentation.shared.widgets.table_view.button_delegate import ButtonDelegate
 from src.presentation.shared.widgets.table_view.item import Item
@@ -49,6 +49,8 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self._attrs: typing.Final[tuple[Attr[typing.Any, typing.Any], ...]] = tuple(attrs)
         self._date_format: typing.Final[str] = date_format
         self._datetime_format: typing.Final[str] = datetime_format
+
+        self._font_metrics = font.DEFAULT_FONT_METRICS
 
         self._key_attr_name: typing.Final[str] = next(attr.name for attr in self._attrs if attr.key)
 
@@ -110,42 +112,37 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.setColumnHidden(self._key_col, True)
         self.setMouseTracking(True)
 
-        font_metrics = qtg.QFontMetrics(fonts.NORMAL)
-
-        self._default_column_widths: typing.Final[dict[str, int]] = {}
-        for attr in self._attrs:
+        for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
                 if attr.data_type == "date":
-                    default_col_width = font_metrics.width("  88/88/8888  ")
+                    col_width = self._font_metrics.width("  88/88/8888  ")
                 else:
-                    default_col_width = font_metrics.boundingRect(
-                        attr.display_name + "33333333"
-                    ).width()  # + (2 * self.fontMetrics().maxWidth())
-
-                self._default_column_widths[attr.name] = default_col_width
+                    col_width = self._font_metrics.width(attr.display_name + "33333333")
             else:
-                self._default_column_widths[attr.name] = attr.width
+                col_width = attr.width
+
+            self.horizontalHeader().resizeSection(col_num, col_width)
 
         self.horizontalHeader().setDefaultAlignment(
             qtc.Qt.AlignHCenter | qtc.Qt.AlignBottom | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
         )
-        min_text_height = font_metrics.height() * 2 + 8
+        min_text_height = self._font_metrics.height() * 2
         # min_text_height = font_metrics.height() + 8
         self.horizontalHeader().setMinimumHeight(min_text_height)
         self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
         # display at most 5 lines
-        self.verticalHeader().setMaximumSectionSize(font_metrics.height() * 5 + 8)
-        self.setStyleSheet(
-            """
-            QTableView::item {
-              border: 0px;
-              padding: 2px;
-            }
-            QHeaderView::section::vertical {
-                padding: 2px;
-            }
-        """
-        )
+        self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
+        # self.setStyleSheet(
+        #     """
+        #     QTableView::item {
+        #       border: 0px;
+        #       padding: 2px;
+        #     }
+        #     QHeaderView::section::vertical {
+        #         padding: 2px;
+        #     }
+        # """
+        # )
 
         # noinspection PyUnresolvedReferences
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))
@@ -202,9 +199,9 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             if attr.key:
                 continue
 
-            col_width = self._default_column_widths[attr.name]
-
-            self.horizontalHeader().resizeSection(col_num, col_width)
+            # col_width = self._default_column_widths[attr.name]
+            #
+            # self.horizontalHeader().resizeSection(col_num, col_width)
 
         # self.resizeRowsToContents()
 

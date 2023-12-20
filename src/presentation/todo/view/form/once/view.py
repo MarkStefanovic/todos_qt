@@ -4,7 +4,7 @@ import datetime
 
 from PyQt5 import QtWidgets as qtw  # noqa
 
-from src.presentation.shared import fonts, widgets
+from src.presentation.shared import widgets
 from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
 
 __all__ = ("OnceFrequencyForm",)
@@ -15,7 +15,7 @@ class OnceFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         due_date_lbl = qtw.QLabel("Due Date")
-        due_date_lbl.setFont(fonts.BOLD)
+        due_date_lbl.font().setBold(True)
         self._due_date_edit = widgets.DateEditor()
         self._due_date_edit.setFixedWidth(150)
 

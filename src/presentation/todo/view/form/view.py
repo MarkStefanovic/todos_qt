@@ -8,7 +8,7 @@ from loguru import logger
 
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
-from src.presentation.shared import fonts, icons, widgets
+from src.presentation.shared import icons, widgets
 from src.presentation.shared.widgets import DateEditor
 from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
 from src.presentation.todo.view.form import requests
@@ -40,37 +40,37 @@ class TodoFormView(qtw.QWidget):
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.setFont(fonts.BOLD)
+        description_lbl.font().setBold(True)
         self._description_txt = qtw.QLineEdit()
 
         advance_days_lbl = qtw.QLabel("Advance Days")
-        advance_days_lbl.setFont(fonts.BOLD)
+        advance_days_lbl.font().setBold(True)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setRange(0, 999)
         self._advance_days_sb.setFixedWidth(80)
 
         expire_days_lbl = qtw.QLabel("Expire Days")
-        expire_days_lbl.setFont(fonts.BOLD)
+        expire_days_lbl.font().setBold(True)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setRange(1, 999)
         self._expire_days_sb.setFixedWidth(80)
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.setFont(fonts.BOLD)
+        user_lbl.font().setBold(True)
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.setFont(fonts.BOLD)
+        category_lbl.font().setBold(True)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.setFont(fonts.BOLD)
+        note_lbl.font().setBold(True)
         self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
-        start_date_lbl.setFont(fonts.BOLD)
+        start_date_lbl.font().setBold(True)
         self._start_date_edit = DateEditor()
 
         frequency_lbl = qtw.QLabel("Frequency")
-        frequency_lbl.setFont(fonts.BOLD)
+        frequency_lbl.font().setBold(True)
         self._frequency_cbo: typing.Final[widgets.MapCBO[domain.FrequencyType]] = widgets.MapCBO()
         self._frequency_cbo.set_values(
             {
@@ -115,12 +115,10 @@ class TodoFormView(qtw.QWidget):
 
         back_btn_icon = icons.back_btn_icon(parent=self)
         self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setFont(fonts.BOLD)
         self.back_btn.setMaximumWidth(100)
 
         save_btn_icon = icons.save_btn_icon(parent=self)
         self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setFont(fonts.BOLD)
         self.save_btn.setMaximumWidth(100)
         self.save_btn.setDefault(True)
 

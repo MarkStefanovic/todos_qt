@@ -4,13 +4,14 @@ ref: https://gist.github.com/jniemann66/dbc298b35a840bf3f1a2206ea6284c7b
 import math
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
-from src.presentation.shared import fonts
 
 __all__ = ("RichTextDelegate",)
 
+from src.presentation.shared import font
+
 
 class RichTextDelegate(qtw.QStyledItemDelegate):
-    def __init__(self, *, parent: qtw.QWidget | None):
+    def __init__(self, *, parent: qtw.QWidget):
         super().__init__(parent)
 
     def paint(
@@ -36,7 +37,7 @@ class RichTextDelegate(qtw.QStyledItemDelegate):
         else:
             s = str(value)
 
-        document.setDefaultFont(fonts.NORMAL)
+        document.setDefaultFont(font.DEFAULT_FONT)
 
         document.setHtml(s)
 

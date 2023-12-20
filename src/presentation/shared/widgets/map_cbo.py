@@ -4,7 +4,6 @@ import typing
 import warnings
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw  # noqa
-from src.presentation.shared import fonts
 
 __all__ = ("MapCBO",)
 
@@ -18,7 +17,6 @@ class MapCBO(typing.Generic[Value], qtw.QComboBox):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.setFont(fonts.NORMAL)
         self.setFocusPolicy(qtc.Qt.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")

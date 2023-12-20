@@ -3,7 +3,7 @@ import typing
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
-from src.presentation.shared import fonts
+from src.presentation.shared import font
 from src.presentation.user_selector.state import UserSelectorState
 
 __all__ = ("UserSelectorView",)
@@ -22,8 +22,6 @@ class UserSelectorView(qtw.QComboBox):
         self._item_selected_requests: typing.Final[qtc.pyqtBoundSignal] = item_selected_requests
         self._states: typing.Final[qtc.pyqtBoundSignal] = states
 
-        self.setFont(fonts.NORMAL)
-
         self.setFocusPolicy(qtc.Qt.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")
@@ -31,8 +29,8 @@ class UserSelectorView(qtw.QComboBox):
         # noinspection PyUnresolvedReferences
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
-        self.setMaximumHeight(fonts.NORMAL_FONT_METRICS.height() + 8)
-        self.setFixedWidth(fonts.NORMAL_FONT_METRICS.width(" " * 30))
+        self.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() + 8)
+        self.setFixedWidth(font.DEFAULT_FONT_METRICS.width(" " * 30))
         # self.adjustSize()
 
         self._states.connect(self._set_state)

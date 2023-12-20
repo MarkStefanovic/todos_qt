@@ -6,7 +6,7 @@ import typing
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
-from src.presentation.shared import fonts, widgets
+from src.presentation.shared import widgets
 from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
 
 __all__ = ("IrregularFrequencyForm",)
@@ -17,7 +17,7 @@ class IrregularFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
-        month_lbl.setFont(fonts.BOLD)
+        month_lbl.font().setBold(True)
         self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO()
         self._month_cbo.set_values(
             {
@@ -39,13 +39,13 @@ class IrregularFrequencyForm(qtw.QWidget):
         self._month_cbo.setFixedWidth(150)
 
         week_number_lbl = qtw.QLabel("Week #")
-        week_number_lbl.setFont(fonts.BOLD)
+        week_number_lbl.font().setBold(True)
         self._week_number_sb = qtw.QSpinBox()
         self._week_number_sb.setRange(1, 5)
         self._week_number_sb.setFixedWidth(150)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.setFont(fonts.BOLD)
+        weekday_lbl.font().setBold(True)
         self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
         self._weekday_cbo.set_values(
             {
@@ -77,7 +77,7 @@ class IrregularFrequencyForm(qtw.QWidget):
         weekday = self._weekday_cbo.get_value()
         if weekday is None:
             return domain.Error.new("weekday is required.")
-        
+
         return IrregularFrequencyFormState(
             month=month,
             week_number=self._week_number_sb.value(),

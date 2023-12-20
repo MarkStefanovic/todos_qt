@@ -5,7 +5,6 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src.presentation.shared.widgets.table_view.attr import Attr
 from src.presentation.shared.widgets.table_view.item import Item
-from src.presentation.shared import fonts
 
 __all__ = ("TableViewModel",)
 
@@ -194,8 +193,8 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
             if role == qtc.Qt.TextAlignmentRole:
                 return qtc.Qt.Alignment(qtc.Qt.AlignTop | qtc.Qt.AlignLeft)
 
-        if role == qtc.Qt.FontRole:
-            return fonts.BOLD
+        # if role == qtc.Qt.FontRole:
+        #     return fonts.BOLD
 
     def highlight_row(self, *keys: str) -> None:
         last_col = len(self._column_header)

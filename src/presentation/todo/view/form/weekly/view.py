@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import fonts, widgets
+from src.presentation.shared import widgets
 from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 
 __all__ = ("WeeklyFrequencyForm",)
@@ -15,7 +15,7 @@ class WeeklyFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.setFont(fonts.BOLD)
+        weekday_lbl.font().setBold(True)
         self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
         self._weekday_cbo.set_values(
             {

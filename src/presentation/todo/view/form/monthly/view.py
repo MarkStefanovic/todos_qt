@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from PyQt5 import QtWidgets as qtw
 
-from src.presentation.shared import fonts
 from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
 
 __all__ = ("MonthlyFrequencyForm",)
@@ -13,7 +12,7 @@ class MonthlyFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         month_day_lbl = qtw.QLabel("Day")
-        month_day_lbl.setFont(fonts.BOLD)
+        month_day_lbl.font().setBold(True)
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 28)
         self._month_day_sb.setFixedWidth(100)

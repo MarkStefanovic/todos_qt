@@ -5,7 +5,7 @@ from loguru import logger
 
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
-from src.presentation.shared import fonts, icons
+from src.presentation.shared import icons, font
 from src.presentation.shared.widgets import table_view, StatusBar
 from src.presentation.todo.view.dash import requests
 from src.presentation.todo.view.dash.state import TodoDashState
@@ -33,30 +33,28 @@ class TodoDashView(qtw.QWidget):
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setFont(fonts.BOLD)
         self._refresh_btn.setMaximumWidth(100)
         # self._refresh_btn.setDefault(True)
         self._refresh_btn.setAutoFillBackground(True)
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self._add_btn.setFont(fonts.BOLD)
         self._add_btn.setMaximumWidth(100)
 
         due_lbl = qtw.QLabel("Due?")
-        due_lbl.setFont(fonts.BOLD)
+        due_lbl.font().setBold(True)
         self._due_chk = qtw.QCheckBox()
         self._due_chk.setChecked(True)
         self._due_chk.stateChanged.connect(self._refresh_btn.click)  # noqa
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.setFont(fonts.BOLD)
+        category_lbl.font().setBold(True)
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.setFont(fonts.BOLD)
+        user_lbl.font().setBold(True)
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.setFont(fonts.BOLD)
+        description_lbl.font().setBold(True)
         self._description_filter_txt = qtw.QLineEdit("")
         self._description_filter_txt.setMaximumWidth(200)
 
@@ -74,8 +72,6 @@ class TodoDashView(qtw.QWidget):
         toolbar_layout.addWidget(self._description_filter_txt)
         toolbar_layout.addStretch()
 
-        fm = qtg.QFontMetrics(fonts.BOLD)
-
         self._table: table_view.TableView[domain.Todo, str] = table_view.TableView(
             attrs=(
                 table_view.integer(
@@ -87,7 +83,7 @@ class TodoDashView(qtw.QWidget):
                     name="complete",
                     button_text="Complete",
                     text_selector=lambda todo: "Complete" if todo.should_display() else "Incomplete",
-                    width=fm.width("  Incomplete  "),
+                    width=font.BOLD_FONT_METRICS.width("  Incomplete  "),
                 ),
                 table_view.text(
                     name="description",
@@ -154,7 +150,7 @@ class TodoDashView(qtw.QWidget):
                 table_view.button(
                     name="edit",
                     button_text="Edit",
-                    width=fm.width("  Edit  "),
+                    width=font.BOLD_FONT_METRICS.width("  Edit  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -163,7 +159,7 @@ class TodoDashView(qtw.QWidget):
                 table_view.button(
                     name="delete",
                     button_text="Delete",
-                    width=fm.width("  Delete  "),
+                    width=font.BOLD_FONT_METRICS.width("  Delete  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
