@@ -14,6 +14,7 @@ logger = logging.getLogger()
 
 
 class CategoryController(qtc.QObject):
+    categories_updated = qtc.pyqtSignal()
     states = qtc.pyqtSignal(CategoryState)
 
     def __init__(
@@ -86,6 +87,8 @@ class CategoryController(qtc.QObject):
                 self._set_status(str(delete_result))
                 return None
 
+            self.categories_updated.emit()
+
             self.states.emit(
                 CategoryState(
                     dash_state=dash.CategoryDashState(
@@ -131,6 +134,8 @@ class CategoryController(qtc.QObject):
             if self._category_service.get(category_id=event.category.category_id):
                 self._category_service.update(category=event.category)
 
+                self.categories_updated.emit()
+
                 state = CategoryState(
                     dash_state=dash.CategoryDashState(
                         category_edited=event.category,
@@ -141,6 +146,8 @@ class CategoryController(qtc.QObject):
             else:
                 self._category_service.add(category=event.category)
 
+                self.categories_updated.emit()
+                
                 state = CategoryState(
                     dash_state=dash.CategoryDashState(
                         category_added=event.category,

@@ -13,6 +13,7 @@ __all__ = ("UserController",)
 
 
 class UserController(qtc.QObject):
+    users_updated = qtc.pyqtSignal()
     states = qtc.pyqtSignal(UserState)
 
     def __init__(
@@ -84,6 +85,8 @@ class UserController(qtc.QObject):
             delete_result = self._user_service.delete(user_id=request.user.user_id)
             if isinstance(delete_result, domain.Error):
                 self._set_status(str(delete_result))
+
+            self.users_updated.emit()
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_dash_delete_btn_clicked() failed: {e!s}")
 
@@ -127,6 +130,8 @@ class UserController(qtc.QObject):
                     self._set_status(str(add_result))
                     return None
 
+                self.users_updated.emit()
+
                 self.states.emit(
                     UserState(
                         dash_active=True,
@@ -143,6 +148,8 @@ class UserController(qtc.QObject):
                 if isinstance(update_result, domain.Error):
                     self._set_status(str(update_result))
                     return None
+
+                self.users_updated.emit()
 
                 self.states.emit(
                     UserState(

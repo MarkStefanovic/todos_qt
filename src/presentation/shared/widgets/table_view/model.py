@@ -131,12 +131,6 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
                 case "datetime":
                     return value.strftime(self._datetime_format)
                 case "text":
-                    if attr.rich_text:
-                        d = qtg.QTextDocument()
-                        d.setHtml(value)
-                        plain_text = d.toPlainText().strip(" \n\t")
-                        if plain_text == "":
-                            return qtc.QVariant("")
                     return qtc.QVariant("{0}".format(value.strip(" \n\t")))
                 case _:
                     return qtc.QVariant("{0}".format(value))
@@ -148,10 +142,14 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # return fonts.NORMAL
 
         if role == qtc.Qt.ForegroundRole:
-            # if self._attr_by_name[attr.name].data_type == "button":
-            #     return qtg.QBrush(qtc.Qt.cyan)
             if index.row() in self._highlighted_rows:
                 return qtg.QBrush(qtc.Qt.yellow)
+
+            if attr.color_selector is not None:
+                item = self._items[index.row()]
+
+                if color := attr.color_selector(item):
+                    return qtg.QBrush(color)
 
         return qtc.QVariant()
 

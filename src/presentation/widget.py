@@ -1,5 +1,6 @@
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from loguru import logger
 
 from src import domain
 from src.presentation.category.widget import CategoryWidget
@@ -34,13 +35,13 @@ class MainWidget(qtw.QMainWindow):
             | qtc.Qt.WindowSystemMenuHint
         )
 
-        category_widget = CategoryWidget(
+        self._category_widget = CategoryWidget(
             category_service=category_service,
             current_user=current_user,
             parent=self,
         )
 
-        todo_widget = TodoWidget(
+        self._todo_widget = TodoWidget(
             category_service=category_service,
             todo_service=todo_service,
             user_service=user_service,
@@ -48,18 +49,31 @@ class MainWidget(qtw.QMainWindow):
             parent=self,
         )
 
-        user_widget = UserWidget(
+        self._user_widget = UserWidget(
             current_user=current_user,
             user_service=user_service,
             parent=self,
         )
 
         self._view = MainView(
-            category_widget=category_widget,
-            todo_widget=todo_widget,
-            user_widget=user_widget,
+            category_widget=self._category_widget,
+            todo_widget=self._todo_widget,
+            user_widget=self._user_widget,
         )
 
         self.setCentralWidget(self._view)
 
         self._view.on_load()
+
+        self._category_widget.categories_updated.connect(self._on_category_widget_categories_updated)
+        self._user_widget.users_updated.connect(self._on_users_widget_users_updated)
+
+    def _on_category_widget_categories_updated(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_category_widget_categories_updated()")
+
+        self._todo_widget.refresh_categories()
+
+    def _on_users_widget_users_updated(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_users_widget_users_updated()")
+
+        self._todo_widget.refresh_users()

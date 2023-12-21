@@ -41,25 +41,25 @@ class TodoWidget(qtw.QWidget):
 
         self._controller.moveToThread(self._controller_thread)
 
-        dash_category_selector = CategorySelectorWidget(
+        self._dash_category_selector = CategorySelectorWidget(
             category_service=category_service,
             include_all_category=True,
             parent=self,
         )
 
-        form_category_selector = CategorySelectorWidget(
+        self._form_category_selector = CategorySelectorWidget(
             category_service=category_service,
             include_all_category=False,
             parent=self,
         )
 
-        dash_user_selector = UserSelectorWidget(
+        self._dash_user_selector = UserSelectorWidget(
             user_service=user_service,
             include_all_user=True,
             parent=self,
         )
 
-        form_user_selector = UserSelectorWidget(
+        self._form_user_selector = UserSelectorWidget(
             user_service=user_service,
             include_all_user=False,
             parent=self,
@@ -70,10 +70,10 @@ class TodoWidget(qtw.QWidget):
             dash_requests=dash_requests,
             form_requests=form_requests,
             current_user=current_user,
-            dash_category_selector=dash_category_selector,
-            form_category_selector=form_category_selector,
-            dash_user_selector=dash_user_selector,
-            form_user_selector=form_user_selector,
+            dash_category_selector=self._dash_category_selector,
+            form_category_selector=self._form_category_selector,
+            dash_user_selector=self._dash_user_selector,
+            form_user_selector=self._form_user_selector,
             parent=self,
         )
 
@@ -84,8 +84,16 @@ class TodoWidget(qtw.QWidget):
     def current_view(self) -> typing.Literal["dash", "form"]:
         return self._view.current_view()
 
+    def refresh_categories(self) -> None:
+        self._dash_category_selector.refresh()
+        self._form_category_selector.refresh()
+
     def refresh_dash(self) -> None:
         self._view.refresh_dash()
+
+    def refresh_users(self) -> None:
+        self._dash_user_selector.refresh()
+        self._form_user_selector.refresh()
 
     def save_form(self) -> None:
         self._view.save_form()

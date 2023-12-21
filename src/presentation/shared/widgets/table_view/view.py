@@ -10,7 +10,6 @@ from src.presentation.shared.widgets.table_view.button_delegate import ButtonDel
 from src.presentation.shared.widgets.table_view.item import Item
 from src.presentation.shared.widgets.table_view.key import Key
 from src.presentation.shared.widgets.table_view.model import TableViewModel
-from src.presentation.shared.widgets.table_view.rich_text_delegate import RichTextDelegate
 
 __all__ = (
     "ButtonClickedEvent",
@@ -96,13 +95,6 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 self.setItemDelegateForColumn(col_num, btn_delegate)
 
                 btn_delegate.clicked.connect(lambda ix: self._on_click(index=ix))
-            if attr.data_type == "text":
-                if attr.rich_text:
-                    rich_text_delegate = RichTextDelegate(parent=self)
-
-                    col_num = self._view_model.get_column_number_for_attr_name(attr.name)
-
-                    self.setItemDelegateForColumn(col_num, rich_text_delegate)
 
         self.setSortingEnabled(True)
         # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
@@ -126,23 +118,14 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.horizontalHeader().setDefaultAlignment(
             qtc.Qt.AlignHCenter | qtc.Qt.AlignBottom | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
         )
-        min_text_height = self._font_metrics.height() * 2
+        min_text_height = font.BOLD_FONT_METRICS.height() * 2 + 8
         # min_text_height = font_metrics.height() + 8
         self.horizontalHeader().setMinimumHeight(min_text_height)
+
         self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
+
         # display at most 5 lines
         self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
-        # self.setStyleSheet(
-        #     """
-        #     QTableView::item {
-        #       border: 0px;
-        #       padding: 2px;
-        #     }
-        #     QHeaderView::section::vertical {
-        #         padding: 2px;
-        #     }
-        # """
-        # )
 
         # noinspection PyUnresolvedReferences
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))

@@ -28,16 +28,12 @@ def main() -> None | domain.Error:
                 QTabBar { font-weight: bold; }
                 QTableView::item { padding: 4px; }
                 QHeaderView::section::horizontal { padding: 4px; }
+                QToolTip { font-weight: bold; color: #00fbff; background-color: #1c1c1c; border: none; }
             """,
             custom_colors={"primary": "#00fbff"},
         )  # https://github.com/5yutan5/PyQtDarkTheme
-        # qdarktheme.setup_theme(custom_colors={"primary": "#04EECC"})
 
         app.setFont(font.DEFAULT_FONT)
-
-        # app.setStyle("Fusion")
-
-        # presentation.theme.apply_theme(app=app)
 
         engine = adapter.db.create_engine(url=adapter.config.db_url(), echo=True)
         if isinstance(engine, domain.Error):

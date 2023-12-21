@@ -8,9 +8,8 @@ from loguru import logger
 
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
-from src.presentation.shared import icons, widgets
+from src.presentation.shared import icons, widgets, font
 from src.presentation.shared.widgets import DateEditor
-from src.presentation.shared.widgets.rich_text_editor import RichTextEditor
 from src.presentation.todo.view.form import requests
 from src.presentation.todo.view.form.irregular.view import IrregularFrequencyForm
 from src.presentation.todo.view.form.monthly.view import MonthlyFrequencyForm
@@ -47,13 +46,13 @@ class TodoFormView(qtw.QWidget):
         advance_days_lbl.font().setBold(True)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setRange(0, 999)
-        self._advance_days_sb.setFixedWidth(80)
+        self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   999   "))
 
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.font().setBold(True)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setRange(1, 999)
-        self._expire_days_sb.setFixedWidth(80)
+        self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   999   "))
 
         user_lbl = qtw.QLabel("User")
         user_lbl.font().setBold(True)
@@ -63,7 +62,8 @@ class TodoFormView(qtw.QWidget):
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.font().setBold(True)
-        self._note_txt = RichTextEditor(parent=self)
+        self._note_txt = qtw.QTextEdit(parent=self)
+        # self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.font().setBold(True)
@@ -85,7 +85,7 @@ class TodoFormView(qtw.QWidget):
         )
         self._frequency_cbo.set_value(domain.FrequencyType.Daily)
         self._frequency_cbo.value_changed.connect(self._frequency_changed)
-        self._frequency_cbo.setFixedWidth(150)
+        self._frequency_cbo.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   Irregular   "))
 
         self._irregular_frequency_form = IrregularFrequencyForm()
         self._monthly_frequency_form = MonthlyFrequencyForm()
@@ -114,12 +114,17 @@ class TodoFormView(qtw.QWidget):
         form_layout.addRow(frequency_lbl, self._frequency_cbo)
 
         back_btn_icon = icons.back_btn_icon(parent=self)
-        self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setMaximumWidth(100)
+        self.back_btn = qtw.QPushButton(back_btn_icon, "")
+        self.back_btn.setMinimumWidth(60)
+        self.back_btn.setToolTip("Back to Dashboard")
+        # self.back_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("   Back   "))
 
         save_btn_icon = icons.save_btn_icon(parent=self)
-        self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setMaximumWidth(100)
+        self.save_btn = qtw.QPushButton(save_btn_icon, "")
+        self.save_btn.setMinimumWidth(60)
+        self.save_btn.setToolTip("Save")
+        # self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
+        # self.save_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("     Save     "))
         self.save_btn.setDefault(True)
 
         main_layout = qtw.QVBoxLayout()
@@ -172,7 +177,8 @@ class TodoFormView(qtw.QWidget):
                 category=self._category_selector.selected_item(),
                 description=self._description_txt.text(),
                 frequency_name=frequency_name,
-                note=self._note_txt.get_value(),
+                note=self._note_txt.toPlainText(),
+                # note=self._note_txt.get_value(),
                 start_date=self._start_date_edit.get_value() or datetime.date(1900, 1, 1),
                 date_added=self._date_added,
                 date_updated=self._date_updated,
@@ -186,8 +192,6 @@ class TodoFormView(qtw.QWidget):
                 weekly_frequency_form_state=weekly_form_state,
                 xdays_frequency_form_state=self._xdays_frequency_form.get_state(),
                 yearly_frequency_form_state=yearly_form_state,
-                categories_stale=False,
-                users_stale=False,
                 focus_description=self._description_txt.hasFocus(),
             )
         except Exception as e:
@@ -214,10 +218,6 @@ class TodoFormView(qtw.QWidget):
             if not isinstance(state.prior_completed, domain.Unspecified):
                 self._prior_completed = state.prior_completed
 
-            if not isinstance(state.users_stale, domain.Unspecified):
-                if state.users_stale:
-                    self._user_selector.refresh()
-
             if not isinstance(state.user, domain.Unspecified):
                 self._user_selector.select_item(state.user)
 
@@ -234,15 +234,12 @@ class TodoFormView(qtw.QWidget):
                 self._advance_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
                 self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
 
-            if not isinstance(state.categories_stale, domain.Unspecified):
-                if state.categories_stale:
-                    self._category_selector.refresh()
-
             if not isinstance(state.category, domain.Unspecified):
                 self._category_selector.select_item(state.category)
 
             if not isinstance(state.note, domain.Unspecified):
-                self._note_txt.set_value(state.note)
+                self._note_txt.setText(state.note)
+                # self._note_txt.set_value(state.note)
 
             if not isinstance(state.start_date, domain.Unspecified):
                 self._start_date_edit.set_value(state.start_date)

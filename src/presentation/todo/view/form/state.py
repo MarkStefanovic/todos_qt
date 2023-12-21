@@ -38,8 +38,6 @@ class TodoFormState:
     weekly_frequency_form_state: WeeklyFrequencyFormState | domain.Unspecified = domain.Unspecified()
     xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified = domain.Unspecified()
     yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
-    categories_stale: bool | domain.Unspecified = domain.Unspecified()
-    users_stale: bool | domain.Unspecified = domain.Unspecified()
     focus_description: bool | domain.Unspecified = domain.Unspecified()
 
     @staticmethod
@@ -67,8 +65,6 @@ class TodoFormState:
             weekly_frequency_form_state=WeeklyFrequencyFormState.initial(),
             xdays_frequency_form_state=XDaysFrequencyFormState.initial(),
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
-            categories_stale=True,
-            users_stale=True,
             focus_description=True,
         )
 
@@ -251,7 +247,5 @@ class TodoFormState:
             prior_completed=todo.prior_completed,
             last_completed_by=todo.last_completed_by,
             prior_completed_by=todo.prior_completed_by,
-            categories_stale=domain.Unspecified(),
-            users_stale=domain.Unspecified(),
             focus_description=True,
         )

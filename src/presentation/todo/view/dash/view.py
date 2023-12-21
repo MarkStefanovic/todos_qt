@@ -32,13 +32,14 @@ class TodoDashView(qtw.QWidget):
         self._current_user: typing.Final[domain.User] = current_user
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
-        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
+        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
+        # self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
         self._refresh_btn.setMaximumWidth(100)
         # self._refresh_btn.setDefault(True)
         self._refresh_btn.setAutoFillBackground(True)
 
         add_btn_icon = icons.add_btn_icon(parent=self)
-        self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
+        self._add_btn = qtw.QPushButton(add_btn_icon, "")
         self._add_btn.setMaximumWidth(100)
 
         due_lbl = qtw.QLabel("Due?")
@@ -95,11 +96,12 @@ class TodoDashView(qtw.QWidget):
                     display_name="Due Date",
                     value_selector=lambda todo: todo.due_date(),
                 ),
-                table_view.text(
+                table_view.integer(
                     name="days",
                     display_name="Days",
-                    value_selector=lambda todo: _render_days(todo.days()),
-                    rich_text=True,
+                    width=font.BOLD_FONT_METRICS.width(" 999 "),
+                    value_selector=lambda todo: todo.days(),
+                    color_selector=lambda todo: _days_color_selector(todo.days()),
                 ),
                 table_view.text(
                     name="user",
@@ -124,7 +126,7 @@ class TodoDashView(qtw.QWidget):
                     name="note",
                     display_name="Note",
                     width=200,
-                    rich_text=True,
+                    # rich_text=True,
                 ),
                 table_view.date(
                     name="last_completed",
@@ -198,8 +200,6 @@ class TodoDashView(qtw.QWidget):
             updated_todo=None,
             deleted_todo=None,
             status=self._status_bar.message,
-            categories_stale=False,
-            users_stale=False,
         )
 
     def refresh(self) -> None:
@@ -213,17 +213,8 @@ class TodoDashView(qtw.QWidget):
             if isinstance(state.user_filter, domain.User):
                 self._user_selector.select_item(state.user_filter)
 
-            if state.users_stale is True:
-                self._user_selector.refresh()
-
-            if state.categories_stale is True:
-                self._category_selector.refresh()
-
             if isinstance(state.category_filter, domain.Category):
                 self._category_selector.select_item(state.category_filter)
-
-            if state.categories_stale is True:
-                self._category_selector.refresh()
 
             if isinstance(state.due_filter, bool):
                 self._due_chk.setChecked(state.due_filter)
@@ -306,17 +297,17 @@ class TodoDashView(qtw.QWidget):
         self._requests.refresh.emit(request)
 
 
-def _render_days(days: int | None, /) -> str:
+def _days_color_selector(days: int | None, /) -> qtg.QColor | None:
     if days is None:
-        return ""
+        return None
 
     if days < 0:
-        return f'<center><font color="red">{days}</font></center>'
+        return typing.cast(qtg.QColor, qtc.Qt.red)
 
     if days == 0:
-        return f'<center><font color="yellow">{days}</font></center>'
+        return typing.cast(qtg.QColor, qtc.Qt.yellow)
 
-    return f"<center>{days}</center>"
+    return None
 
 
 def _render_frequency(*, frequency: domain.Frequency) -> str:

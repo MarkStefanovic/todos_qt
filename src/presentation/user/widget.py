@@ -13,6 +13,8 @@ __all__ = ("UserWidget",)
 
 
 class UserWidget(qtw.QWidget):
+    users_updated = qtc.pyqtSignal()
+
     def __init__(
         self,
         *,

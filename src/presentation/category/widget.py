@@ -11,6 +11,8 @@ __all__ = ("CategoryWidget",)
 
 
 class CategoryWidget(qtw.QWidget):
+    categories_updated = qtc.pyqtSignal()
+
     def __init__(
         self,
         *,
@@ -50,6 +52,8 @@ class CategoryWidget(qtw.QWidget):
         layout = qtw.QStackedLayout()
         layout.addWidget(self._view)
         self.setLayout(layout)
+
+        self._controller.categories_updated.connect(self.categories_updated)
 
     def current_view(self) -> typing.Literal["dash", "form"]:
         return self._view.current_view()

@@ -158,8 +158,6 @@ class TodoController(qtc.QObject):
                 TodoState(
                     dash_state=dash.TodoDashState(
                         todos=tuple(todos),
-                        categories_stale=True,
-                        users_stale=True,
                         status="Todos refreshed.",
                     )
                 )

@@ -3,6 +3,9 @@ from __future__ import annotations
 import datetime
 import typing
 
+# noinspection PyPep8Naming
+from PyQt5 import QtGui as qtg
+
 __all__ = (
     "Attr",
     "text",
@@ -27,8 +30,8 @@ class Attr(typing.Generic[Item, Value]):
         "name",
         "enabled_selector",
         "value_selector",
+        "color_selector",
         "width",
-        "rich_text",
     )
 
     def __init__(
@@ -40,8 +43,8 @@ class Attr(typing.Generic[Item, Value]):
         enabled_when: typing.Callable[[Item], bool] | None,
         key: bool,
         name: str,
-        rich_text: bool,
         value_selector: typing.Callable[[Item], Value] | None,
+        color_selector: typing.Callable[[Item], qtg.QColor | None] | None,
         width: int | None,
     ):
         self.alignment: typing.Final[typing.Literal["center", "left", "right"]] = alignment
@@ -50,8 +53,8 @@ class Attr(typing.Generic[Item, Value]):
         self.enabled_selector: typing.Final[typing.Callable[[Item], bool] | None] = enabled_when
         self.key: typing.Final[bool] = key
         self.name: typing.Final[str] = name
-        self.rich_text: typing.Final[bool] = rich_text
         self.value_selector: typing.Final[typing.Callable[[Item], Value] | None] = value_selector
+        self.color_selector: typing.Final[typing.Callable[[Item], qtg.QColor | None] | None] = color_selector
         self.width: typing.Final[int | None] = width
 
     def __eq__(self, other: object) -> bool:
@@ -71,7 +74,6 @@ class Attr(typing.Generic[Item, Value]):
             f"  enabled_selector: {self.enabled_selector!r}"
             f"  key: {self.key!r}"
             f"  name: {self.name!r}"
-            f"  rich_text: {self.rich_text!r}"
             f"  value_selector: {self.value_selector!r}"
             f"  width: {self.width!r}"
             "]"
@@ -85,7 +87,7 @@ def text(
     alignment: typing.Literal["center", "left", "right"] = "left",
     width: int | None = None,
     value_selector: typing.Callable[[Item], str] | None = None,
-    rich_text: bool = False,
+    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
 ) -> Attr[Item, str]:
     return Attr(
         name=name,
@@ -96,7 +98,7 @@ def text(
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        rich_text=rich_text,
+        color_selector=color_selector,
     )
 
 
@@ -106,6 +108,7 @@ def button(
     width: int | None = None,
     enabled_when: typing.Callable[[Item], bool] | None = None,
     text_selector: typing.Callable[[Item], str] | None = None,
+    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
 ) -> Attr[Item, str]:
     return Attr(
         name=name,
@@ -116,7 +119,7 @@ def button(
         width=width,
         enabled_when=enabled_when,
         value_selector=text_selector,
-        rich_text=False,
+        color_selector=color_selector,
     )
 
 
@@ -125,6 +128,7 @@ def timestamp(
     display_name: str,
     width: int | None = None,
     value_selector: typing.Callable[[Item], datetime.datetime | None] | None = None,
+    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
 ) -> Attr[Item, datetime.datetime | None]:
     return Attr(
         name=name,
@@ -135,7 +139,7 @@ def timestamp(
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        rich_text=False,
+        color_selector=color_selector,
     )
 
 
@@ -144,6 +148,7 @@ def date(
     display_name: str,
     width: int | None = None,
     value_selector: typing.Callable[[Item], datetime.date | None] | None = None,
+    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
 ) -> Attr[Item, datetime.date | None]:
     return Attr(
         name=name,
@@ -154,7 +159,7 @@ def date(
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        rich_text=False,
+        color_selector=color_selector,
     )
 
 
@@ -165,6 +170,7 @@ def integer(
     alignment: typing.Literal["center", "left", "right"] = "center",
     width: int | None = None,
     value_selector: typing.Callable[[Item], int] | None = None,
+    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
 ) -> Attr[Item, int]:
     return Attr(
         name=name,
@@ -175,5 +181,5 @@ def integer(
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        rich_text=False,
+        color_selector=color_selector,
     )

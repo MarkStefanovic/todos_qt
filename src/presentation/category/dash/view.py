@@ -56,7 +56,6 @@ class CategoryDash(qtw.QWidget):
                     display_name="Note",
                     name="note",
                     width=400,
-                    rich_text=True,
                 ),
                 table_view.date(
                     name="date_added",
