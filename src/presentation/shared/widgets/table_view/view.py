@@ -94,16 +94,14 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 col_num = self._view_model.get_column_number_for_attr_name(attr.name)
 
                 self.setItemDelegateForColumn(col_num, btn_delegate)
-
-                btn_delegate.clicked.connect(lambda ix: self._on_click(index=ix))
+                #
+                # btn_delegate.clicked.connect(lambda ix: self._on_click(ix))
 
         self.setSortingEnabled(True)
         # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
-        # noinspection PyUnresolvedReferences
-        # self.clicked.connect(self._on_click)
         self.setAlternatingRowColors(True)
         self.setColumnHidden(self._key_col, True)
-        self.setMouseTracking(True)
+        # self.setMouseTracking(True)
 
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
@@ -119,6 +117,10 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.horizontalHeader().setDefaultAlignment(
             qtc.Qt.AlignHCenter | qtc.Qt.AlignBottom | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
         )
+        # self.verticalHeader().setDefaultAlignment(
+        #     qtc.Qt.AlignLeft | qtc.Qt.AlignTop | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
+        # )
+
         min_text_height = font.BOLD_FONT_METRICS.height() * 2 + 8
         # min_text_height = font_metrics.height() + 8
         self.horizontalHeader().setMinimumHeight(min_text_height)
@@ -129,7 +131,10 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
 
         # noinspection PyUnresolvedReferences
+        self.clicked.connect(self._on_click)
+        # noinspection PyUnresolvedReferences
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))
+        # self.selectionModel().selectionChanged.connect(self._on_selection_changed)
 
     @property
     def items(self) -> list[Item]:
@@ -236,6 +241,39 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
         return attr_button_text_selector(item)
 
+    def _on_click(self, /, index: qtc.QModelIndex) -> None:
+        attr = self._view_model.get_attr_for_column_number(index.column())
+
+        if attr.data_type == "button":
+            key_index = self._view_model.index(index.row(), self._key_col)
+            if not key_index.isValid():
+                return
+
+            model_data = self._view_model.data(key_index)
+            if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+                return
+
+            key = model_data.value()
+
+            if item := self._view_model.get_item(key):
+                if attr.enabled_selector is None:
+                    self.button_clicked.emit(ButtonClickedEvent(attr=attr, item=item))
+                else:
+                    if attr.enabled_selector(item):
+                        self.button_clicked.emit(ButtonClickedEvent(attr=attr, item=item))
+        # else:
+        #     print(f"highlight row, {index.row()}")
+        #     key_index = self._view_model.index(index.row(), self._key_col)
+        #
+        #     model_data = self._view_model.data(key_index)
+        #     if isinstance(model_data, (qtc.Qt.Alignment, qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+        #         return
+        #
+        #     key = model_data.value()
+        #
+        #     self._view_model.clear_highlights()
+        #     self._view_model.highlight_row(str(key))
+
     def _on_double_click(self, *, index: qtc.QModelIndex) -> None:
         attr = self._view_model.get_attr_for_column_number(index.column())
 
@@ -254,21 +292,19 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             event = DoubleClickEvent(attr=attr, item=item)
             self.double_click.emit(event)
 
-    def _on_click(self, *, index: qtc.QModelIndex) -> None:
-        attr = self._view_model.get_attr_for_column_number(index.column())
-
-        if attr.data_type == "button":
-            key_index = self._view_model.index(index.row(), self._key_col)
-
-            if not key_index.isValid():
-                return
-
-            model_data = self._view_model.data(key_index)
-            if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont)):
-                return
-
-            key = model_data.value()
-            item = self._view_model.get_item(key)
-            if item:
-                event = ButtonClickedEvent(attr=attr, item=item)
-                self.button_clicked.emit(event)
+    # def _on_selection_changed(self, selected: qtc.QItemSelection, deselected: qtc.QItemSelection) -> None:
+    #     print("_on_selection_changed")
+    #     if selected:
+    #         first_selection = selected[0]
+    #         top_row = first_selection.top()
+    #         if top_row is not None:
+    #             key_index = self._view_model.index(top_row, self._key_col)
+    #
+    #             model_data = self._view_model.data(key_index)
+    #             if isinstance(model_data, (qtc.Qt.Alignment, qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+    #                 return
+    #
+    #             key = model_data.value()
+    #
+    #             self._view_model.clear_highlights()
+    #             self._view_model.highlight_row(key)

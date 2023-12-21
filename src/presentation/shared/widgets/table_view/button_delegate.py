@@ -16,7 +16,7 @@ from src.presentation.shared import font
 
 
 class ButtonDelegate(qtw.QStyledItemDelegate):
-    clicked = qtc.pyqtSignal(qtc.QModelIndex)
+    # clicked = qtc.pyqtSignal(qtc.QModelIndex)
 
     def __init__(
         self,
@@ -62,21 +62,21 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
     #
     #     return super().editorEvent(event, model, option, index)
 
-    def editorEvent(
-        self,
-        event: qtc.QEvent,
-        model: qtc.QAbstractItemModel,
-        option: qtw.QStyleOptionViewItem,
-        index: qtc.QModelIndex,
-    ) -> bool:
-        if event is not None:
-            if event.type() == qtc.QEvent.MouseButtonRelease:
-                if self._button_is_enabled(index=index):
-                    self._on_click(index=index)
-
-                return True
-
-        return super().editorEvent(event, model, option, index)
+    # def editorEvent(
+    #     self,
+    #     event: qtc.QEvent,
+    #     model: qtc.QAbstractItemModel,
+    #     option: qtw.QStyleOptionViewItem,
+    #     index: qtc.QModelIndex,
+    # ) -> bool:
+    #     if event is not None:
+    #         if event.type() == qtc.QEvent.MouseButtonRelease:
+    #             if self._button_is_enabled(index=index):
+    #                 self._on_click(index=index)
+    #
+    #             return True
+    #
+    #     return super().editorEvent(event, model, option, index)
 
     def paint(
         self,
@@ -116,9 +116,9 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
 
-    def _on_click(self, *, index: qtc.QModelIndex) -> None:
-        self.clicked.emit(index)
-
+    # def _on_click(self, *, index: qtc.QModelIndex) -> None:
+    #     self.clicked.emit(index)
+    #
     def _button_is_enabled(self, *, index: qtc.QModelIndex) -> bool:
         if self._enabled_selector is None:
             return True

@@ -6,7 +6,7 @@ from loguru import logger
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
 from src.presentation.shared import icons, font
-from src.presentation.shared.widgets import table_view, StatusBar
+from src.presentation.shared.widgets import table_view, StatusBar, popup
 from src.presentation.todo.view.dash import requests
 from src.presentation.todo.view.dash.state import TodoDashState
 from src.presentation.user_selector import UserSelectorWidget
@@ -267,9 +267,10 @@ class TodoDashView(qtw.QWidget):
                     user=self._current_user,
                     todo=event.item,
                 ):
-                    request = requests.DeleteTodo(todo=event.item)
+                    if popup.confirm(question=f'Are you sure you want to delete "{event.item.description}"?'):
+                        request = requests.DeleteTodo(todo=event.item)
 
-                    self._requests.delete.emit(request)
+                        self._requests.delete.emit(request)
             case "edit":
                 if domain.permissions.user_can_edit_todo(
                     user=self._current_user,

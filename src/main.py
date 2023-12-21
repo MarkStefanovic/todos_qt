@@ -21,6 +21,7 @@ from src.presentation.shared import font
 
 
 def main() -> None | domain.Error:
+    # noinspection PyShadowingNames
     try:
         app = qtw.QApplication(sys.argv)
 
@@ -31,10 +32,10 @@ def main() -> None | domain.Error:
                 QHeaderView { font-weight: bold; }
                 QPushButton { font-weight: bold; border: 1px solid #00a7aa; }
                 QTabBar { font-weight: bold; }
-                QTableView::item { padding: 4px; }
-                QHeaderView::section::horizontal { padding: 4px; }
+                QTableView:item { padding: 4px; }
+                QHeaderView:section:horizontal { padding: 4px; }
                 QToolTip { color: #00fbff; background-color: #1c1c1c; border: none; }
-                QTableView::item::hover { background-color: #005455; }
+                QTableView:item:hover { background-color: #005455; }
             """,
             custom_colors={"primary": "#00fbff"},
         )
