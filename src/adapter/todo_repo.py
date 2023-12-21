@@ -149,27 +149,31 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
         if row is None:
             return None
 
+        valid_row = _validate_row(row)
+        if isinstance(valid_row, domain.Error):
+            return valid_row
+
         user = user_repo.get(
             con=con,
-            user_id=row.user_id,
+            user_id=valid_row.user_id,
         )
         if isinstance(user, domain.Error):
             return user
 
-        if row.last_completed_by:
+        if valid_row.last_completed_by_user_id:
             last_completed_by = user_repo.get(
                 con=con,
-                user_id=row.last_completed_by,
+                user_id=valid_row.last_completed_by_user_id,
             )
             if isinstance(last_completed_by, domain.Error):
                 return last_completed_by
         else:
             last_completed_by = None
 
-        if row.prior_completed_by:
+        if valid_row.prior_completed_by_user_id:
             prior_completed_by = user_repo.get(
                 con=con,
-                user_id=row.prior_completed_by,
+                user_id=valid_row.prior_completed_by_user_id,
             )
             if isinstance(prior_completed_by, domain.Error):
                 return prior_completed_by
@@ -178,39 +182,39 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
 
         category = category_repo.get(
             con=con,
-            category_id=row.category_id,
+            category_id=valid_row.category_id,
         )
         if isinstance(category, domain.Error):
             return category
 
         if category is None:
-            return domain.Error.new(f"category_id, {row.category_id}, not found.")
+            return domain.Error.new(f"category_id, {valid_row.category_id}, not found.")
 
         return domain.Todo(
-            todo_id=row.todo_id,
-            template_todo_id=row.template_todo_id,
+            todo_id=valid_row.todo_id,
+            template_todo_id=valid_row.template_todo_id,
             category=category,
             user=user or domain.DEFAULT_USER,
-            description=row.description,
+            description=valid_row.description,
             frequency=_parse_frequency(
-                advance_display_days=row.advance_days,
-                days=row.days,
-                due_date=row.due_date,
-                expire_display_days=row.expire_days,
-                frequency=row.frequency,
-                month=row.month,
-                month_day=row.month_day,
-                start_date=row.start_date,
-                week_day=row.week_day,
-                week_number=row.week_number,
+                advance_display_days=valid_row.advance_days,
+                days=valid_row.days,
+                due_date=valid_row.due_date,
+                expire_display_days=valid_row.expire_days,
+                frequency=valid_row.frequency,
+                month=valid_row.month,
+                month_day=valid_row.month_day,
+                start_date=valid_row.start_date,
+                week_day=valid_row.week_day,
+                week_number=valid_row.week_number,
             ),
-            note=row.note,
-            last_completed=row.last_completed,
+            note=valid_row.note,
+            last_completed=valid_row.last_completed,
             last_completed_by=last_completed_by,
-            prior_completed=row.prior_completed,
+            prior_completed=valid_row.prior_completed,
             prior_completed_by=prior_completed_by,
-            date_added=row.date_added,
-            date_updated=row.date_updated,
+            date_added=valid_row.date_added,
+            date_updated=valid_row.date_updated,
         )
     except Exception as e:
         logger.error(f"{__file__}.get({todo_id=!r}) failed: {e}")
@@ -623,21 +627,21 @@ def _validate_row(row: sa.Row[typing.Any], /) -> ValidRow | domain.Error:
             else:
                 errors.append(f"prior_completed, {row.prior_completed!r}, is not a date.")
 
-        if row.last_completed_by_user_id is None:
-            errors.append("last_completed_by_user_id is None.")
+        if row.last_completed_by is None:
+            values["last_completed_by_user_id"] = None
         else:
-            if isinstance(row.last_completed_by_user_id, str):
-                values["last_completed_by_user_id"] = row.last_completed_by_user_id
+            if isinstance(row.last_completed_by, str):
+                values["last_completed_by_user_id"] = row.last_completed_by
             else:
-                errors.append(f"last_completed_by_user_id, {row.last_completed_by_user_id!r}, is not a string.")
+                errors.append(f"last_completed_by, {row.last_completed_by!r}, is not a string.")
 
-        if row.prior_completed_by_user_id is None:
-            errors.append("prior_completed_by_user_id is None.")
+        if row.prior_completed_by is None:
+            values["prior_completed_by_user_id"] = None
         else:
-            if isinstance(row.prior_completed_by_user_id, str):
-                values["prior_completed_by_user_id"] = row.prior_completed_by_user_id
+            if isinstance(row.prior_completed_by, str):
+                values["prior_completed_by_user_id"] = row.prior_completed_by
             else:
-                errors.append(f"prior_completed_by_user_id, {row.prior_completed_by_user_id!r}, is not a string.")
+                errors.append(f"prior_completed_by, {row.prior_completed_by!r}, is not a string.")
 
         if row.date_added is None:
             errors.append("date_added is None.")
@@ -678,6 +682,10 @@ def _validate_row(row: sa.Row[typing.Any], /) -> ValidRow | domain.Error:
                 values["start_date"] = row.start_date
             else:
                 errors.append(f"start_date, {row.start_date!r}, is not a date.")
+
+        if errors:
+            error_csv = ", ".join(errors)
+            return domain.Error.new(f"Invalid Todo row, {row!r}: {error_csv}")
 
         return ValidRow(**values)
     except Exception as e:

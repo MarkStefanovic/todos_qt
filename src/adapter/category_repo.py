@@ -172,7 +172,23 @@ def _row_to_domain(row: sa.Row[typing.Any], /) -> domain.Category | domain.Error
             if isinstance(row.date_added, datetime.datetime):
                 values["date_added"] = row.date_added
             else:
-                errors.append("date_added, {row.date_added!r}, is not a datetime.")
+                errors.append(f"date_added, {row.date_added!r}, is not a datetime.")
+
+        if row.date_updated is None:
+            values["date_updated"] = None
+        else:
+            if isinstance(row.date_added, datetime.datetime):
+                values["date_updated"] = row.date_updated
+            else:
+                errors.append(f"date_updated, {row.date_updated!r}, is not a datetime.")
+
+        if row.date_deleted is None:
+            values["date_deleted"] = None
+        else:
+            if isinstance(row.date_added, datetime.datetime):
+                values["date_deleted"] = row.date_deleted
+            else:
+                errors.append(f"date_deleted, {row.date_deleted!r}, is not a datetime.")
 
         if errors:
             errors_csv = ", ".join(errors)

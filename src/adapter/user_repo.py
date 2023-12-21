@@ -170,6 +170,10 @@ def _row_to_domain(row: sa.Row[typing.Any], /) -> domain.User | domain.Error:
             else:
                 errors.append(f"is_admin, {row.is_admin!r}, is not a bool.")
 
+        if errors:
+            error_csv = ", ".join(errors)
+            return domain.Error.new(f"Invalid User row, {row!r}: {error_csv}")
+
         return domain.User(**values)
     except Exception as e:
         logger.error(f"{__file__}._row_to_domain({row=!r}) failed: {e!s}")

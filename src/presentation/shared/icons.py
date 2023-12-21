@@ -1,5 +1,3 @@
-import qtawesome as qta
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 
@@ -18,8 +16,14 @@ __all__ = (
 )
 
 
-def add_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="ei.plus", parent=parent)
+def add_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="ei.plus", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_FileDialogNewFolder)
 
 
 def app_icon() -> qtg.QIcon | domain.Error:
@@ -33,36 +37,71 @@ def app_icon() -> qtg.QIcon | domain.Error:
         return domain.Error.new(str(e))
 
 
-def bold_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="mdi.format-bold", parent=parent)
+def back_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="ei.arrow-left", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_MediaSeekBackward)
 
 
-def clear_bold_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="mdi.bootstrap", parent=parent)
+def bold_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="mdi.format-bold", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_MediaVolume)
 
 
-def refresh_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="fa.refresh", parent=parent)
+def clear_bold_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="mdi.bootstrap", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_MediaVolumeMuted)
 
 
-def highlight_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="mdi.format-color-highlight", parent=parent)
+def clear_highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="mdi.format-color-marker-cancel", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_DialogCloseButton)
 
 
-def clear_highlight_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="mdi.format-color-marker-cancel", parent=parent)
+def highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="mdi.format-color-highlight", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_DialogResetButton)
 
 
-def back_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="ei.arrow-left", parent=parent)
+def refresh_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="fa.refresh", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_BrowserReload)
 
 
-def save_btn_icon(*, parent: qtw.QWidget | None) -> qtg.QIcon:
-    return _icon(icon_name="fa5.save", parent=parent)
+def save_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
 
-
-def _icon(*, icon_name: str, parent: qtw.QWidget | None) -> qtg.QIcon:
-    if parent is None:
-        return qta.icon(icon_name)
-
-    return qta.icon(icon_name, color=parent.palette().text().color())
+        return qta.icon(icon_name="fa5.save", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_DialogSaveButton)
