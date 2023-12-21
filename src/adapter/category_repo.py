@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 from loguru import logger
 
@@ -55,6 +56,8 @@ def delete(
 
         return None
     except Exception as e:
+        logger.error(f"{__file__}.delete({category_id=!r}) failed: {e!s}")
+
         return domain.Error.new(str(e), category_id=category_id)
 
 
@@ -67,14 +70,20 @@ def get(
         result = con.execute(sa.select(db.category).where(db.category.c.category_id == category_id))
 
         if row := result.one_or_none():
-            return domain.Category(
-                category_id=row.category_id,
-                name=row.name,
-                note=row.note,
-                date_added=row.date_added,
-                date_updated=row.date_updated,
-                date_deleted=row.date_deleted,
-            )
+            errors: list[str] = []
+            if row.category_id is None:
+                errors.append("category is None.")
+            if row.name is None:
+                errors.append("name is None.")
+            if row.note is None:
+                errors.append("note is None.")
+            if row.date_added is None:
+                errors.append("date_added is None.")
+            if errors:
+                errors_str = "\n- ".join(errors)
+                return domain.Error.new(f"invalid Category row, {row!r}:\n- {errors_str}")
+
+            return _row_to_domain(row)
 
         return None
     except Exception as e:
@@ -93,17 +102,15 @@ def where(*, con: sa.Connection, active: bool) -> list[Category] | domain.Error:
 
         result = con.execute(qry.order_by(db.category.c.name))
 
-        return [
-            domain.Category(
-                category_id=row.category_id,
-                name=row.name,
-                note=row.note,
-                date_added=row.date_added,
-                date_updated=row.date_updated,
-                date_deleted=row.date_deleted,
-            )
-            for row in result.fetchall()
-        ]
+        categories: list[domain.Category] = []
+        for row in result.fetchall():
+            category = _row_to_domain(row)
+            if isinstance(category, domain.Error):
+                return category
+
+            categories.append(category)
+
+        return categories
     except Exception as e:
         logger.error(f"{__file__}.where({active=!r}) failed: {e!s}")
 
@@ -128,6 +135,54 @@ def update(*, con: sa.Connection, category: Category) -> None | domain.Error:
         logger.error(f"{__file__}.update({category=!r}) failed: {e}")
 
         return domain.Error.new(str(e), category=category)
+
+
+def _row_to_domain(row: sa.Row[typing.Any], /) -> domain.Category | domain.Error:
+    try:
+        values: dict[str, typing.Any] = {}
+        errors: list[str] = []
+
+        if row.category_id is None:
+            errors.append("category is None.")
+        else:
+            if isinstance(row.category_id, str):
+                values["category_id"] = row.category_id
+            else:
+                errors.append(f"category_id, {row.category_id!r}, is not a string.")
+
+        if row.name is None:
+            errors.append("name is None.")
+        else:
+            if isinstance(row.name, str):
+                values["name"] = row.name
+            else:
+                errors.append(f"name, {row.name!r}, is not a string.")
+
+        if row.note is None:
+            errors.append("note is None.")
+        else:
+            if isinstance(row.note, str):
+                values["note"] = row.note
+            else:
+                errors.append(f"note, {row.note!r}, is not a string.")
+
+        if row.date_added is None:
+            errors.append("date_added is None.")
+        else:
+            if isinstance(row.date_added, datetime.datetime):
+                values["date_added"] = row.date_added
+            else:
+                errors.append("date_added, {row.date_added!r}, is not a datetime.")
+
+        if errors:
+            errors_csv = ", ".join(errors)
+            return domain.Error.new(f"invalid Category row: {errors_csv}", row=row)
+
+        return domain.Category(**values)
+    except Exception as e:
+        logger.error(f"{__file__}._row_to_domain({row=!r}) failed: {e!s}")
+
+        return domain.Error.new(str(e), row=row)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,10 @@ class CategoryService(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def add_default_categories(self) -> None | Error:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def all(self) -> list[Category] | Error:
         raise NotImplementedError
 

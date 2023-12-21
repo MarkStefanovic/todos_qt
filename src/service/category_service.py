@@ -22,6 +22,20 @@ class CategoryService(domain.CategoryService):
         except Exception as e:
             return domain.Error.new(str(e), category=category)
 
+    def add_default_categories(self) -> None | domain.Error:
+        with self._engine.begin() as con:
+            categories = adapter.category_repo.where(con=con, active=False)
+            if isinstance(categories, domain.Error):
+                return categories
+
+            for category in (domain.TODO_CATEGORY,):
+                if category not in categories:
+                    add_result = adapter.category_repo.add(con=con, category=category)
+                    if isinstance(add_result, domain.Error):
+                        return add_result
+
+        return None
+
     def all(self) -> list[domain.Category] | domain.Error:
         try:
             with self._engine.begin() as con:

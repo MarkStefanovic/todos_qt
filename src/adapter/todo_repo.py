@@ -1,4 +1,6 @@
+import dataclasses
 import datetime
+import typing
 
 import sqlalchemy as sa
 from loguru import logger
@@ -38,6 +40,32 @@ FREQUENCY_NAME_LKP = {
     domain.FrequencyType.XDays: "xdays",
     domain.FrequencyType.Yearly: "yearly",
 }
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class ValidRow:
+    todo_id: str
+    user_id: str
+    category_id: str
+    description: str
+    note: str
+    template_todo_id: str | None
+    last_completed: datetime.date | None
+    last_completed_by_user_id: str | None
+    prior_completed: datetime.date | None
+    prior_completed_by_user_id: str | None
+    date_added: datetime.datetime
+    date_updated: datetime.datetime | None
+    frequency: str
+    month: int | None
+    week_day: int | None
+    week_number: int | None
+    month_day: int | None
+    days: int | None
+    due_date: datetime.date | None
+    advance_days: int
+    expire_days: int
+    start_date: datetime.date
 
 
 # noinspection PyComparisonWithNone
@@ -271,45 +299,55 @@ def where(
         if isinstance(template_todo_id, str):
             qry = qry.where(db.todo.c.template_todo_id == template_todo_id)
 
-        category_by_id = {category.category_id: category for category in categories}
+        category_by_id: dict[str, domain.Category] = {category.category_id: category for category in categories}
 
-        user_by_id = {user.user_id: user for user in users}
+        user_by_id: dict[str, domain.User] = {user.user_id: user for user in users}
 
         todos: list[domain.Todo] = []
         for row in con.execute(qry).fetchall():
-            category = category_by_id.get(row.category_id, domain.TODO_CATEGORY)
+            valid_row = _validate_row(row)
+            if isinstance(valid_row, domain.Error):
+                return valid_row
 
-            user = user_by_id.get(row.user_id, domain.DEFAULT_USER)
+            category = category_by_id.get(valid_row.category_id, domain.TODO_CATEGORY)
 
-            last_completed_by = user_by_id.get(row.last_completed_by)
+            user = user_by_id.get(valid_row.user_id, domain.DEFAULT_USER)
 
-            prior_completed_by = user_by_id.get(row.prior_completed_by)
+            if valid_row.last_completed_by_user_id is None:
+                last_completed_by: domain.User | None = None
+            else:
+                last_completed_by = user_by_id.get(valid_row.last_completed_by_user_id)
+
+            if valid_row.prior_completed_by_user_id is None:
+                prior_completed_by: domain.User | None = None
+            else:
+                prior_completed_by = user_by_id.get(valid_row.prior_completed_by_user_id)
 
             todo = domain.Todo(
-                todo_id=row.todo_id,
-                template_todo_id=row.template_todo_id,
+                todo_id=valid_row.todo_id,
+                template_todo_id=valid_row.template_todo_id,
                 category=category,
                 user=user,
-                description=row.description,
+                description=valid_row.description,
                 frequency=_parse_frequency(
-                    advance_display_days=row.advance_days,
-                    days=row.days,
-                    due_date=row.due_date,
-                    expire_display_days=row.expire_days,
-                    frequency=row.frequency,
-                    month=row.month,
-                    month_day=row.month_day,
-                    start_date=row.start_date,
-                    week_day=row.week_day,
-                    week_number=row.week_number,
+                    advance_display_days=valid_row.advance_days,
+                    days=valid_row.days,
+                    due_date=valid_row.due_date,
+                    expire_display_days=valid_row.expire_days,
+                    frequency=valid_row.frequency,
+                    month=valid_row.month,
+                    month_day=valid_row.month_day,
+                    start_date=valid_row.start_date,
+                    week_day=valid_row.week_day,
+                    week_number=valid_row.week_number,
                 ),
-                note=row.note,
-                last_completed=row.last_completed,
+                note=valid_row.note,
+                last_completed=valid_row.last_completed,
                 last_completed_by=last_completed_by,
-                prior_completed=row.prior_completed,
+                prior_completed=valid_row.prior_completed,
                 prior_completed_by=prior_completed_by,
-                date_added=row.date_added,
-                date_updated=row.date_updated,
+                date_added=valid_row.date_added,
+                date_updated=valid_row.date_updated,
             )
 
             todos.append(todo)
@@ -458,3 +496,211 @@ def _parse_frequency(
         )
     else:
         raise ValueError(f"Unrecognized frequency, {frequency!r}.")
+
+
+def _validate_row(row: sa.Row[typing.Any], /) -> ValidRow | domain.Error:
+    try:
+        values: dict[str, typing.Any] = {}
+        errors: list[str] = []
+
+        if row.todo_id is None:
+            errors.append("todo_id is None.")
+        else:
+            if isinstance(row.todo_id, str):
+                values["todo_id"] = row.todo_id
+            else:
+                errors.append(f"todo_id, {row.todo_id!r}, is not a string.")
+
+        if row.user_id is None:
+            errors.append("user_id is None.")
+        else:
+            if isinstance(row.user_id, str):
+                values["user_id"] = row.user_id
+            else:
+                errors.append(f"user_id, {row.user_id!r}, is not a string.")
+
+        if row.category_id is None:
+            errors.append("category_id is None.")
+        else:
+            if isinstance(row.category_id, str):
+                values["category_id"] = row.category_id
+            else:
+                errors.append(f"category_id, {row.category_id!r}, is not a string.")
+
+        if row.description is None:
+            errors.append("description is None.")
+        else:
+            if isinstance(row.description, str):
+                values["description"] = row.description
+            else:
+                errors.append(f"description, {row.description!r}, is not a string.")
+
+        if row.frequency is None:
+            errors.append("frequency is None.")
+        else:
+            if isinstance(row.frequency, str):
+                values["frequency"] = row.frequency
+            else:
+                errors.append(f"frequency, {row.frequency!r}, is not a string.")
+
+        if row.month is None:
+            values["month"] = None
+        else:
+            if isinstance(row.month, int):
+                values["month"] = row.month
+            else:
+                errors.append(f"month, {row.month!r}, is not an int.")
+
+        if row.week_day is None:
+            values["week_day"] = None
+        else:
+            if isinstance(row.week_day, int):
+                values["week_day"] = row.week_day
+            else:
+                errors.append(f"week_day, {row.week_day!r}, is not an int.")
+
+        if row.week_number is None:
+            values["week_number"] = None
+        else:
+            if isinstance(row.week_number, int):
+                values["week_number"] = row.week_number
+            else:
+                errors.append(f"week_number, {row.week_number!r}, is not an int.")
+
+        if row.month_day is None:
+            values["month_day"] = None
+        else:
+            if isinstance(row.month_day, int):
+                values["month_day"] = row.month_day
+            else:
+                errors.append(f"month_day, {row.month_day!r}, is not an int.")
+
+        if row.days is None:
+            values["days"] = None
+        else:
+            if isinstance(row.days, int):
+                values["days"] = row.days
+            else:
+                errors.append(f"days, {row.days!r}, is not an int.")
+
+        if row.due_date is None:
+            values["due_date"] = None
+        else:
+            if isinstance(row.due_date, datetime.date):
+                values["due_date"] = row.due_date
+            else:
+                errors.append(f"due_date, {row.due_date!r}, is not a date.")
+
+        if row.note is None:
+            errors.append("note is None.")
+        else:
+            if isinstance(row.note, str):
+                values["note"] = row.note
+            else:
+                errors.append(f"note, {row.note!r}, is not a string.")
+
+        if row.template_todo_id is None:
+            values["template_todo_id"] = None
+        else:
+            if isinstance(row.template_todo_id, str):
+                values["template_todo_id"] = row.template_todo_id
+            else:
+                errors.append(f"template_todo_id, {row.template_todo_id!r}, is not a string.")
+
+        if row.last_completed is None:
+            values["last_completed"] = None
+        else:
+            if isinstance(row.last_completed, datetime.date):
+                values["last_completed"] = row.last_completed
+            else:
+                errors.append(f"last_completed, {row.last_completed!r}, is not a date.")
+
+        if row.prior_completed is None:
+            values["prior_completed"] = None
+        else:
+            if isinstance(row.prior_completed, datetime.date):
+                values["prior_completed"] = row.prior_completed
+            else:
+                errors.append(f"prior_completed, {row.prior_completed!r}, is not a date.")
+
+        if row.last_completed_by_user_id is None:
+            errors.append("last_completed_by_user_id is None.")
+        else:
+            if isinstance(row.last_completed_by_user_id, str):
+                values["last_completed_by_user_id"] = row.last_completed_by_user_id
+            else:
+                errors.append(f"last_completed_by_user_id, {row.last_completed_by_user_id!r}, is not a string.")
+
+        if row.prior_completed_by_user_id is None:
+            errors.append("prior_completed_by_user_id is None.")
+        else:
+            if isinstance(row.prior_completed_by_user_id, str):
+                values["prior_completed_by_user_id"] = row.prior_completed_by_user_id
+            else:
+                errors.append(f"prior_completed_by_user_id, {row.prior_completed_by_user_id!r}, is not a string.")
+
+        if row.date_added is None:
+            errors.append("date_added is None.")
+        else:
+            if isinstance(row.date_added, datetime.datetime):
+                values["date_added"] = row.date_added
+            else:
+                errors.append(f"date_added, {row.date_added!r}, is not a datetime.")
+
+        if row.date_updated is None:
+            values["date_updated"] = None
+        else:
+            if isinstance(row.date_updated, datetime.datetime):
+                values["date_updated"] = row.date_updated
+            else:
+                errors.append(f"date_updated, {row.date_updated!r}, is not a datetime.")
+
+        if row.advance_days is None:
+            errors.append("advance_days is None.")
+        else:
+            if isinstance(row.advance_days, int):
+                values["advance_days"] = row.advance_days
+            else:
+                errors.append(f"advance_days, {row.advance_days!r}, is not an int.")
+
+        if row.expire_days is None:
+            errors.append("expire_days is None.")
+        else:
+            if isinstance(row.expire_days, int):
+                values["expire_days"] = row.expire_days
+            else:
+                errors.append(f"expire_days, {row.expire_days!r}, is not an int.")
+
+        if row.start_date is None:
+            values["start_date"] = None
+        else:
+            if isinstance(row.start_date, datetime.date):
+                values["start_date"] = row.start_date
+            else:
+                errors.append(f"start_date, {row.start_date!r}, is not a date.")
+
+        return ValidRow(**values)
+    except Exception as e:
+        logger.error(f"{__file__}._validate_row({row=!r}) failed: {e!s}")
+
+        return domain.Error.new(str(e), row=row)
+
+
+if __name__ == "__main__":
+    eng = db.create_engine()
+    if isinstance(eng, domain.Error):
+        raise Exception(str(eng))
+
+    with eng.begin() as cn:
+        cs = where(
+            con=cn,
+            category_id=domain.Unspecified(),
+            user_id=domain.Unspecified(),
+            description_starts_with=domain.Unspecified(),
+            template_todo_id=domain.Unspecified(),
+        )
+        if isinstance(cs, domain.Error):
+            raise Exception(str(cs))
+
+        for c in cs:
+            print(c)

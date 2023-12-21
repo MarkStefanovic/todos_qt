@@ -44,7 +44,7 @@ class ToggleCompleted:
 
 
 class TodoDashRequests(qtc.QObject):
-    add = qtc.pyqtSignal(AddTodo)
+    add = qtc.pyqtSignal()
     delete = qtc.pyqtSignal(DeleteTodo)
     edit = qtc.pyqtSignal(EditTodo)
     refresh = qtc.pyqtSignal(RefreshRequest)

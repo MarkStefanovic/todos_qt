@@ -49,8 +49,6 @@ class UserController(qtc.QObject):
                 self._set_status(str(users))
                 return None
 
-            logger.info(f"{users=!r}")
-
             self.states.emit(
                 UserState(
                     dash_state=dash.UserDashState(
