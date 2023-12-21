@@ -34,6 +34,8 @@ class CategorySelectorWidget(qtw.QWidget):
         layout.addWidget(self._view)
         self.setLayout(layout)
 
+        self.setFixedSize(self._view.size())
+
         self._view.item_selected.connect(self.item_selected)
 
     def refresh(self) -> None | domain.Error:

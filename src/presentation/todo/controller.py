@@ -185,20 +185,17 @@ class TodoController(qtc.QObject):
 
             preexisting_todo = self._todo_service.get(todo_id=request.todo.todo_id)
             if isinstance(preexisting_todo, domain.Error):
-                logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {preexisting_todo!s}")
                 self._set_status(str(preexisting_todo))
                 return None
 
             if preexisting_todo:
                 update_result = self._todo_service.update(todo=request.todo)
                 if isinstance(update_result, domain.Error):
-                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {update_result!s}")
                     self._set_status(str(update_result))
                     return None
 
                 updated_todo = self._todo_service.get(todo_id=request.todo.todo_id)
                 if isinstance(updated_todo, domain.Error):
-                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {update_result!s}")
                     self._set_status(str(update_result))
                     return None
 
@@ -214,7 +211,8 @@ class TodoController(qtc.QObject):
                         dash_state=dash.TodoDashState(
                             updated_todo=updated_todo,
                             status=f"{request.todo.description} updated.",
-                        )
+                        ),
+                        dash_active=True,
                     )
                 )
             else:
@@ -224,7 +222,6 @@ class TodoController(qtc.QObject):
 
                 todo = self._todo_service.get(todo_id=request.todo.todo_id)
                 if isinstance(todo, domain.Error):
-                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {todo!s}")
                     return None
 
                 if todo is None:
@@ -239,7 +236,8 @@ class TodoController(qtc.QObject):
                         dash_state=dash.TodoDashState(
                             added_todo=todo,
                             status=f"{request.todo.description} added.",
-                        )
+                        ),
+                        dash_active=True,
                     )
                 )
         except Exception as e:

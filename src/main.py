@@ -1,8 +1,12 @@
+"""
+https://github.com/5yutan5/PyQtDarkTheme
+https://imagecolorpicker.com/color-code/00fbff
+"""
 import sys
 import types
 import typing
 
-import qdarktheme
+import qdarktheme  # noqa: F401
 
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
@@ -10,28 +14,30 @@ from loguru import logger
 
 from src import adapter, domain, presentation, service
 from src.adapter import config
-from src.presentation.shared import font
 
 __all__ = ("main",)
+
+from src.presentation.shared import font
 
 
 def main() -> None | domain.Error:
     try:
         app = qtw.QApplication(sys.argv)
 
-        # qdarktheme.enable_hi_dpi()
+        qdarktheme.enable_hi_dpi()
         qdarktheme.setup_theme(
             "dark",  # auto, light, or dark
             additional_qss="""
                 QHeaderView { font-weight: bold; }
-                QPushButton { font-weight: bold; }
+                QPushButton { font-weight: bold; border: 1px solid #00a7aa; }
                 QTabBar { font-weight: bold; }
                 QTableView::item { padding: 4px; }
                 QHeaderView::section::horizontal { padding: 4px; }
-                QToolTip { font-weight: bold; color: #00fbff; background-color: #1c1c1c; border: none; }
+                QToolTip { color: #00fbff; background-color: #1c1c1c; border: none; }
+                QTableView::item::hover { background-color: #005455; }
             """,
             custom_colors={"primary": "#00fbff"},
-        )  # https://github.com/5yutan5/PyQtDarkTheme
+        )
 
         app.setFont(font.DEFAULT_FONT)
 

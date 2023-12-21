@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets as qtw
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import icons, widgets, font
+from src.presentation.shared import icons, widgets
 from src.presentation.shared.widgets import table_view, popup
 from src.presentation.user.dash import requests
 from src.presentation.user.dash.state import UserDashState
@@ -28,12 +28,14 @@ class UserDash(qtw.QWidget):
         self._requests: typing.Final[requests.UserDashRequests] = user_requests
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
-        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setFixedWidth(font.BOLD_FONT_METRICS.width("    Refresh    "))
+        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
+        self._refresh_btn.setFixedWidth(60)
+        self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
-        self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.width("    Add    "))
+        self._add_btn = qtw.QPushButton(add_btn_icon, "")
+        self._add_btn.setFixedWidth(60)
+        self._add_btn.setToolTip("Add New User")
 
         toolbar = qtw.QHBoxLayout()
         toolbar.addWidget(self._refresh_btn)
@@ -68,14 +70,16 @@ class UserDash(qtw.QWidget):
                 ),
                 table_view.button(
                     name="edit",
-                    button_text="Edit",
-                    width=60,
+                    button_text="",
+                    icon=icons.edit_btn_icon(parent=self),
+                    width=40,
                     enabled_when=lambda user: self._enabled_when(user=user),
                 ),
                 table_view.button(
                     name="delete",
-                    button_text="Delete",
-                    width=80,
+                    button_text="",
+                    icon=icons.delete_btn_icon(parent=self),
+                    width=40,
                     enabled_when=lambda user: self._enabled_when(user=user),
                 ),
             ),
@@ -151,7 +155,7 @@ class UserDash(qtw.QWidget):
                     current_user=self._current_user,
                     user=event.item,
                 ):
-                    self._requests.delete.emit(requests.EditRequest(user=event.item))
+                    self._requests.edit.emit(requests.EditRequest(user=event.item))
             case _:
                 logger.error(
                     f"{self.__class__.__name__}._on_table_btn_clicked({event=!r}): unrecognized button attr name, "

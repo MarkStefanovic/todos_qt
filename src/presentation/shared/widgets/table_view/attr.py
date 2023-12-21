@@ -31,6 +31,7 @@ class Attr(typing.Generic[Item, Value]):
         "enabled_selector",
         "value_selector",
         "color_selector",
+        "icon",
         "width",
     )
 
@@ -45,6 +46,7 @@ class Attr(typing.Generic[Item, Value]):
         name: str,
         value_selector: typing.Callable[[Item], Value] | None,
         color_selector: typing.Callable[[Item], qtg.QColor | None] | None,
+        icon: qtg.QIcon | None,
         width: int | None,
     ):
         self.alignment: typing.Final[typing.Literal["center", "left", "right"]] = alignment
@@ -55,6 +57,7 @@ class Attr(typing.Generic[Item, Value]):
         self.name: typing.Final[str] = name
         self.value_selector: typing.Final[typing.Callable[[Item], Value] | None] = value_selector
         self.color_selector: typing.Final[typing.Callable[[Item], qtg.QColor | None] | None] = color_selector
+        self.icon: typing.Final[qtg.QIcon | None] = icon
         self.width: typing.Final[int | None] = width
 
     def __eq__(self, other: object) -> bool:
@@ -74,7 +77,6 @@ class Attr(typing.Generic[Item, Value]):
             f"  enabled_selector: {self.enabled_selector!r}"
             f"  key: {self.key!r}"
             f"  name: {self.name!r}"
-            f"  value_selector: {self.value_selector!r}"
             f"  width: {self.width!r}"
             "]"
         )
@@ -99,6 +101,7 @@ def text(
         enabled_when=None,
         value_selector=value_selector,
         color_selector=color_selector,
+        icon=None,
     )
 
 
@@ -109,6 +112,7 @@ def button(
     enabled_when: typing.Callable[[Item], bool] | None = None,
     text_selector: typing.Callable[[Item], str] | None = None,
     color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
+    icon: qtg.QIcon | None = None,
 ) -> Attr[Item, str]:
     return Attr(
         name=name,
@@ -120,6 +124,7 @@ def button(
         enabled_when=enabled_when,
         value_selector=text_selector,
         color_selector=color_selector,
+        icon=icon,
     )
 
 
@@ -140,6 +145,7 @@ def timestamp(
         enabled_when=None,
         value_selector=value_selector,
         color_selector=color_selector,
+        icon=None,
     )
 
 
@@ -160,6 +166,7 @@ def date(
         enabled_when=None,
         value_selector=value_selector,
         color_selector=color_selector,
+        icon=None,
     )
 
 
@@ -182,4 +189,5 @@ def integer(
         enabled_when=None,
         value_selector=value_selector,
         color_selector=color_selector,
+        icon=None,
     )

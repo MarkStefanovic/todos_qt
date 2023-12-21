@@ -1,3 +1,7 @@
+"""
+qtawesome repo: https://github.com/spyder-ide/qtawesome
+"""
+
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 
@@ -8,6 +12,8 @@ __all__ = (
     "add_btn_icon",
     "bold_btn_icon",
     "clear_bold_btn_icon",
+    "delete_btn_icon",
+    "edit_btn_icon",
     "refresh_btn_icon",
     "highlight_btn_icon",
     "clear_highlight_btn_icon",
@@ -75,6 +81,26 @@ def clear_highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
         return qta.icon(icon_name="mdi.format-color-marker-cancel", color=parent.palette().text().color())
     except:  # noqa: E722
         return parent.style().standardIcon(qtw.QStyle.SP_DialogCloseButton)
+
+
+def delete_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="fa5s.fa-trash-alt", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_DialogDiscardButton)
+
+
+def edit_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
+    # noinspection PyBroadException
+    try:
+        import qtawesome as qta
+
+        return qta.icon(icon_name="fa5s.fa-edit", color=parent.palette().text().color())
+    except:  # noqa: E722
+        return parent.style().standardIcon(qtw.QStyle.SP_FileDialogContentsView)
 
 
 def highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:

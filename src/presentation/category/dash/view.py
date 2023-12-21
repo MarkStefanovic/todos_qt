@@ -28,12 +28,14 @@ class CategoryDash(qtw.QWidget):
         self._current_user: typing.Final[domain.User] = current_user
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
-        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setMaximumWidth(100)
+        self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
+        self._refresh_btn.setFixedWidth(60)
+        self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
-        self._add_btn = qtw.QPushButton(add_btn_icon, "Add")
-        self._add_btn.setMaximumWidth(100)
+        self._add_btn = qtw.QPushButton(add_btn_icon, "")
+        self._add_btn.setFixedWidth(60)
+        self._add_btn.setToolTip("Add New Category")
 
         toolbar_layout = qtw.QHBoxLayout()
         toolbar_layout.addWidget(self._refresh_btn)
@@ -50,12 +52,12 @@ class CategoryDash(qtw.QWidget):
                 table_view.text(
                     display_name="Name",
                     name="name",
-                    width=200,
+                    width=font.DEFAULT_FONT_METRICS.width(" " * 60),
                 ),
                 table_view.text(
                     display_name="Note",
                     name="note",
-                    width=400,
+                    width=font.DEFAULT_FONT_METRICS.width(" " * 120),
                 ),
                 table_view.date(
                     name="date_added",
@@ -67,8 +69,9 @@ class CategoryDash(qtw.QWidget):
                 ),
                 table_view.button(
                     name="edit",
-                    button_text="Edit",
-                    width=font.BOLD_FONT_METRICS.width(" Edit "),
+                    button_text="",
+                    icon=icons.edit_btn_icon(parent=self),
+                    width=40,
                     enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,
@@ -76,8 +79,9 @@ class CategoryDash(qtw.QWidget):
                 ),
                 table_view.button(
                     name="delete",
-                    button_text="Delete",
-                    width=font.BOLD_FONT_METRICS.width(" Delete "),
+                    button_text="",
+                    icon=icons.delete_btn_icon(parent=self),
+                    width=40,
                     enabled_when=lambda category: domain.permissions.user_can_edit_category(
                         user=self._current_user,
                         category=category,

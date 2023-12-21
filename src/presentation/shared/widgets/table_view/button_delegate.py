@@ -12,6 +12,8 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 __all__ = ("ButtonDelegate",)
 
+from src.presentation.shared import font
+
 
 class ButtonDelegate(qtw.QStyledItemDelegate):
     clicked = qtc.pyqtSignal(qtc.QModelIndex)
@@ -22,16 +24,43 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         text: str,
         button_text_selector: typing.Callable[[qtc.QModelIndex], str] | None,
         enabled_selector: typing.Callable[[qtc.QModelIndex], bool] | None,
+        icon: qtg.QIcon | None,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
         self._text: typing.Final[str] = text
+        self._icon: typing.Final[qtg.QIcon | None] = icon
         self._button_text_selector: typing.Final[typing.Callable[[qtc.QModelIndex], str] | None] = button_text_selector
         self._enabled_selector: typing.Final[typing.Callable[[qtc.QModelIndex], bool] | None] = enabled_selector
 
         self._btn = qtw.QPushButton(self._text)
+
         self._btn.setFocusPolicy(qtc.Qt.NoFocus)
+
+    # def editorEvent(
+    #     self,
+    #     event: qtc.QEvent,
+    #     model: qtc.QAbstractItemModel,
+    #     option: qtw.QStyleOptionViewItem,
+    #     index: qtc.QModelIndex,
+    # ) -> bool:
+    #     # if event.type() == qtc.QEvent.MouseMove:
+    #     #     if option.rect.top() < event.y() < option.rect.top() + self._height:
+    #     #         print("mouse_over")
+    #
+    #     if event is not None:
+    #         if event.type() == qtc.QEvent.MouseButtonRelease:
+    #             if self._button_is_enabled(index=index):
+    #                 button_height = min(option.fontMetrics.height() + 8, option.rect.height())
+    #
+    #                 y_coord: int = event.y()  # type: ignore
+    #                 if option.rect.top() < y_coord < option.rect.top() + button_height:
+    #                     self._on_click(index=index)
+    #
+    #             return True
+    #
+    #     return super().editorEvent(event, model, option, index)
 
     def editorEvent(
         self,
@@ -40,18 +69,10 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         option: qtw.QStyleOptionViewItem,
         index: qtc.QModelIndex,
     ) -> bool:
-        # if event.type() == qtc.QEvent.MouseMove:
-        #     if option.rect.top() < event.y() < option.rect.top() + self._height:
-        #         print("mouse_over")
-
         if event is not None:
             if event.type() == qtc.QEvent.MouseButtonRelease:
                 if self._button_is_enabled(index=index):
-                    button_height = min(option.fontMetrics.height() + 8, option.rect.height())
-
-                    y_coord: int = event.y()  # type: ignore
-                    if option.rect.top() < y_coord < option.rect.top() + button_height:
-                        self._on_click(index=index)
+                    self._on_click(index=index)
 
                 return True
 
@@ -68,13 +89,17 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         btn = qtw.QStyleOptionButton()
 
-        if self._button_text_selector is None:
-            btn_text = self._text
+        if self._icon:
+            btn.icon = self._icon
+            btn.iconSize = qtc.QSize(font.BOLD_FONT_METRICS.height(), font.BOLD_FONT_METRICS.height())
         else:
-            # noinspection PyArgumentList
-            btn_text = self._button_text_selector(index=index)  # type: ignore
+            if self._button_text_selector is None:
+                btn_text = self._text
+            else:
+                # noinspection PyArgumentList
+                btn_text = self._button_text_selector(index=index)  # type: ignore
 
-        btn.text = btn_text
+            btn.text = btn_text
 
         # btn.features = qtw.QStyleOptionButton.DefaultButton
         btn.rect = qtc.QRect(
@@ -83,11 +108,6 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
             option.rect.width(),
             min(option.fontMetrics.height() + 8, option.rect.height()),
         )
-
-        # if option.state & qtw.QStyle.State_MouseOver:
-        #     btn.state = qtw.QStyle.State_MouseOver
-        # else:
-        #     btn.state = qtw.QStyle.State_Enabled
 
         if option.state & qtw.QStyle.State_MouseOver:
             btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken

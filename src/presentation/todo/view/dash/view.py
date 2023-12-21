@@ -34,13 +34,14 @@ class TodoDashView(qtw.QWidget):
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
         # self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setMaximumWidth(100)
+        self._refresh_btn.setFixedWidth(60)
         # self._refresh_btn.setDefault(True)
-        self._refresh_btn.setAutoFillBackground(True)
+        self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "")
-        self._add_btn.setMaximumWidth(100)
+        self._add_btn.setFixedWidth(60)
+        self._add_btn.setToolTip("Add New Todo")
 
         due_lbl = qtw.QLabel("Due?")
         due_lbl.font().setBold(True)
@@ -126,7 +127,6 @@ class TodoDashView(qtw.QWidget):
                     name="note",
                     display_name="Note",
                     width=200,
-                    # rich_text=True,
                 ),
                 table_view.date(
                     name="last_completed",
@@ -151,8 +151,9 @@ class TodoDashView(qtw.QWidget):
                 ),
                 table_view.button(
                     name="edit",
-                    button_text="Edit",
-                    width=font.BOLD_FONT_METRICS.width("  Edit  "),
+                    button_text="",
+                    icon=icons.edit_btn_icon(parent=self),
+                    width=40,  # font.BOLD_FONT_METRICS.width("  Edit  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -160,8 +161,9 @@ class TodoDashView(qtw.QWidget):
                 ),
                 table_view.button(
                     name="delete",
-                    button_text="Delete",
-                    width=font.BOLD_FONT_METRICS.width("  Delete  "),
+                    button_text="",
+                    icon=icons.delete_btn_icon(parent=self),
+                    width=40,  # font.BOLD_FONT_METRICS.width("  Delete  "),
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -229,7 +231,13 @@ class TodoDashView(qtw.QWidget):
                 self._table.set_items(state.todos)
 
             if state.updated_todo:
-                self._table.update_item(state.updated_todo)
+                if self._due_chk.isChecked():
+                    if state.updated_todo.should_display():
+                        self._table.update_item(state.updated_todo)
+                    else:
+                        self._table.delete_item(key=state.updated_todo.todo_id)
+                else:
+                    self._table.update_item(state.updated_todo)
 
             if isinstance(state.selected_todo, domain.Todo):
                 self._table.select_item_by_key(key=state.selected_todo.todo_id)

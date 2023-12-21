@@ -23,4 +23,4 @@ dependencies:
     - ruff
     - ruff-lsp
     - qtawesome
-#    - "pyqtdarktheme>=2.1.0"
+#    - "qdarkstyle==3.2.3"

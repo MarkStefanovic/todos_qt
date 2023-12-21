@@ -3,6 +3,7 @@ import datetime
 import typing
 
 import sqlalchemy as sa
+from loguru import logger
 
 from src import adapter, domain
 
@@ -24,6 +25,8 @@ class TodoService(domain.TodoService):
             with self._engine.begin() as con:
                 return adapter.todo_repo.add(con=con, todo=todo)
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.add({todo=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo=todo)
 
     # def add_default_holidays_for_all_users(self) -> None | domain.Error:
@@ -76,6 +79,8 @@ class TodoService(domain.TodoService):
             with self._engine.begin() as con:
                 return adapter.todo_repo.delete(con=con, todo_id=todo_id)
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.delete({todo_id=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo_id=todo_id)
 
     def get(self, *, todo_id: str) -> domain.Todo | None | domain.Error:
@@ -83,6 +88,8 @@ class TodoService(domain.TodoService):
             with self._engine.begin() as con:
                 return adapter.todo_repo.get(con=con, todo_id=todo_id)
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get({todo_id=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo_id=todo_id)
 
     def get_by_template_id_and_user_id(
@@ -112,6 +119,8 @@ class TodoService(domain.TodoService):
                     None,
                 )
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.get({template_todo_id=!r}, {user_id=!r}) failed: {e!s}")
+
             return domain.Error.new(
                 str(e),
                 template_todo_id=template_todo_id,
@@ -152,6 +161,8 @@ class TodoService(domain.TodoService):
 
             return None
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.mark_complete({todo_id=!r}, {user=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo_id=todo_id, user=user)
 
     def where(
@@ -189,6 +200,11 @@ class TodoService(domain.TodoService):
                 ),
             )
         except Exception as e:
+            logger.error(
+                f"{self.__class__.__name__}.where({due_filter=!r}, {description_like=!r}, {category_id_filter=!r}, "
+                f"{user_id_filter=!r}) failed: {e!s}"
+            )
+
             return domain.Error.new(
                 str(e),
                 due_filter=due_filter,
@@ -223,6 +239,8 @@ class TodoService(domain.TodoService):
 
             return None
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.mark_incomplete({todo_id=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo_id=todo_id)
 
     def update(self, *, todo: domain.Todo) -> None | domain.Error:
@@ -237,6 +255,8 @@ class TodoService(domain.TodoService):
                     todo=updated_todo,
                 )
         except Exception as e:
+            logger.error(f"{self.__class__.__name__}.update({todo=!r}) failed: {e!s}")
+
             return domain.Error.new(str(e), todo=todo)
 
 

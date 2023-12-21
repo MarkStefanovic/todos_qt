@@ -81,13 +81,17 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
     def data(
         self, index: qtc.QModelIndex, role: int = qtc.Qt.DisplayRole
-    ) -> qtc.QVariant | qtc.Qt.Alignment | qtg.QBrush | qtg.QFont:
+    ) -> qtc.QVariant | qtc.Qt.Alignment | qtg.QBrush | qtg.QFont | qtg.QIcon:
         if not index.isValid():
             return qtc.QVariant()
 
         attr = self._attr_by_col_num[index.column()]
 
         if attr.data_type == "button":
+            if role == qtc.Qt.DecorationRole:
+                if attr.icon is not None:
+                    return attr.icon
+
             return qtc.QVariant()
 
         if role == qtc.Qt.TextAlignmentRole:
@@ -241,11 +245,18 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # noinspection PyUnresolvedReferences
         self.layoutAboutToBeChanged.emit()
 
-        self._items = sorted(
-            self._items,
-            key=lambda x: ((v := getattr(x, attr.name)) is None, v),
-            reverse=(order == qtc.Qt.DescendingOrder),
-        )
+        if attr.value_selector:
+            self._items = sorted(
+                self._items,
+                key=lambda item: ((v := attr.value_selector(item)) is None, v),
+                reverse=(order == qtc.Qt.DescendingOrder),
+            )
+        else:
+            self._items = sorted(
+                self._items,
+                key=lambda x: ((v := getattr(x, attr.name)) is None, v),
+                reverse=(order == qtc.Qt.DescendingOrder),
+            )
 
         self._reindex_rows()
 

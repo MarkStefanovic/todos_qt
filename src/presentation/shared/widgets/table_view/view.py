@@ -87,6 +87,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                     text=attr.display_name,
                     button_text_selector=btn_txt_selector,
                     enabled_selector=btn_enabled_selector,
+                    icon=attr.icon,
                     parent=self,
                 )
 
@@ -244,7 +245,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             return
 
         model_data = self._view_model.data(key_index)
-        if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont)):
+        if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont, qtg.QIcon)):
             return
 
         key = model_data.value()

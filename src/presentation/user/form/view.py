@@ -26,8 +26,8 @@ class UserForm(qtw.QWidget):
         self._requests: typing.Final[requests.UserFormRequests] = form_requests
 
         back_btn_icon = icons.back_btn_icon(parent=self)
-        self._back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self._back_btn.setMaximumWidth(100)
+        self._back_btn = qtw.QPushButton(back_btn_icon, "")
+        self._back_btn.setFixedWidth(60)
 
         display_name_lbl = qtw.QLabel("Name")
         display_name_lbl.font().setBold(True)
@@ -39,19 +39,18 @@ class UserForm(qtw.QWidget):
         self._username_txt = qtw.QLineEdit()
         self._username_txt.setMaximumWidth(400)
 
-        form_layout = qtw.QFormLayout()
-        form_layout.addRow(display_name_lbl, self._display_name_txt)
-        form_layout.addRow(username_lbl, self._username_txt)
-
         save_btn_icon = icons.save_btn_icon(parent=self)
-        self._save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self._save_btn.setMaximumWidth(100)
+        self._save_btn = qtw.QPushButton(save_btn_icon, "")
+        self._save_btn.setFixedWidth(60)
 
-        layout = qtw.QVBoxLayout()
-        layout.addWidget(self._back_btn, alignment=qtc.Qt.AlignLeft)
-        layout.addLayout(form_layout)
-        layout.addWidget(self._save_btn, alignment=qtc.Qt.AlignRight)
-
+        layout = qtw.QGridLayout()
+        layout.addWidget(self._back_btn, 0, 0, alignment=qtc.Qt.AlignLeft)
+        layout.addWidget(display_name_lbl, 1, 0)
+        layout.addWidget(self._display_name_txt, 1, 1)
+        layout.addWidget(username_lbl, 2, 0)
+        layout.addWidget(self._username_txt, 2, 1)
+        layout.addWidget(self._save_btn, 3, 1, alignment=qtc.Qt.AlignRight)
+        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding), 4, 2)
         self.setLayout(layout)
 
         self._user_id = ""

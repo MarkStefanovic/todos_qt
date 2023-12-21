@@ -35,6 +35,8 @@ class UserSelectorWidget(qtw.QWidget):
         layout.addWidget(self._view)
         self.setLayout(layout)
 
+        self.setFixedSize(self._view.size())
+
     def get_selected_item(self) -> domain.User:
         return self._view.get_selected_item()
 

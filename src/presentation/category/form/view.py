@@ -24,36 +24,38 @@ class CategoryForm(qtw.QWidget):
         self._form_requests = form_requests
 
         back_btn_icon = icons.back_btn_icon(parent=self)
-        self.back_btn = qtw.QPushButton(back_btn_icon, "Back")
-        self.back_btn.setMaximumWidth(100)
+        self.back_btn = qtw.QPushButton(back_btn_icon, "")
+        self.back_btn.setFixedWidth(60)
 
         name_lbl = qtw.QLabel("Name")
         name_lbl.font().setBold(True)
+        # name_lbl.setFixedWidth(font.BOLD_FONT_METRICS.width("  Name  "))
         self._name_txt = qtw.QLineEdit()
-        self._name_txt.setMaximumWidth(400)
+        self._name_txt.setMaximumWidth(800)
+
+        save_btn_icon = icons.save_btn_icon(parent=self)
+        self.save_btn = qtw.QPushButton(save_btn_icon, "")
+        self.save_btn.setFixedWidth(60)
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.font().setBold(True)
         self._note_txt = qtw.QTextEdit()
+        self._note_txt.setMaximumWidth(800)
+        self._note_txt.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() * 8 + 12)
 
-        form_layout = qtw.QFormLayout()
-        form_layout.addRow(name_lbl, self._name_txt)
-        form_layout.addRow(note_lbl, self._note_txt)
+        layout = qtw.QGridLayout()
+        layout.addWidget(self.back_btn, 0, 0, alignment=qtc.Qt.AlignLeft)
+        layout.addWidget(name_lbl, 1, 0)
+        layout.addWidget(self._name_txt, 1, 1)
+        layout.addWidget(note_lbl, 2, 0)
+        layout.addWidget(self._note_txt, 2, 1)
+        layout.addWidget(self.save_btn, 3, 1, alignment=qtc.Qt.AlignRight)
+        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding), 4, 2)
+        self.setLayout(layout)
 
         self._category_id: str = ""
         self._date_added: datetime.datetime = datetime.datetime.now()
         self._date_updated: datetime.datetime | None = None
-
-        save_btn_icon = icons.save_btn_icon(parent=self)
-        self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        self.save_btn.setFixedWidth(font.BOLD_FONT_METRICS.width(" Save "))
-
-        layout = qtw.QVBoxLayout()
-        layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)
-        layout.addLayout(form_layout)
-        layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignRight)
-
-        self.setLayout(layout)
 
         # noinspection PyUnresolvedReferences
         self.back_btn.clicked.connect(self._on_back_btn_clicked)
