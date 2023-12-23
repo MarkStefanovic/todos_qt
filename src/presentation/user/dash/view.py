@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets as qtw
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import icons, widgets
+from src.presentation.shared import icons, widgets, font
 from src.presentation.shared.widgets import table_view, popup
 from src.presentation.user.dash import requests
 from src.presentation.user.dash.state import UserDashState
@@ -29,12 +29,12 @@ class UserDash(qtw.QWidget):
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
-        self._refresh_btn.setFixedWidth(60)
+        self._refresh_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "")
-        self._add_btn.setFixedWidth(60)
+        self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         self._add_btn.setToolTip("Add New User")
 
         toolbar = qtw.QHBoxLayout()

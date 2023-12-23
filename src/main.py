@@ -30,7 +30,7 @@ def main() -> None | domain.Error:
             "dark",  # auto, light, or dark
             additional_qss="""
                 QHeaderView { font-weight: bold; }
-                QPushButton { font-weight: bold; border: 1px solid #00a7aa; }
+                QPushButton { font-weight: bold; border: 1px solid #00a7aa; background-color: none; }
                 QTabBar { font-weight: bold; }
                 QTableView:item { padding: 4px; }
                 QHeaderView:section:horizontal { padding: 4px; }

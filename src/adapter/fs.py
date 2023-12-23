@@ -28,7 +28,9 @@ def root_dir() -> pathlib.Path:
 @functools.lru_cache
 def assets_folder() -> pathlib.Path:
     folder = root_dir() / "assets"
+
     assert folder.exists(), f"{folder.resolve()!s} does not exist."
+
     return folder
 
 

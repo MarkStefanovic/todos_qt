@@ -115,17 +115,17 @@ class TodoFormView(qtw.QWidget):
 
         back_btn_icon = icons.back_btn_icon(parent=self)
         self.back_btn = qtw.QPushButton(back_btn_icon, "")
-        self.back_btn.setMinimumWidth(60)
+        self.back_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
         self.back_btn.setToolTip("Back to Dashboard")
         # self.back_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("   Back   "))
 
         save_btn_icon = icons.save_btn_icon(parent=self)
         self.save_btn = qtw.QPushButton(save_btn_icon, "")
-        self.save_btn.setMinimumWidth(60)
+        self.save_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
         self.save_btn.setToolTip("Save")
         # self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         # self.save_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("     Save     "))
-        self.save_btn.setDefault(True)
+        # self.save_btn.setDefault(True)
 
         main_layout = qtw.QVBoxLayout()
         main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)

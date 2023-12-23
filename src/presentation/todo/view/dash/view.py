@@ -34,13 +34,13 @@ class TodoDashView(qtw.QWidget):
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
         # self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "Refresh")
-        self._refresh_btn.setFixedWidth(60)
+        self._refresh_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         # self._refresh_btn.setDefault(True)
         self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "")
-        self._add_btn.setFixedWidth(60)
+        self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         self._add_btn.setToolTip("Add New Todo")
 
         due_lbl = qtw.QLabel("Due?")
@@ -100,7 +100,7 @@ class TodoDashView(qtw.QWidget):
                 table_view.integer(
                     name="days",
                     display_name="Days",
-                    width=font.BOLD_FONT_METRICS.width(" 999 "),
+                    width=font.BOLD_FONT_METRICS.width("  Days  "),
                     value_selector=lambda todo: todo.days(),
                     color_selector=lambda todo: _days_color_selector(todo.days()),
                 ),

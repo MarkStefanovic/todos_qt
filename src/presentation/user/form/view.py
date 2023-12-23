@@ -1,13 +1,12 @@
 import datetime
 import typing
 
-
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
-from src.presentation.shared import icons
+from src.presentation.shared import icons, font
 from src.presentation.user.form import requests
 from src.presentation.user.form.state import UserFormState
 
@@ -27,7 +26,7 @@ class UserForm(qtw.QWidget):
 
         back_btn_icon = icons.back_btn_icon(parent=self)
         self._back_btn = qtw.QPushButton(back_btn_icon, "")
-        self._back_btn.setFixedWidth(60)
+        self._back_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         display_name_lbl = qtw.QLabel("Name")
         display_name_lbl.font().setBold(True)
@@ -41,7 +40,7 @@ class UserForm(qtw.QWidget):
 
         save_btn_icon = icons.save_btn_icon(parent=self)
         self._save_btn = qtw.QPushButton(save_btn_icon, "")
-        self._save_btn.setFixedWidth(60)
+        self._save_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         layout = qtw.QGridLayout()
         layout.addWidget(self._back_btn, 0, 0, alignment=qtc.Qt.AlignLeft)

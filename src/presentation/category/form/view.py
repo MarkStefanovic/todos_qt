@@ -25,7 +25,7 @@ class CategoryForm(qtw.QWidget):
 
         back_btn_icon = icons.back_btn_icon(parent=self)
         self.back_btn = qtw.QPushButton(back_btn_icon, "")
-        self.back_btn.setFixedWidth(60)
+        self.back_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         name_lbl = qtw.QLabel("Name")
         name_lbl.font().setBold(True)
@@ -35,7 +35,7 @@ class CategoryForm(qtw.QWidget):
 
         save_btn_icon = icons.save_btn_icon(parent=self)
         self.save_btn = qtw.QPushButton(save_btn_icon, "")
-        self.save_btn.setFixedWidth(60)
+        self.save_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         note_lbl = qtw.QLabel("Note")
         note_lbl.font().setBold(True)

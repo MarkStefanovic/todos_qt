@@ -16,11 +16,11 @@ dependencies:
   - pyinstaller
   - python-dateutil
   - psycopg2-binary
+  - qtawesome
   - pip
   - pip:
     - pyqt5-stubs
     - pip-audit
     - ruff
     - ruff-lsp
-    - qtawesome
 #    - "qdarkstyle==3.2.3"

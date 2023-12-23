@@ -29,12 +29,12 @@ class CategoryDash(qtw.QWidget):
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
-        self._refresh_btn.setFixedWidth(60)
+        self._refresh_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         self._refresh_btn.setToolTip("Refresh")
 
         add_btn_icon = icons.add_btn_icon(parent=self)
         self._add_btn = qtw.QPushButton(add_btn_icon, "")
-        self._add_btn.setFixedWidth(60)
+        self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
         self._add_btn.setToolTip("Add New Category")
 
         toolbar_layout = qtw.QHBoxLayout()
