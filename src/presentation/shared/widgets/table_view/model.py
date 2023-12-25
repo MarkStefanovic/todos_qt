@@ -41,7 +41,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
         self._items: list[Item] = []
         self._row_num_by_key: dict[str, int] = {}
-        self._highlighted_rows: set[str] = set()
+        self._highlighted_rows: set[int] = set()
 
     @property
     def items(self) -> list[Item]:
@@ -53,16 +53,15 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         self._reindex_rows()
         self.endInsertRows()
 
-    def clear_highlight(self, *keys: str) -> None:
+    def clear_highlight(self, *rows: int) -> None:
         last_col = len(self._column_header)
-        for key in keys:
-            row_num = self._row_num_by_key[key]
+        for row_num in rows:
             self.dataChanged.emit(
                 self.index(row_num, 0),
                 self.index(row_num, last_col),
                 [qtc.Qt.DisplayRole],
             )
-            self._highlighted_rows.remove(key)
+            self._highlighted_rows.remove(row_num)
 
     def clear_highlights(self) -> None:
         self.clear_highlight(*self._highlighted_rows.copy())
@@ -146,10 +145,10 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # return fonts.NORMAL
 
         if role == qtc.Qt.ForegroundRole:
-            if index.row() in self._highlighted_rows:
-                return qtg.QBrush(qtc.Qt.yellow)
-
-            if attr.color_selector is not None:
+            if attr.color_selector is None:
+                if index.row() in self._highlighted_rows:
+                    return qtg.QBrush(qtc.Qt.yellow)
+            else:
                 item = self._items[index.row()]
 
                 if color := attr.color_selector(item):
@@ -202,7 +201,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         last_col = len(self._column_header)
         for key in keys:
             row_num = self._row_num_by_key[key]
-            self._highlighted_rows.add(key)
+            self._highlighted_rows.add(row_num)
             self.dataChanged.emit(
                 self.index(row_num, 0),
                 self.index(row_num, last_col),

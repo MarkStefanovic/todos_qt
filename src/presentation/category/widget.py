@@ -36,7 +36,7 @@ class CategoryWidget(qtw.QWidget):
             category_service=category_service,
             dash_requests=self._dash_requests,
             form_requests=self._form_requests,
-            parent=self,
+            parent=None,
         )
 
         self._controller.moveToThread(self._controller_thread)

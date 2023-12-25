@@ -34,10 +34,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             color: cyan;
             border: none;
         }
-        QMainWindow { border: none; }
-        QStatusBar { border: none; }
-        QHeaderView { border: none; }
-        QTableView { border: none; }
+        QHeaderView, QMainWindow, QStatusBar, QTableView { border: none; }
         QTableView:item {
             border: 0px;
             padding: 4px;

@@ -130,6 +130,9 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         # display at most 5 lines
         self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
 
+        # self.setSelectionBehavior(qtw.QTableView.SelectRows)
+        # self.setSelectionMode(qtw.QTableView.SelectionMode.ExtendedSelection)
+
         # noinspection PyUnresolvedReferences
         self.clicked.connect(self._on_click)
         # noinspection PyUnresolvedReferences
@@ -251,18 +254,17 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 else:
                     if attr.enabled_selector(item):
                         self.button_clicked.emit(ButtonClickedEvent(attr=attr, item=item))
-        # else:
-        #     print(f"highlight row, {index.row()}")
-        #     key_index = self._view_model.index(index.row(), self._key_col)
-        #
-        #     model_data = self._view_model.data(key_index)
-        #     if isinstance(model_data, (qtc.Qt.Alignment, qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
-        #         return
-        #
-        #     key = model_data.value()
-        #
-        #     self._view_model.clear_highlights()
-        #     self._view_model.highlight_row(str(key))
+        else:
+            key_index = self._view_model.index(index.row(), self._key_col)
+
+            model_data = self._view_model.data(key_index)
+            if isinstance(model_data, (qtc.Qt.Alignment, qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+                return
+
+            key = model_data.value()
+
+            self._view_model.clear_highlights()
+            self._view_model.highlight_row(str(key))
 
     def _on_double_click(self, *, index: qtc.QModelIndex) -> None:
         attr = self._view_model.get_attr_for_column_number(index.column())

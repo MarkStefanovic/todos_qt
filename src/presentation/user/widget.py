@@ -35,7 +35,7 @@ class UserWidget(qtw.QWidget):
             form_requests=form_requests,
             current_user=current_user,
             user_service=user_service,
-            parent=self,
+            parent=None,
         )
 
         self._controller.moveToThread(self._controller_thread)
