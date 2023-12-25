@@ -7,17 +7,12 @@ from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 
 from src import adapter, domain
 
-
 __all__ = (
     "app_icon",
     "add_btn_icon",
-    "bold_btn_icon",
-    "clear_bold_btn_icon",
     "delete_btn_icon",
     "edit_btn_icon",
     "refresh_btn_icon",
-    "highlight_btn_icon",
-    "clear_highlight_btn_icon",
     "back_btn_icon",
     "save_btn_icon",
 )
@@ -50,45 +45,6 @@ def back_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
         return qtg.QIcon.fromTheme("go-previous", parent.style().standardIcon(qtw.QStyle.SP_FileDialogNewFolder))
 
 
-# def bold_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
-#     # noinspection PyBroadException
-#     try:
-#         return qtg.QIcon.fromTheme("format-text-bold")
-#     except:  # noqa: E722
-#         try:
-#             import qtawesome as qta
-#
-#             return qta.icon(icon_name="mdi.format-bold", color=parent.palette().text().color())
-#         except:  # noqa: E722
-#             return parent.style().standardIcon(qtw.QStyle.SP_MediaVolume)
-#
-#
-# def clear_bold_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
-#     # noinspection PyBroadException
-#     try:
-#         return qtg.QIcon.fromTheme("go-last")
-#     except:  # noqa: E722
-#         try:
-#             import qtawesome as qta
-#
-#             return qta.icon(icon_name="mdi.bootstrap", color=parent.palette().text().color())
-#         except:  # noqa: E722
-#             return parent.style().standardIcon(qtw.QStyle.SP_MediaVolumeMuted)
-
-
-# def clear_highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
-#     # noinspection PyBroadException
-#     try:
-#         return qtg.QIcon.fromTheme("go-last")
-#     except:  # noqa: E722
-#         try:
-#             import qtawesome as qta
-#
-#             return qta.icon(icon_name="mdi.format-color-marker-cancel", color=parent.palette().text().color())
-#         except:  # noqa: E722
-#             return parent.style().standardIcon(qtw.QStyle.SP_DialogCloseButton)
-
-
 def delete_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
     # noinspection PyBroadException
     try:
@@ -103,19 +59,6 @@ def edit_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
         return qtg.QIcon(str((adapter.fs.assets_folder() / "icons" / "pen-solid.svg").resolve()))
     except:  # noqa: E722
         return qtg.QIcon.fromTheme("edit-undo", parent.style().standardIcon(qtw.QStyle.SP_FileDialogContentsView))
-
-
-# def highlight_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
-#     # noinspection PyBroadException
-#     try:
-#         return qtg.QIcon.fromTheme("format-justify-fill")
-#     except:  # noqa: E722
-#         try:
-#             import qtawesome as qta
-#
-#             return qta.icon(icon_name="mdi.format-color-highlight", color=parent.palette().text().color())
-#         except:  # noqa: E722
-#             return parent.style().standardIcon(qtw.QStyle.SP_DialogResetButton)
 
 
 def refresh_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:

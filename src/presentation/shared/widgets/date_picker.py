@@ -2,7 +2,7 @@ import datetime
 
 from PyQt5 import QtCore as qtc, QtWidgets as qtw  # noqa
 
-from src.presentation.shared import font
+from src.presentation.shared.theme import font
 
 __all__ = ("DatePicker",)
 

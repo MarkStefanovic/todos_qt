@@ -15,14 +15,17 @@ class UserService(domain.UserService):
         *,
         engine: sa.engine.Engine,
         username: str,
+        user_is_admin: bool,
     ):
         self._engine: typing.Final[sa.engine.Engine] = engine
         self._username: typing.Final[str] = username.lower().strip()
+        self._user_is_admin: typing.Final[bool] = user_is_admin
 
     def add(self, *, user: domain.User) -> None | domain.Error:
         try:
-            with self._engine.begin() as con:
-                adapter.user_repo.add(con=con, user=user)
+            if self._user_is_admin:
+                with self._engine.begin() as con:
+                    adapter.user_repo.add(con=con, user=user)
 
             return None
         except Exception as e:
@@ -47,7 +50,7 @@ class UserService(domain.UserService):
                         user_id=domain.create_uuid(),
                         username=self._username,
                         display_name=self._username,
-                        is_admin=False,
+                        is_admin=self._user_is_admin,
                         date_added=datetime.datetime.now(),
                         date_updated=None,
                     )
@@ -64,12 +67,13 @@ class UserService(domain.UserService):
 
     def delete(self, *, user_id: str) -> None | domain.Error:
         try:
-            with self._engine.begin() as con:
-                delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
-                if isinstance(delete_result, domain.Error):
-                    return delete_result
+            if self._user_is_admin:
+                with self._engine.begin() as con:
+                    delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
+                    if isinstance(delete_result, domain.Error):
+                        return delete_result
 
-                return None
+            return None
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.delete({user_id=!r}) failed: {e!s}")
 
@@ -87,8 +91,11 @@ class UserService(domain.UserService):
 
     def update(self, *, user: domain.User) -> None | domain.Error:
         try:
-            with self._engine.begin() as con:
-                return adapter.user_repo.update(con=con, user=user)
+            if self._user_is_admin:
+                with self._engine.begin() as con:
+                    return adapter.user_repo.update(con=con, user=user)
+
+            return None
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.update({user=!r}) failed: {e!s}")
 
@@ -107,7 +114,7 @@ class UserService(domain.UserService):
 if __name__ == "__main__":
     eng = adapter.db.create_engine()
     assert not isinstance(eng, domain.Error)
-    svc = UserService(engine=eng, username="test")
+    svc = UserService(engine=eng, username="test", user_is_admin=True)
     rs = svc.where(active=True)
     assert not isinstance(rs, domain.Error)
     for r in rs:

@@ -39,7 +39,18 @@ def delete_user(
     user_id: str,
 ) -> None | domain.Error:
     try:
-        con.execute(sa.update(db.todo).where(db.todo.c.user_id == user_id).values(date_deleted=datetime.datetime.now()))
+        # noinspection PyComparisonWithNone,PyTypeChecker
+        todos_for_user = con.execute(
+            sa.select(sa.func.count(db.todo.c.todo_id)).where(
+                (db.todo.c.user_id == user_id) & (db.todo.c.date_deleted == None)  # noqa: E711
+            )
+        ).scalar_one()
+
+        if todos_for_user is not None and todos_for_user > 0:
+            return domain.Error.new(
+                f"Cannot delete user, as there are {todos_for_user} Todos associated with them.  "
+                f"Please reassign or delete those first."
+            )
 
         con.execute(sa.update(db.user).where(db.user.c.user_id == user_id).values(date_deleted=datetime.datetime.now()))
 

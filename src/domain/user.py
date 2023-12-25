@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import typing
 
 __all__ = (
     "ALL_USER",
     "DEFAULT_USER",
     "User",
 )
-
-import typing
 
 
 @dataclasses.dataclass(frozen=True)

@@ -47,21 +47,21 @@ class CategoryController(qtc.QObject):
 
             categories = self._category_service.all()
             if isinstance(categories, domain.Error):
-                self._set_status(str(categories))
+                self._set_status(categories.error_message)
                 return None
 
-            state = CategoryState(
-                dash_state=dash.CategoryDashState(
-                    categories=categories,
-                    status="Categories refreshed.",
+            self.states.emit(
+                CategoryState(
+                    dash_state=dash.CategoryDashState(
+                        categories=categories,
+                        status="Categories refreshed.",
+                    ),
                 ),
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.refresh() failed: {e!s}")
 
-            state = CategoryState.set_status(str(e))
-
-        self.states.emit(state)
+            self._set_status(str(e))
 
     def _on_add_request(self) -> None:
         logger.debug(f"{self.__class__.__name__}._on_add_request()")
@@ -82,9 +82,11 @@ class CategoryController(qtc.QObject):
         logger.debug(f"{self.__class__.__name__}._on_delete_request({request=!r})")
 
         try:
-            delete_result = self._category_service.delete(category_id=request.category.category_id)
+            delete_result = self._category_service.delete(
+                category_id=request.category.category_id,
+            )
             if isinstance(delete_result, domain.Error):
-                self._set_status(str(delete_result))
+                self._set_status(delete_result.error_message)
                 return None
 
             self.categories_updated.emit()
@@ -147,7 +149,7 @@ class CategoryController(qtc.QObject):
                 self._category_service.add(category=event.category)
 
                 self.categories_updated.emit()
-                
+
                 state = CategoryState(
                     dash_state=dash.CategoryDashState(
                         category_added=event.category,

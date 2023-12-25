@@ -9,15 +9,12 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
+from src.presentation.shared.theme import font
 
 __all__ = ("ButtonDelegate",)
 
-from src.presentation.shared import font
-
 
 class ButtonDelegate(qtw.QStyledItemDelegate):
-    # clicked = qtc.pyqtSignal(qtc.QModelIndex)
-
     def __init__(
         self,
         *,
@@ -35,6 +32,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         self._enabled_selector: typing.Final[typing.Callable[[qtc.QModelIndex], bool] | None] = enabled_selector
 
         self._btn = qtw.QPushButton(self._text)
+        self._btn.setStyleSheet("border-radius: 0px;")
 
         self._btn.setFocusPolicy(qtc.Qt.NoFocus)
 
@@ -45,9 +43,14 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
     #     option: qtw.QStyleOptionViewItem,
     #     index: qtc.QModelIndex,
     # ) -> bool:
-    #     # if event.type() == qtc.QEvent.MouseMove:
-    #     #     if option.rect.top() < event.y() < option.rect.top() + self._height:
-    #     #         print("mouse_over")
+    #     print(f"{event.type()=}")
+    #     if event.type() == qtc.QEvent.MouseMove:
+    #         print("mouseover")
+    #         self._btn.setStyleSheet("background-color: cyan;")
+    #         return True
+    #
+    #     return super().editorEvent(event, model, option, index)
+
     #
     #     if event is not None:
     #         if event.type() == qtc.QEvent.MouseButtonRelease:
@@ -57,22 +60,6 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
     #                 y_coord: int = event.y()  # type: ignore
     #                 if option.rect.top() < y_coord < option.rect.top() + button_height:
     #                     self._on_click(index=index)
-    #
-    #             return True
-    #
-    #     return super().editorEvent(event, model, option, index)
-
-    # def editorEvent(
-    #     self,
-    #     event: qtc.QEvent,
-    #     model: qtc.QAbstractItemModel,
-    #     option: qtw.QStyleOptionViewItem,
-    #     index: qtc.QModelIndex,
-    # ) -> bool:
-    #     if event is not None:
-    #         if event.type() == qtc.QEvent.MouseButtonRelease:
-    #             if self._button_is_enabled(index=index):
-    #                 self._on_click(index=index)
     #
     #             return True
     #
@@ -91,7 +78,10 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         if self._icon:
             btn.icon = self._icon
-            btn.iconSize = qtc.QSize(font.BOLD_FONT_METRICS.height(), font.BOLD_FONT_METRICS.height())
+            btn.iconSize = qtc.QSize(
+                min(option.rect.width() - 4, font.BOLD_FONT_METRICS.height() - 4),
+                min(option.rect.height() - 4, font.BOLD_FONT_METRICS.height() - 4),
+            )
         else:
             if self._button_text_selector is None:
                 btn_text = self._text
@@ -101,24 +91,32 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
             btn.text = btn_text
 
-        # btn.features = qtw.QStyleOptionButton.DefaultButton
-        btn.rect = qtc.QRect(
-            option.rect.x(),
-            option.rect.y(),
-            option.rect.width(),
-            min(option.fontMetrics.height() + 8, option.rect.height()),
-        )
+        btn.rect = option.rect
 
         if option.state & qtw.QStyle.State_MouseOver:
             btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken
         else:
             btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Raised
 
-        self._btn.style().drawControl(qtw.QStyle.CE_PushButton, btn, painter, self._btn)
+        # if option.state & qtw.QStyle.State_Enabled:
+        #     btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken
+        #     print('enabled"')
+        # if option.state & qtw.QStyle.State_MouseOver:
+        #     print("mouseover")
+        # if option.state & qtw.QStyle.State_Active:
+        #     print("active")
+        # if option.state & qtw.QStyle.State_AutoRaise:
+        #     print("autoraise")
+        # if option.state & qtw.QStyle.State_Sunken:
+        #     print("sunken")
 
-    # def _on_click(self, *, index: qtc.QModelIndex) -> None:
-    #     self.clicked.emit(index)
-    #
+        self._btn.style().drawControl(
+            qtw.QStyle.CE_PushButton,
+            btn,
+            painter,
+            self._btn,
+        )
+
     def _button_is_enabled(self, *, index: qtc.QModelIndex) -> bool:
         if self._enabled_selector is None:
             return True

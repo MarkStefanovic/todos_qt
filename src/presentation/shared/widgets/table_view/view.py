@@ -4,7 +4,7 @@ import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
-from src.presentation.shared import font
+from src.presentation.shared.theme import font
 from src.presentation.shared.widgets.table_view.attr import Attr, Value
 from src.presentation.shared.widgets.table_view.button_delegate import ButtonDelegate
 from src.presentation.shared.widgets.table_view.item import Item
@@ -101,7 +101,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
         self.setAlternatingRowColors(True)
         self.setColumnHidden(self._key_col, True)
-        # self.setMouseTracking(True)
+        self.setMouseTracking(True)
 
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
@@ -183,16 +183,6 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
     def set_items(self, /, items: typing.Iterable[Item]) -> None:
         self._view_model.set_items(items)
-
-        for col_num, attr in enumerate(self._attrs):
-            if attr.key:
-                continue
-
-            # col_width = self._default_column_widths[attr.name]
-            #
-            # self.horizontalHeader().resizeSection(col_num, col_width)
-
-        # self.resizeRowsToContents()
 
     def update_item(self, /, item: Item) -> None:
         self._view_model.update_item(item)

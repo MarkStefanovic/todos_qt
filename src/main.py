@@ -1,23 +1,15 @@
-"""
-https://github.com/5yutan5/PyQtDarkTheme
-https://imagecolorpicker.com/color-code/00fbff
-"""
+import os
 import sys
 import types
 import typing
-
-import qdarktheme  # noqa: F401
 
 # noinspection PyPep8Naming
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 from loguru import logger
 
 from src import adapter, domain, presentation, service
-from src.adapter import config
 
 __all__ = ("main",)
-
-from src.presentation.shared import font
 
 
 def main() -> None | domain.Error:
@@ -25,22 +17,7 @@ def main() -> None | domain.Error:
     try:
         app = qtw.QApplication(sys.argv)
 
-        qdarktheme.enable_hi_dpi()
-        qdarktheme.setup_theme(
-            "dark",  # auto, light, or dark
-            additional_qss="""
-                QHeaderView { font-weight: bold; }
-                QPushButton { font-weight: bold; border: 1px solid #00a7aa; background-color: none; }
-                QTabBar { font-weight: bold; }
-                QTableView:item { padding: 4px; }
-                QHeaderView:section:horizontal { padding: 4px; }
-                QToolTip { color: #00fbff; background-color: #1c1c1c; border: none; }
-                QTableView:item:hover { background-color: #005455; }
-            """,
-            custom_colors={"primary": "#00fbff"},
-        )
-
-        app.setFont(font.DEFAULT_FONT)
+        presentation.theme.cobalt.apply_theme(app)
 
         engine = adapter.db.create_engine(url=adapter.config.db_url(), echo=True)
         if isinstance(engine, domain.Error):
@@ -50,7 +27,7 @@ def main() -> None | domain.Error:
         if isinstance(create_tables_result, domain.Error):
             return create_tables_result
 
-        username: typing.Final[str] = config.current_user()
+        username: typing.Final[str] = os.environ.get("USERNAME", "user")
 
         category_service = service.CategoryService(engine=engine)
 
@@ -61,6 +38,7 @@ def main() -> None | domain.Error:
         user_service: typing.Final[service.UserService] = service.UserService(
             engine=engine,
             username=username,
+            user_is_admin=True,
         )
 
         current_user = user_service.get_current_user()
@@ -69,7 +47,7 @@ def main() -> None | domain.Error:
 
         todo_service = service.TodoService(engine=engine, username=username)
 
-        app_icon = presentation.icons.app_icon()
+        app_icon = presentation.theme.icons.app_icon()
         if isinstance(app_icon, domain.Error):
             return app_icon
 

@@ -13,27 +13,30 @@ class MainView(qtw.QWidget):
     def __init__(
         self,
         *,
+        user_is_admin: bool,
         category_widget: CategoryWidget,
         todo_widget: TodoWidget,
         user_widget: UserWidget,
     ):
         super().__init__()
 
-        self._categories: typing.Final[CategoryWidget] = category_widget
         self._todos: typing.Final[TodoWidget] = todo_widget
-        self._users: typing.Final[UserWidget] = user_widget
 
         self._tabs: typing.Final[qtw.QTabWidget] = qtw.QTabWidget()
         self._tabs.addTab(self._todos, "Todo")
-        self._tabs.addTab(self._categories, "Category")
-        self._tabs.addTab(self._users, "Users")
+
+        if user_is_admin:
+            self._categories: typing.Final[CategoryWidget] = category_widget
+            self._users: typing.Final[UserWidget] = user_widget
+
+            self._tabs.addTab(self._categories, "Category")
+            self._tabs.addTab(self._users, "Users")
+            # noinspection PyUnresolvedReferences
+            self._tabs.currentChanged.connect(self._on_tab_changed)
 
         layout = qtw.QVBoxLayout()
         layout.addWidget(self._tabs)
         self.setLayout(layout)
-
-        # noinspection PyUnresolvedReferences
-        self._tabs.currentChanged.connect(self._on_tab_changed)
 
         self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
         # noinspection PyUnresolvedReferences

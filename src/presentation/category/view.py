@@ -17,7 +17,7 @@ class CategoryView(qtw.QWidget):
     def __init__(
         self,
         *,
-        current_user: domain.User,
+        user_is_admin: bool,
         dash_requests: dash.requests.CategoryDashRequests,
         form_requests: form.requests.CategoryFormRequests,
         states: qtc.pyqtBoundSignal,
@@ -25,13 +25,12 @@ class CategoryView(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
-        self._current_user: typing.Final[domain.User] = current_user
         self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.CategoryFormRequests] = form_requests
 
         self._dash = dash.CategoryDash(
             parent=self,
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             dash_requests=dash_requests,
         )
 

@@ -1,9 +1,10 @@
 import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from loguru import logger
 
 from src import domain
-from src.presentation.shared import font
+from src.presentation.shared.theme import font
 from src.presentation.user_selector.state import UserSelectorState
 
 __all__ = ("UserSelectorView",)
@@ -66,10 +67,10 @@ class UserSelectorView(qtw.QComboBox):
         self._item_selected_requests.emit(item)
 
     def _set_state(self, /, state: UserSelectorState) -> None:
+        logger.debug(f"{self.__class__.__name__}._set_state({state=!r})")
+
         if not isinstance(state.users, domain.Unspecified):
             self.set_items(state.users)
-
-        # if not isinstance(state.error)
 
         if not isinstance(state.selected_category, domain.Unspecified):
             self.select_item(state.selected_category)

@@ -245,18 +245,22 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # noinspection PyUnresolvedReferences
         self.layoutAboutToBeChanged.emit()
 
-        if attr.value_selector:
-            self._items = sorted(
-                self._items,
-                key=lambda item: ((v := attr.value_selector(item)) is None, v),
-                reverse=(order == qtc.Qt.DescendingOrder),
-            )
-        else:
-            self._items = sorted(
-                self._items,
-                key=lambda x: ((v := getattr(x, attr.name)) is None, v),
-                reverse=(order == qtc.Qt.DescendingOrder),
-            )
+        def key_fn(item: Item, /) -> tuple[bool, typing.Any]:
+            if attr.value_selector:
+                val = attr.value_selector(item)
+            else:
+                val = getattr(item, attr.name)
+
+            if val is None:
+                return False, None
+            else:
+                return True, val
+
+        self._items = sorted(
+            self._items,
+            key=key_fn,
+            reverse=(order == qtc.Qt.DescendingOrder),
+        )
 
         self._reindex_rows()
 

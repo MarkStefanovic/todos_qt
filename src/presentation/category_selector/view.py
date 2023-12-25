@@ -1,10 +1,11 @@
 import typing
 
 from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from loguru import logger
 
 from src import domain
 from src.presentation.category_selector.state import CategorySelectorState
-from src.presentation.shared import font
+from src.presentation.shared.theme import font
 
 __all__ = ("CategorySelectorView",)
 
@@ -35,7 +36,9 @@ class CategorySelectorView(qtw.QComboBox):
         return self.currentData()
 
     def _set_state(self, /, state: CategorySelectorState) -> None:
-        if isinstance(state.category_options, tuple):
+        logger.debug(f"{self.__class__.__name__}._set_state({state=!r})")
+
+        if not isinstance(state.category_options, domain.Unspecified):
             self.blockSignals(True)
             try:
                 prior_selection: domain.Category = self.currentData()

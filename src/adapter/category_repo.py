@@ -48,6 +48,18 @@ def delete(
     category_id: str,
 ) -> None | domain.Error:
     try:
+        # noinspection PyComparisonWithNone
+        categories_for_user = con.execute(
+            sa.select(sa.func.count(db.todo.c.todo_id)).where(
+                (db.todo.c.category_id == category_id) & (db.todo.c.date_deleted == None)  # noqa: E711
+            )
+        ).scalar_one()
+        if categories_for_user is not None and categories_for_user > 0:
+            return domain.Error.new(
+                f"Cannot delete category, as there are {categories_for_user} Todos associated with it.  "
+                f"Please reassign or delete those first."
+            )
+
         con.execute(
             sa.update(db.category)
             .where(db.category.c.category_id == category_id)

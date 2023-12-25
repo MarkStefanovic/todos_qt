@@ -52,6 +52,8 @@ class UserWidget(qtw.QWidget):
         layout.addWidget(self._view)
         self.setLayout(layout)
 
+        self._controller.users_updated.connect(self.users_updated.emit)
+
     def current_view(self) -> typing.Literal["dash", "form"]:
         return self._view.current_view()
 

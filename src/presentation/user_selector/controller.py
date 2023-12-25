@@ -32,7 +32,7 @@ class UserSelectorController(qtc.QObject):
             if isinstance(users, domain.Error):
                 logger.error(f"{self.__class__.__name__}.refresh() failed: {users!s}")
 
-                self.states.emit(UserSelectorState(error=domain.Error.new(str(users))))
+                self.states.emit(UserSelectorState(error=users))
 
                 return None
 

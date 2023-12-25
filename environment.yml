@@ -23,4 +23,3 @@ dependencies:
     - pip-audit
     - ruff
     - ruff-lsp
-#    - "qdarkstyle==3.2.3"

@@ -1,4 +1,5 @@
 from src import domain
+from src.domain import Error
 
 __all__ = ("CategoryService",)
 
@@ -13,6 +14,9 @@ class CategoryService(domain.CategoryService):
 
     def add(self, /, category: domain.Category) -> None | domain.Error:
         return self.add_result
+
+    def add_default_categories(self) -> None | Error:
+        return None
 
     def all(self) -> list[domain.Category] | domain.Error:
         return self.all_result

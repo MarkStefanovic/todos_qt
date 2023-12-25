@@ -37,7 +37,7 @@ def current_user(
     username = _config(path=config_path).get("current-user")
     if username:
         return username
-    return os.environ.get("USERNAME", "anonymous")
+    return os.environ.get("USERNAME", "user")
 
 
 def db_schema(

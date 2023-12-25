@@ -6,6 +6,7 @@ from loguru import logger
 
 from src import domain
 from src.presentation.user import dash, form
+from src.presentation.user.dash import UserDashState
 from src.presentation.user.form.state import UserFormState
 from src.presentation.user.state import UserState
 
@@ -47,7 +48,7 @@ class UserController(qtc.QObject):
 
             users = self._user_service.where(active=True)
             if isinstance(users, domain.Error):
-                self._set_status(str(users))
+                self._set_status(users.error_message)
                 return None
 
             self.states.emit(
@@ -84,7 +85,10 @@ class UserController(qtc.QObject):
         try:
             delete_result = self._user_service.delete(user_id=request.user.user_id)
             if isinstance(delete_result, domain.Error):
-                self._set_status(str(delete_result))
+                self._set_status(delete_result.error_message)
+                return None
+
+            self.states.emit(UserState(dash_state=UserDashState(user_deleted=request.user)))
 
             self.users_updated.emit()
         except Exception as e:
@@ -121,13 +125,13 @@ class UserController(qtc.QObject):
         try:
             db_user = self._user_service.get(user_id=request.user.user_id)
             if isinstance(db_user, domain.Error):
-                self._set_status(str(db_user))
+                self._set_status(db_user.error_message)
                 return None
 
             if db_user is None:
                 add_result = self._user_service.add(user=request.user)
                 if isinstance(add_result, domain.Error):
-                    self._set_status(str(add_result))
+                    self._set_status(add_result.error_message)
                     return None
 
                 self.users_updated.emit()
@@ -146,7 +150,7 @@ class UserController(qtc.QObject):
             else:
                 update_result = self._user_service.update(user=request.user)
                 if isinstance(update_result, domain.Error):
-                    self._set_status(str(update_result))
+                    self._set_status(update_result.error_message)
                     return None
 
                 self.users_updated.emit()

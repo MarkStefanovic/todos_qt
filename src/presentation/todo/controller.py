@@ -53,6 +53,7 @@ class TodoController(qtc.QObject):
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_add_request() failed: {e!s}")
+
             self._set_status(str(e))
 
     def _on_toggle_completed_request(self, /, request: dash.requests.ToggleCompleted) -> None:
@@ -88,6 +89,7 @@ class TodoController(qtc.QObject):
             )
         except Exception as e:
             logger.debug(f"{self.__class__.__name__}._on_toggle_completed_request({request=!r}) failed: {e!s}")
+
             self._set_status(str(e))
 
     def _on_delete_request(self, /, request: dash.requests.DeleteTodo) -> None:
@@ -97,7 +99,7 @@ class TodoController(qtc.QObject):
             delete_result = self._todo_service.delete(todo_id=request.todo.todo_id)
             if isinstance(delete_result, domain.Error):
                 logger.error(f"{self.__class__.__name__}._on_delete_request({request=!r}): {delete_result!s}")
-                self._set_status(str(delete_result))
+                self._set_status(delete_result.error_message)
                 return None
 
             self.states.emit(
@@ -110,6 +112,7 @@ class TodoController(qtc.QObject):
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_delete_request({request=!r}) failed: {e!s}")
+
             self._set_status(str(e))
 
     def _on_edit_request(self, /, request: dash.requests.EditTodo) -> None:
@@ -124,6 +127,7 @@ class TodoController(qtc.QObject):
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_edit_request({request=!r}) failed: {e!s}")
+
             self._set_status(str(e))
 
     def _on_refresh_request(self, /, request: dash.requests.RefreshRequest) -> None:
@@ -151,7 +155,7 @@ class TodoController(qtc.QObject):
             # logger.info(f"{todos=!r}")
             if isinstance(todos, domain.Error):
                 logger.error(f"{self.__class__.__name__}._on_refresh_request({request=!r}): {todos!s}")
-                self._set_status(str(todos))
+                self._set_status(todos.error_message)
                 return None
 
             self.states.emit(
@@ -164,6 +168,7 @@ class TodoController(qtc.QObject):
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}._on_refresh_request({request=!r}) failed: {e!s}")
+
             self._set_status(str(e))
 
     def _on_back_request(self) -> None:
@@ -185,18 +190,18 @@ class TodoController(qtc.QObject):
 
             preexisting_todo = self._todo_service.get(todo_id=request.todo.todo_id)
             if isinstance(preexisting_todo, domain.Error):
-                self._set_status(str(preexisting_todo))
+                self._set_status(preexisting_todo.error_message)
                 return None
 
             if preexisting_todo:
                 update_result = self._todo_service.update(todo=request.todo)
                 if isinstance(update_result, domain.Error):
-                    self._set_status(str(update_result))
+                    self._set_status(update_result.error_message)
                     return None
 
                 updated_todo = self._todo_service.get(todo_id=request.todo.todo_id)
                 if isinstance(updated_todo, domain.Error):
-                    self._set_status(str(update_result))
+                    self._set_status(updated_todo.error_message)
                     return None
 
                 if updated_todo is None:

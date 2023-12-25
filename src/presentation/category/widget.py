@@ -16,8 +16,8 @@ class CategoryWidget(qtw.QWidget):
     def __init__(
         self,
         *,
+        user_is_admin: bool,
         category_service: domain.CategoryService,
-        current_user: domain.User,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
@@ -42,7 +42,7 @@ class CategoryWidget(qtw.QWidget):
         self._controller.moveToThread(self._controller_thread)
 
         self._view = CategoryView(
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             dash_requests=self._dash_requests,
             form_requests=self._form_requests,
             states=self._controller.states,
@@ -53,7 +53,7 @@ class CategoryWidget(qtw.QWidget):
         layout.addWidget(self._view)
         self.setLayout(layout)
 
-        self._controller.categories_updated.connect(self.categories_updated)
+        self._controller.categories_updated.connect(self.categories_updated.emit)
 
     def current_view(self) -> typing.Literal["dash", "form"]:
         return self._view.current_view()

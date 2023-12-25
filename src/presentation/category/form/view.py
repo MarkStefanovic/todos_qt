@@ -7,7 +7,7 @@ from loguru import logger
 from src import domain
 from src.presentation.category.form import requests
 from src.presentation.category.form.state import CategoryFormState
-from src.presentation.shared import icons, font
+from src.presentation.shared.theme import font, icons
 
 __all__ = ("CategoryForm",)
 

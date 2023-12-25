@@ -2,5 +2,5 @@
   "instructions": "Create a copy of this file and name it config.json, and update the settings below.",
   "db-schema": null,
   "add-holidays": true,
-  "current-user": "admin"
+  "current-user": "user"
 }

@@ -23,7 +23,7 @@ class MainWidget(qtw.QMainWindow):
     ):
         super().__init__()
 
-        self.setWindowTitle(f"Todos - {current_user.username}")
+        self.setWindowTitle(f"Todos - {current_user.display_name}")
 
         self.setWindowIcon(window_icon)
 
@@ -37,7 +37,7 @@ class MainWidget(qtw.QMainWindow):
 
         self._category_widget = CategoryWidget(
             category_service=category_service,
-            current_user=current_user,
+            user_is_admin=current_user.is_admin,
             parent=self,
         )
 
@@ -56,6 +56,7 @@ class MainWidget(qtw.QMainWindow):
         )
 
         self._view = MainView(
+            user_is_admin=current_user.is_admin,
             category_widget=self._category_widget,
             todo_widget=self._todo_widget,
             user_widget=self._user_widget,
