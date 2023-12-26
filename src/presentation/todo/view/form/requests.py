@@ -1,7 +1,7 @@
 import dataclasses
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc
+from PyQt6 import QtCore as qtc
 
 from src import domain
 

@@ -1,7 +1,7 @@
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc
+from PyQt6 import QtCore as qtc
 from loguru import logger
 
 from src import domain

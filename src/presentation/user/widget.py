@@ -1,7 +1,7 @@
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.user.controller import UserController

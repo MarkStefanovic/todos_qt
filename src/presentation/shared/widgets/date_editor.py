@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 
 from dateutil.parser import parse, ParserError
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = ("DateEditor",)
 
@@ -20,13 +20,13 @@ class DateEditor(qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self._text_edit.textChanged.connect(self._on_text_changed)
         self._text_edit.setFixedWidth(100)
-        self._text_edit.setAlignment(qtc.Qt.AlignCenter)
+        self._text_edit.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)
         self.setLayout(layout)
 
-        self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.setFixedHeight(self._text_edit.height() + 8)
 
         self._dt: datetime.date | None = None

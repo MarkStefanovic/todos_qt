@@ -1,4 +1,6 @@
 import sys
+import types
+import typing
 
 from loguru import logger
 
@@ -12,6 +14,19 @@ if __name__ == "__main__":
 
         # logger.add(log_folder / "error.log", rotation="5 MB", retention="7 days", level="ERROR")
         logger.add(sys.stderr, format="{time} {level} {message}", level="INFO")
+
+        except_hook = sys.excepthook
+
+        def exception_hook(
+            exctype: typing.Type[BaseException],
+            value: BaseException,
+            traceback: types.TracebackType | None,
+        ) -> None:
+            logger.exception(value)
+            except_hook(exctype, value, traceback)
+            sys.exit(1)
+
+        sys.excepthook = exception_hook
 
         full_db_path = domain.fs.assets_folder() / "todo.db"
         db_url = f"sqlite:///{full_db_path.resolve()!s}"

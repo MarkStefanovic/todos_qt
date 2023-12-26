@@ -3,7 +3,7 @@ qtawesome repo: https://github.com/spyder-ide/qtawesome
 """
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 
 from src import domain
 
@@ -27,7 +27,9 @@ def add_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "plus.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("list-add", parent.style().standardIcon(qtw.QStyle.SP_FileDialogNewFolder))
+        return qtg.QIcon.fromTheme(
+            "list-add", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_FileDialogNewFolder)
+        )
 
 
 def app_icon() -> qtg.QIcon | domain.Error:
@@ -50,7 +52,9 @@ def back_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "arrow-left.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("go-previous", parent.style().standardIcon(qtw.QStyle.SP_FileDialogNewFolder))
+        return qtg.QIcon.fromTheme(
+            "go-previous", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_FileDialogNewFolder)
+        )
 
 
 def delete_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
@@ -62,7 +66,9 @@ def delete_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "trash.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("list-remove", parent.style().standardIcon(qtw.QStyle.SP_DialogDiscardButton))
+        return qtg.QIcon.fromTheme(
+            "list-remove", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_DialogDiscardButton)
+        )
 
 
 def edit_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
@@ -74,7 +80,9 @@ def edit_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "pen.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("edit-undo", parent.style().standardIcon(qtw.QStyle.SP_FileDialogContentsView))
+        return qtg.QIcon.fromTheme(
+            "edit-undo", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_FileDialogContentsView)
+        )
 
 
 def refresh_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
@@ -86,7 +94,9 @@ def refresh_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "refresh.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("view-refresh", parent.style().standardIcon(qtw.QStyle.SP_BrowserReload))
+        return qtg.QIcon.fromTheme(
+            "view-refresh", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_BrowserReload)
+        )
 
 
 def save_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
@@ -98,4 +108,6 @@ def save_btn_icon(*, parent: qtw.QWidget) -> qtg.QIcon:
 
         return qtg.QIcon(str((domain.fs.assets_folder() / "icons" / "save.svg").resolve()))
     except:  # noqa: E722
-        return qtg.QIcon.fromTheme("document-save-as", parent.style().standardIcon(qtw.QStyle.SP_DialogSaveButton))
+        return qtg.QIcon.fromTheme(
+            "document-save-as", parent.style().standardIcon(qtw.QStyle.StandardPixmap.SP_DialogSaveButton)
+        )

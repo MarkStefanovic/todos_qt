@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import typing
-import warnings
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtWidgets as qtw  # noqa
 
 __all__ = ("MapCBO",)
 
@@ -17,7 +16,7 @@ class MapCBO(typing.Generic[Value], qtw.QComboBox):
     def __init__(self, *, parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
-        self.setFocusPolicy(qtc.Qt.StrongFocus)
+        self.setFocusPolicy(qtc.Qt.FocusPolicy.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")
 
@@ -42,7 +41,7 @@ class MapCBO(typing.Generic[Value], qtw.QComboBox):
                     self.setCurrentIndex(i)
                     return None
 
-        warnings.warn(f"The value, {value!r}, is not an option.")
+        # warnings.warn(f"The value, {value!r}, is not an option.")
 
     def set_values(self, /, values: dict[Value, str]) -> None:
         self.blockSignals(True)

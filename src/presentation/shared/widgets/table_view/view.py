@@ -2,7 +2,7 @@ import dataclasses
 import functools
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src.presentation.shared.theme import font
 from src.presentation.shared.widgets.table_view.attr import Attr, Value
@@ -102,17 +102,19 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
                 if attr.data_type == "date":
-                    col_width = self._font_metrics.width("  88/88/8888  ")
+                    col_width = self._font_metrics.boundingRect("  88/88/8888  ").width()
                 else:
-                    col_width = self._font_metrics.width(attr.display_name + "33333333")
+                    col_width = self._font_metrics.boundingRect(attr.display_name + "33333333").width()
             else:
                 col_width = attr.width
 
             self.horizontalHeader().resizeSection(col_num, col_width)
 
         self.horizontalHeader().setDefaultAlignment(
-            qtc.Qt.AlignHCenter | qtc.Qt.AlignBottom | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
+            qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
+            # | qtc.Qt.AlignmentFlag(qtg.QTextOption.WrapMode.WordWrap)
         )
+        self.horizontalHeader()
         # self.verticalHeader().setDefaultAlignment(
         #     qtc.Qt.AlignLeft | qtc.Qt.AlignTop | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
         # )
@@ -121,7 +123,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         # min_text_height = font_metrics.height() + 8
         self.horizontalHeader().setMinimumHeight(min_text_height)
 
-        self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
+        self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
 
         # display at most 5 lines
         self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
@@ -172,7 +174,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             index = self.model().index(row_num, self._key_col)
             model_key = self.model().data(index)
             if model_key == key:
-                self.selectionModel().select(index, qtc.QItemSelectionModel.Rows)
+                self.selectionModel().select(index, qtc.QItemSelectionModel.SelectionFlag.Rows)
 
                 return None
 
@@ -244,7 +246,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 return
 
             model_data = self._view_model.data(key_index)
-            if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+            if isinstance(model_data, (qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
                 return
 
             key = model_data.value()
@@ -259,7 +261,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             key_index = self._view_model.index(index.row(), self._key_col)
 
             model_data = self._view_model.data(key_index)
-            if isinstance(model_data, (qtc.Qt.Alignment, qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+            if isinstance(model_data, (qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
                 return
 
             key = model_data.value()
@@ -276,7 +278,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             return
 
         model_data = self._view_model.data(key_index)
-        if isinstance(model_data, (qtc.Qt.Alignment, qtg.QBrush, qtg.QFont, qtg.QIcon)):
+        if isinstance(model_data, (qtc.Qt.AlignmentFlag, qtg.QBrush, qtg.QFont, qtg.QIcon)):
             return
 
         key = model_data.value()

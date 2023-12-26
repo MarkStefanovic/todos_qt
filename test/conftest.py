@@ -3,7 +3,7 @@ import typing
 
 import pytest
 import sqlalchemy as sa
-from PyQt5 import QtWidgets as qtw  # noqa
+from PyQt6 import QtWidgets as qtw  # noqa
 from sqlalchemy.orm import Session
 
 from src import adapter, domain

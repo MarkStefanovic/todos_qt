@@ -1,7 +1,7 @@
 import datetime
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
@@ -44,13 +44,13 @@ class CategoryForm(qtw.QWidget):
         self._note_txt.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() * 8 + 12)
 
         layout = qtw.QGridLayout()
-        layout.addWidget(self.back_btn, 0, 0, alignment=qtc.Qt.AlignLeft)
+        layout.addWidget(self.back_btn, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(name_lbl, 1, 0)
         layout.addWidget(self._name_txt, 1, 1)
         layout.addWidget(note_lbl, 2, 0)
         layout.addWidget(self._note_txt, 2, 1)
-        layout.addWidget(self.save_btn, 3, 1, alignment=qtc.Qt.AlignRight)
-        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding), 4, 2)
+        layout.addWidget(self.save_btn, 3, 1, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 4, 2)
         self.setLayout(layout)
 
         self._category_id: str = ""

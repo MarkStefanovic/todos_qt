@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.category_selector.widget import CategorySelectorWidget

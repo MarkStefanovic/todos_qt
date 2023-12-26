@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
@@ -18,7 +18,7 @@ class CategorySelectorView(qtw.QComboBox):
 
         self._states: typing.Final[qtc.pyqtBoundSignal] = states
 
-        self.setFocusPolicy(qtc.Qt.StrongFocus)
+        self.setFocusPolicy(qtc.Qt.FocusPolicy.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")
 
@@ -26,8 +26,8 @@ class CategorySelectorView(qtw.QComboBox):
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
         self.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() + 8)
-        self.setFixedWidth(font.DEFAULT_FONT_METRICS.width(" " * 30))
-        self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect(" " * 30).width())
+        self.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
 
         self._states.connect(self._set_state)
 

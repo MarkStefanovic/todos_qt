@@ -1,4 +1,4 @@
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.user_selector.controller import UserSelectorController

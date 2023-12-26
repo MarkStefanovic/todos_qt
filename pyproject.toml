@@ -1,7 +1,30 @@
 [project]
+name = "todos-qt"
+description = "A humble ToDo application"
 requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+    "loguru",
+    "pyqt6",
+    "hypothesis",
+    "mypy",
+    "pytest",
+    "sqlalchemy",
+    "pyinstaller",
+    "python-dateutil",
+    "psycopg2-binary",
+    "pyqt5-stubs",
+    "pip-audit",
+    "ruff",
+    "ruff-lsp",
+]
 
 [tool.ruff]
 src = ["src"]
 line-length = 120
-ignore = ["F403"]
+ignore = ["F401", "F403"]
+[tool.hatch]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

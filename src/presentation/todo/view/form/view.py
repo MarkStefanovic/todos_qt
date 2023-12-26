@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
@@ -47,13 +47,13 @@ class TodoFormView(qtw.QWidget):
         advance_days_lbl.font().setBold(True)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setRange(0, 999)
-        self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   999   "))
+        self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
 
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.font().setBold(True)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setRange(1, 999)
-        self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   999   "))
+        self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
 
         user_lbl = qtw.QLabel("User")
         user_lbl.font().setBold(True)
@@ -86,7 +86,7 @@ class TodoFormView(qtw.QWidget):
         )
         self._frequency_cbo.set_value(domain.FrequencyType.Daily)
         self._frequency_cbo.value_changed.connect(self._frequency_changed)
-        self._frequency_cbo.setFixedWidth(font.DEFAULT_FONT_METRICS.width("   Irregular   "))
+        self._frequency_cbo.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   Irregular   ").width())
 
         self._irregular_frequency_form = IrregularFrequencyForm()
         self._monthly_frequency_form = MonthlyFrequencyForm()
@@ -129,11 +129,13 @@ class TodoFormView(qtw.QWidget):
         # self.save_btn.setDefault(True)
 
         main_layout = qtw.QVBoxLayout()
-        main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignLeft)
+        main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
         main_layout.addLayout(form_layout)
         main_layout.addLayout(self._frequency_subform_layout)
-        main_layout.addSpacerItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Expanding))
-        main_layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignRight)
+        main_layout.addSpacerItem(
+            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Minimum, qtw.QSizePolicy.Policy.Expanding)
+        )
+        main_layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(main_layout)
 

@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
@@ -23,7 +23,7 @@ class UserSelectorView(qtw.QComboBox):
         self._item_selected_requests: typing.Final[qtc.pyqtBoundSignal] = item_selected_requests
         self._states: typing.Final[qtc.pyqtBoundSignal] = states
 
-        self.setFocusPolicy(qtc.Qt.StrongFocus)
+        self.setFocusPolicy(qtc.Qt.FocusPolicy.StrongFocus)
         self.setMouseTracking(False)
         self.setStyleSheet("combobox-popup: 0;")
 
@@ -31,7 +31,7 @@ class UserSelectorView(qtw.QComboBox):
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
         self.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() + 8)
-        self.setFixedWidth(font.DEFAULT_FONT_METRICS.width(" " * 30))
+        self.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect(" " * 30).width())
         # self.adjustSize()
 
         self._states.connect(self._set_state)

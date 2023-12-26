@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PyQt5 import QtWidgets as qtw
+from PyQt6 import QtWidgets as qtw
 
 from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
 

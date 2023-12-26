@@ -2,7 +2,7 @@ import datetime
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
@@ -31,7 +31,7 @@ class UserForm(qtw.QWidget):
         display_name_lbl = qtw.QLabel("Display Name")
         display_name_lbl.font().setBold(True)
         self._display_name_txt = qtw.QLineEdit()
-        self._display_name_txt.setMaximumWidth(font.DEFAULT_FONT_METRICS.width("  Display Name  "))
+        self._display_name_txt.setMaximumWidth(font.DEFAULT_FONT_METRICS.boundingRect("  Display Name  ").width())
 
         username_lbl = qtw.QLabel("Username")
         username_lbl.font().setBold(True)
@@ -43,13 +43,13 @@ class UserForm(qtw.QWidget):
         self._save_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         layout = qtw.QGridLayout()
-        layout.addWidget(self._back_btn, 0, 0, alignment=qtc.Qt.AlignLeft)
+        layout.addWidget(self._back_btn, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(display_name_lbl, 1, 0)
         layout.addWidget(self._display_name_txt, 1, 1)
         layout.addWidget(username_lbl, 2, 0)
         layout.addWidget(self._username_txt, 2, 1)
-        layout.addWidget(self._save_btn, 3, 1, alignment=qtc.Qt.AlignRight)
-        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Expanding, qtw.QSizePolicy.Expanding), 4, 2)
+        layout.addWidget(self._save_btn, 3, 1, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout.addItem(qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 4, 2)
         self.setLayout(layout)
 
         self._user_id = ""

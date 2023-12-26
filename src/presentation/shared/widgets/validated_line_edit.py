@@ -1,7 +1,7 @@
 import functools
 import typing
 
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = (
     "ValidatedLineEdit",

@@ -1,5 +1,5 @@
 # noinspection PyPep8Naming
-from PyQt5 import QtWidgets as qtw
+from PyQt6 import QtWidgets as qtw
 
 from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
 

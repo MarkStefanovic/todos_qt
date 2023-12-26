@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src.presentation.category.widget import CategoryWidget
 from src.presentation.todo.widget import TodoWidget
@@ -38,7 +38,7 @@ class MainView(qtw.QWidget):
         layout.addWidget(self._tabs)
         self.setLayout(layout)
 
-        self.enter_key_shortcut = qtw.QShortcut(qtg.QKeySequence(qtc.Qt.Key_Return), self)
+        self.enter_key_shortcut = qtg.QShortcut(qtg.QKeySequence(qtc.Qt.Key.Key_Return), self)
         # noinspection PyUnresolvedReferences
         self.enter_key_shortcut.activated.connect(self._on_enter_key_pressed)
 

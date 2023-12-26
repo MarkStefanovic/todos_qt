@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
@@ -55,12 +55,12 @@ class CategoryDash(qtw.QWidget):
             table_view.text(
                 display_name="Name",
                 name="name",
-                width=font.DEFAULT_FONT_METRICS.width(" " * 60),
+                width=font.DEFAULT_FONT_METRICS.boundingRect(" " * 60).width(),
             ),
             table_view.text(
                 display_name="Note",
                 name="note",
-                width=font.DEFAULT_FONT_METRICS.width(" " * 120),
+                width=font.DEFAULT_FONT_METRICS.boundingRect(" " * 120).width(),
             ),
             table_view.date(
                 name="date_added",

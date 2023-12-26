@@ -1,5 +1,5 @@
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
@@ -30,9 +30,9 @@ class MainWidget(qtw.QMainWindow):
         # noinspection PyTypeChecker
         self.setWindowFlags(
             self.windowFlags()
-            | qtc.Qt.WindowMinimizeButtonHint
-            | qtc.Qt.WindowMaximizeButtonHint
-            | qtc.Qt.WindowSystemMenuHint
+            | qtc.Qt.WindowType.WindowMinimizeButtonHint
+            | qtc.Qt.WindowType.WindowMaximizeButtonHint
+            | qtc.Qt.WindowType.WindowSystemMenuHint
         )
 
         self._category_widget = CategoryWidget(

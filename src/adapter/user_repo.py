@@ -53,7 +53,7 @@ def delete(
         # noinspection PyComparisonWithNone,PyTypeChecker
         todos_for_user = con.execute(
             sa.select(sa.func.count(db.todo(schema=schema).c.todo_id)).where(
-                (db.todo(schema=schema).c.user_id == user_id) & (db.todo.c.date_deleted == None)  # noqa: E711
+                (db.todo(schema=schema).c.user_id == user_id) & (db.todo(schema=schema).c.date_deleted == None)  # noqa: E711
             )
         ).scalar_one()
 

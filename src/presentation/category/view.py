@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 from loguru import logger
 
 from src import domain

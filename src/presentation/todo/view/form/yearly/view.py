@@ -1,7 +1,7 @@
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtWidgets as qtw
+from PyQt6 import QtWidgets as qtw
 from loguru import logger
 
 from src import domain

@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import widgets
@@ -62,7 +62,7 @@ class IrregularFrequencyForm(qtw.QWidget):
         self._weekday_cbo.setFixedWidth(150)
 
         form_layout = qtw.QFormLayout()
-        form_layout.setAlignment(qtc.Qt.AlignLeft)
+        form_layout.setAlignment(qtc.Qt.AlignmentFlag.AlignLeft)
         form_layout.addRow(month_lbl, self._month_cbo)
         form_layout.addRow(week_number_lbl, self._week_number_sb)
         form_layout.addRow(weekday_lbl, self._weekday_cbo)

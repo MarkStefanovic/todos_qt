@@ -7,7 +7,7 @@ https://stackoverflow.com/questions/11777637/adding-button-to-qtableview
 """
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src.presentation.shared.theme import font
 
@@ -34,7 +34,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         self._btn = qtw.QPushButton(self._text)
         self._btn.setStyleSheet("border-radius: 0px;")
 
-        self._btn.setFocusPolicy(qtc.Qt.NoFocus)
+        self._btn.setFocusPolicy(qtc.Qt.FocusPolicy.NoFocus)
 
     # def editorEvent(
     #     self,
@@ -93,10 +93,10 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         btn.rect = option.rect
 
-        if option.state & qtw.QStyle.State_MouseOver:
-            btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken
+        if option.state & qtw.QStyle.StateFlag.State_MouseOver:
+            btn.state = qtw.QStyle.StateFlag.State_Enabled | qtw.QStyle.StateFlag.State_Sunken
         else:
-            btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Raised
+            btn.state = qtw.QStyle.StateFlag.State_Enabled | qtw.QStyle.StateFlag.State_Raised
 
         # if option.state & qtw.QStyle.State_Enabled:
         #     btn.state = qtw.QStyle.State_Enabled | qtw.QStyle.State_Sunken
@@ -111,7 +111,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         #     print("sunken")
 
         self._btn.style().drawControl(
-            qtw.QStyle.CE_PushButton,
+            qtw.QStyle.ControlElement.CE_PushButton,
             btn,
             painter,
             self._btn,

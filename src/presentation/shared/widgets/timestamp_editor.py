@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 
 from dateutil.parser import parse, ParserError
-from PyQt5 import QtCore as qtc, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = ("TimestampEditor",)
 
@@ -17,14 +17,14 @@ class TimestampEditor(qtw.QWidget):
         self._text_edit = qtw.QLineEdit("", parent=self)
         self._text_edit.textChanged.connect(self.validate)
         self._text_edit.setFixedWidth(130)
-        self._text_edit.setAlignment(qtc.Qt.AlignCenter)
+        self._text_edit.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
 
         layout = qtw.QStackedLayout()
         layout.addWidget(self._text_edit)
 
         self.setLayout(layout)
 
-        self.setSizePolicy(qtw.QSizePolicy.Fixed, qtw.QSizePolicy.Fixed)
+        self.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
 
         self._ts: datetime.datetime | None = None
         self._is_valid = True

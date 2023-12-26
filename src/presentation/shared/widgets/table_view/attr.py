@@ -4,7 +4,7 @@ import datetime
 import typing
 
 # noinspection PyPep8Naming
-from PyQt5 import QtGui as qtg
+from PyQt6 import QtGui as qtg
 
 __all__ = (
     "Attr",

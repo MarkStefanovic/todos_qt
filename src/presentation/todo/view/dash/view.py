@@ -1,6 +1,6 @@
 import typing
 
-from PyQt5 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
@@ -67,7 +67,9 @@ class TodoDashView(qtw.QWidget):
         self._description_filter_txt = qtw.QLineEdit("")
         self._description_filter_txt.setMaximumWidth(200)
 
-        toolbar_layout.addSpacerItem(qtw.QSpacerItem(10, 0, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Minimum))
+        toolbar_layout.addSpacerItem(
+            qtw.QSpacerItem(10, 0, qtw.QSizePolicy.Policy.Minimum, qtw.QSizePolicy.Policy.Minimum)
+        )
         toolbar_layout.addWidget(due_lbl)
         toolbar_layout.addWidget(self._due_chk)
         toolbar_layout.addWidget(user_lbl)
@@ -88,7 +90,7 @@ class TodoDashView(qtw.QWidget):
                 name="complete",
                 button_text="Complete",
                 text_selector=lambda todo: "Complete" if todo.should_display() else "Incomplete",
-                width=font.BOLD_FONT_METRICS.width("  Incomplete  "),
+                width=font.BOLD_FONT_METRICS.boundingRect("  Incomplete  ").width(),
             ),
             table_view.text(
                 name="description",
@@ -103,7 +105,7 @@ class TodoDashView(qtw.QWidget):
             table_view.integer(
                 name="days",
                 display_name="Days",
-                width=font.BOLD_FONT_METRICS.width("  Days  "),
+                width=font.BOLD_FONT_METRICS.boundingRect("  Days  ").width(),
                 value_selector=lambda todo: 0 if (d := todo.days()) is None else d,
                 color_selector=lambda todo: _days_color_selector(todo.days()),
             ),
@@ -160,7 +162,7 @@ class TodoDashView(qtw.QWidget):
                     name="edit",
                     button_text="",
                     icon=icons.edit_btn_icon(parent=self),
-                    width=40,  # font.BOLD_FONT_METRICS.width("  Edit  "),
+                    width=40,
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -170,7 +172,7 @@ class TodoDashView(qtw.QWidget):
                     name="delete",
                     button_text="",
                     icon=icons.delete_btn_icon(parent=self),
-                    width=40,  # font.BOLD_FONT_METRICS.width("  Delete  "),
+                    width=40,
                     enabled_when=lambda todo: domain.permissions.user_can_edit_todo(
                         user=current_user,
                         todo=todo,
@@ -312,10 +314,10 @@ def _days_color_selector(days: int | None, /) -> qtg.QColor | None:
         return None
 
     if days < 0:
-        return typing.cast(qtg.QColor, qtc.Qt.red)
+        return typing.cast(qtg.QColor, qtg.QColor.red)
 
     if days == 0:
-        return typing.cast(qtg.QColor, qtc.Qt.yellow)
+        return typing.cast(qtg.QColor, qtg.QColor.yellow)
 
     return None
 

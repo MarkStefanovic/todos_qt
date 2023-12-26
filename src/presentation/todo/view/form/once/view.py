@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 
-from PyQt5 import QtWidgets as qtw  # noqa
+from PyQt6 import QtWidgets as qtw  # noqa
 
 from src.presentation.shared import widgets
 from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
