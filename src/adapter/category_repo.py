@@ -18,12 +18,13 @@ __all__ = (
 
 def add(
     *,
+    schema: str | None,
     con: sa.Connection,
     category: domain.Category,
 ) -> None | domain.Error:
     try:
         con.execute(
-            sa.insert(db.category).values(
+            sa.insert(db.category(schema=schema)).values(
                 category_id=category.category_id,
                 name=category.name,
                 note=category.note,
@@ -42,14 +43,15 @@ def add(
 
 def delete(
     *,
+    schema: str | None,
     con: sa.Connection,
     category_id: str,
 ) -> None | domain.Error:
     try:
         # noinspection PyComparisonWithNone
         categories_for_user = con.execute(
-            sa.select(sa.func.count(db.todo.c.todo_id)).where(
-                (db.todo.c.category_id == category_id) & (db.todo.c.date_deleted == None)  # noqa: E711
+            sa.select(sa.func.count(db.todo(schema=schema).c.todo_id)).where(
+                (db.todo(schema=schema).c.category_id == category_id) & (db.todo(schema=schema).c.date_deleted == None)  # noqa: E711
             )
         ).scalar_one()
         if categories_for_user is not None and categories_for_user > 0:
@@ -59,8 +61,8 @@ def delete(
             )
 
         con.execute(
-            sa.update(db.category)
-            .where(db.category.c.category_id == category_id)
+            sa.update(db.category(schema=schema))
+            .where(db.category(schema=schema).c.category_id == category_id)
             .values(date_deleted=datetime.datetime.now())
         )
 
@@ -73,11 +75,14 @@ def delete(
 
 def get(
     *,
+    schema: str | None,
     con: sa.Connection,
     category_id: str,
 ) -> domain.Category | None | domain.Error:
     try:
-        result = con.execute(sa.select(db.category).where(db.category.c.category_id == category_id))
+        result = con.execute(
+            sa.select(db.category(schema=schema)).where(db.category(schema=schema).c.category_id == category_id)
+        )
 
         if row := result.one_or_none():
             errors: list[str] = []
@@ -104,17 +109,18 @@ def get(
 
 def where(
     *,
+    schema: str | None,
     con: sa.Connection,
     active: bool,
 ) -> list[domain.Category] | domain.Error:
     try:
-        qry = sa.select(db.category)
+        qry = sa.select(db.category(schema=schema))
 
         if active:
             # noinspection PyComparisonWithNone,PyTypeChecker
-            qry = qry.where(db.category.c.date_deleted == None)  # noqa: E711
+            qry = qry.where(db.category(schema=schema).c.date_deleted == None)  # noqa: E711
 
-        result = con.execute(qry.order_by(db.category.c.name))
+        result = con.execute(qry.order_by(db.category(schema=schema).c.name))
 
         categories: list[domain.Category] = []
         for row in result.fetchall():
@@ -133,13 +139,14 @@ def where(
 
 def update(
     *,
+    schema: str | None,
     con: sa.Connection,
     category: domain.Category,
 ) -> None | domain.Error:
     try:
         con.execute(
-            sa.update(db.category)
-            .where(db.category.c.category_id == category.category_id)
+            sa.update(db.category(schema=schema))
+            .where(db.category(schema=schema).c.category_id == category.category_id)
             .values(
                 name=category.name,
                 note=category.note,

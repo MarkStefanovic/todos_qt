@@ -17,6 +17,7 @@ if __name__ == "__main__":
         db_url = f"sqlite:///{full_db_path.resolve()!s}"
 
         result = main(
+            config_file_path=domain.fs.assets_folder() / "config.json",
             db_url=db_url,
             user_is_admin=True,
         )

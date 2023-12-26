@@ -27,6 +27,7 @@ def apply_theme(app: qtw.QApplication) -> None:
         QHeaderView:section { 
             background-color: rgb(35, 35, 50);
             font-weight: bold; 
+            border: none;
         }
         QPushButton {
             font-weight: bold;
@@ -34,21 +35,19 @@ def apply_theme(app: qtw.QApplication) -> None:
             color: cyan;
             border: none;
         }
-        QHeaderView, QMainWindow, QStatusBar, QTableView { border: none; }
-        QTableView:item {
-            border: 0px;
-            padding: 4px;
-            min-height: 20px;
+        QHeaderView, QLabel, QMainWindow, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
+        
+        QTabWidget:pane {
+            background-color: none;
+            border: none;
         }
-        QTableView:item:hover { background-color: rgb(80, 80, 140); }
-        QPushButton:hover { background-color: rgb(80, 80, 140); }
-        QPushButton:pressed { background-color: rgb(80, 80, 140); }
         QTabBar { 
             font-weight: bold;
             border-top: none; 
-            border-bottom: 1px solid rgb(35, 35, 50); 
             border-left: none; 
             border-right: none; 
+            border-bottom: none;
+            background-color: none;
         }
         QTabBar:tab { 
             min-height: 30px;
@@ -61,7 +60,23 @@ def apply_theme(app: qtw.QApplication) -> None:
             background: rgb(80, 80, 100);
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
-        QLabel { border: none; }
+        
+        QHeaderView, QHeaderView::section {
+            border-radius: 0px;
+            background-color: rgb(35, 35, 50);
+        }
+        QTableCornerButton:section { 
+            background-color: rgb(35, 35, 50);
+        }
+        QTableView:item {
+            border: 0px;
+            padding: 4px;
+            min-height: 20px;
+        }
+        QTableView:item:hover { background-color: rgb(80, 80, 140); }
+        
+        QPushButton:hover { background-color: rgb(80, 80, 140); }
+        QPushButton:pressed { background-color: rgb(80, 80, 140); }
         QComboBox {
             border: none;
             combobox-popup: 0;

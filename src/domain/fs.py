@@ -5,7 +5,6 @@ import sys
 
 __all__ = (
     "assets_folder",
-    "config_path",
     "root_dir",
 )
 
@@ -32,16 +31,3 @@ def assets_folder() -> pathlib.Path:
     assert folder.exists(), f"{folder.resolve()!s} does not exist."
 
     return folder
-
-
-@functools.lru_cache
-def config_path() -> pathlib.Path:
-    path = assets_folder() / "config.json"
-
-    assert path.exists(), f"config path, {path.resolve()!s}, not found."
-
-    return path
-
-
-if __name__ == "__main__":
-    print(config_path())

@@ -16,7 +16,7 @@ QT_APP = qtw.QApplication([])
 @pytest.fixture(scope="function")
 def engine() -> sa.engine.Engine:
     eng = sa.create_engine("sqlite://", echo=True)
-    create_tables_result = adapter.db.create_tables(engine=eng)
+    create_tables_result = adapter.db.create_tables(schema=None, engine=eng)
     if isinstance(create_tables_result, domain.Error):
         raise Exception(f"Error creating tables: {create_tables_result!s}")
 

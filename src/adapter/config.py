@@ -1,46 +1,50 @@
 import functools
 import json
 import os
+import pathlib
 import typing
 
 from src import domain
 
 __all__ = (
-    "current_user",
     "db_schema",
+    "username",
 )
 
 
 @functools.lru_cache
-def _config() -> dict[str, typing.Any] | domain.Error:
+def _config(*, config_file_path: pathlib.Path) -> dict[str, typing.Any] | domain.Error:
     # noinspection PyBroadException
     try:
-        path = domain.fs.config_path()
-        with path.open("r") as fh:
+        if not config_file_path.exists():
+            return domain.Error.new(f"config_file_path, {config_file_path.resolve()!s}, does not exist.")
+
+        with config_file_path.open("r") as fh:
             return json.load(fh)
     except:  # noqa: E722
         return domain.Error.new("An error occurred while reading config.json.")
 
 
-def current_user() -> str | domain.Error:
+def username(*, config_file_path: pathlib.Path) -> str | domain.Error:
     # noinspection PyBroadException
     try:
-        config = _config()
+        config = _config(config_file_path=config_file_path)
         if isinstance(config, domain.Error):
             return config
 
-        username = config.get("current-user")
-        if username:
-            return username
+        config_file_username = config.get("current-user")
+        if config_file_username:
+            return config_file_username
+
         return os.environ.get("USERNAME", "user")
     except:  # noqa: E722
         return domain.Error.new("An error occurred while looking up current user from config.json.")
 
 
-def db_schema() -> str | None | domain.Error:
+def db_schema(*, config_file_path: pathlib.Path) -> str | None | domain.Error:
     # noinspection PyBroadException
     try:
-        config = _config()
+        config = _config(config_file_path=config_file_path)
         if isinstance(config, domain.Error):
             return config
 

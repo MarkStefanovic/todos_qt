@@ -17,10 +17,15 @@ __all__ = (
 
 
 # noinspection DuplicatedCode
-def add(*, con: sa.Connection, user: domain.User) -> None | domain.Error:
+def add(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    user: domain.User,
+) -> None | domain.Error:
     try:
         con.execute(
-            sa.insert(db.user).values(
+            sa.insert(db.user(schema=schema)).values(
                 user_id=user.user_id,
                 display_name=user.display_name,
                 username=user.username,
@@ -40,14 +45,15 @@ def add(*, con: sa.Connection, user: domain.User) -> None | domain.Error:
 
 def delete(
     *,
+    schema: str | None,
     con: sa.Connection,
     user_id: str,
 ) -> None | domain.Error:
     try:
         # noinspection PyComparisonWithNone,PyTypeChecker
         todos_for_user = con.execute(
-            sa.select(sa.func.count(db.todo.c.todo_id)).where(
-                (db.todo.c.user_id == user_id) & (db.todo.c.date_deleted == None)  # noqa: E711
+            sa.select(sa.func.count(db.todo(schema=schema).c.todo_id)).where(
+                (db.todo(schema=schema).c.user_id == user_id) & (db.todo.c.date_deleted == None)  # noqa: E711
             )
         ).scalar_one()
 
@@ -57,7 +63,11 @@ def delete(
                 f"Please reassign or delete those first."
             )
 
-        con.execute(sa.update(db.user).where(db.user.c.user_id == user_id).values(date_deleted=datetime.datetime.now()))
+        con.execute(
+            sa.update(db.user(schema=schema))
+            .where(db.user(schema=schema).c.user_id == user_id)
+            .values(date_deleted=datetime.datetime.now())
+        )
 
         return None
     except Exception as e:
@@ -68,11 +78,12 @@ def delete(
 
 def get(
     *,
+    schema: str | None,
     con: sa.Connection,
     user_id: str,
 ) -> domain.User | None | domain.Error:
     try:
-        result = con.execute(sa.select(db.user).where(db.user.c.user_id == user_id))
+        result = con.execute(sa.select(db.user(schema=schema)).where(db.user(schema=schema).c.user_id == user_id))
 
         if row := result.one_or_none():
             return _row_to_domain(row)
@@ -86,13 +97,14 @@ def get(
 
 def update(
     *,
+    schema: str | None,
     con: sa.Connection,
     user: domain.User,
 ) -> None | domain.Error:
     try:
         con.execute(
-            sa.update(db.user)
-            .where(db.user.c.user_id == user.user_id)
+            sa.update(db.user(schema=schema))
+            .where(db.user(schema=schema).c.user_id == user.user_id)
             .values(
                 username=user.username,
                 display_name=user.display_name,
@@ -111,16 +123,17 @@ def update(
 
 def where(
     *,
+    schema: str | None,
     con: sa.Connection,
     active: bool,
 ) -> list[domain.User] | domain.Error:
     try:
-        qry = sa.select(db.user)
+        qry = sa.select(db.user(schema=schema))
 
         if active:
-            qry = qry.where(db.user.c.date_deleted == None)  # noqa
+            qry = qry.where(db.user(schema=schema).c.date_deleted == None)  # noqa
 
-        result = con.execute(qry.order_by(db.user.c.display_name))
+        result = con.execute(qry.order_by(db.user(schema=schema).c.display_name))
 
         users: list[domain.User] = []
         for row in result.fetchall():

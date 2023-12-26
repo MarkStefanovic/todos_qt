@@ -14,16 +14,22 @@ class TodoService(domain.TodoService):
     def __init__(
         self,
         *,
+        schema: str | None,
         engine: sa.engine.Engine,
         username: str,
     ):
+        self._schema: typing.Final[str | None] = schema
         self._engine: typing.Final[sa.engine.Engine] = engine
         self._username: typing.Final[str] = username
 
     def add(self, *, todo: domain.Todo) -> None | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.todo_repo.add(con=con, todo=todo)
+                return adapter.todo_repo.add(
+                    schema=self._schema,
+                    con=con,
+                    todo=todo,
+                )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.add({todo=!r}) failed: {e!s}")
 
@@ -77,7 +83,11 @@ class TodoService(domain.TodoService):
     def delete(self, *, todo_id: str) -> None | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.todo_repo.delete(con=con, todo_id=todo_id)
+                return adapter.todo_repo.delete(
+                    schema=self._schema,
+                    con=con,
+                    todo_id=todo_id,
+                )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.delete({todo_id=!r}) failed: {e!s}")
 
@@ -86,7 +96,11 @@ class TodoService(domain.TodoService):
     def get(self, *, todo_id: str) -> domain.Todo | None | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.todo_repo.get(con=con, todo_id=todo_id)
+                return adapter.todo_repo.get(
+                    schema=self._schema,
+                    con=con,
+                    todo_id=todo_id,
+                )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.get({todo_id=!r}) failed: {e!s}")
 
@@ -101,6 +115,7 @@ class TodoService(domain.TodoService):
         try:
             with self._engine.begin() as con:
                 todos = adapter.todo_repo.where(
+                    schema=self._schema,
                     con=con,
                     category_id=domain.Unspecified(),
                     user_id=user_id,
@@ -135,7 +150,11 @@ class TodoService(domain.TodoService):
     ) -> None | domain.Error:
         try:
             with self._engine.begin() as con:
-                todo = adapter.todo_repo.get(con=con, todo_id=todo_id)
+                todo = adapter.todo_repo.get(
+                    schema=self._schema,
+                    con=con,
+                    todo_id=todo_id,
+                )
                 if isinstance(todo, domain.Error):
                     return todo
 
@@ -157,7 +176,11 @@ class TodoService(domain.TodoService):
                     prior_completed_by=prior_completed_by,
                 )
 
-                adapter.todo_repo.update(con=con, todo=updated_todo)
+                adapter.todo_repo.update(
+                    schema=self._schema,
+                    con=con,
+                    todo=updated_todo,
+                )
 
             return None
         except Exception as e:
@@ -176,6 +199,7 @@ class TodoService(domain.TodoService):
         try:
             with self._engine.begin() as con:
                 todos: typing.Iterable[domain.Todo] | domain.Error = adapter.todo_repo.where(
+                    schema=self._schema,
                     con=con,
                     category_id=category_id_filter,
                     user_id=user_id_filter,
@@ -216,7 +240,11 @@ class TodoService(domain.TodoService):
     def mark_incomplete(self, *, todo_id: str) -> None | domain.Error:
         try:
             with self._engine.begin() as con:
-                todo = adapter.todo_repo.get(con=con, todo_id=todo_id)
+                todo = adapter.todo_repo.get(
+                    schema=self._schema,
+                    con=con,
+                    todo_id=todo_id,
+                )
                 if isinstance(todo, domain.Error):
                     return todo
 
@@ -235,7 +263,11 @@ class TodoService(domain.TodoService):
                         prior_completed=None,
                     )
 
-                    return adapter.todo_repo.update(con=con, todo=updated_todo)
+                    return adapter.todo_repo.update(
+                        schema=self._schema,
+                        con=con,
+                        todo=updated_todo,
+                    )
 
             return None
         except Exception as e:
@@ -251,6 +283,7 @@ class TodoService(domain.TodoService):
                     date_updated=datetime.datetime.now(),
                 )
                 return adapter.todo_repo.update(
+                    schema=self._schema,
                     con=con,
                     todo=updated_todo,
                 )

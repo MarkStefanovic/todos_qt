@@ -1,6 +1,8 @@
+import pathlib
 import sys
 import typing
 
+# noinspection PyPep8Naming
 from PyQt5 import QtWidgets as qtw
 from loguru import logger
 
@@ -11,6 +13,7 @@ __all__ = ("main",)
 
 def main(
     *,
+    config_file_path: pathlib.Path,
     db_url: str,
     user_is_admin: bool,
 ) -> None | domain.Error:
@@ -24,21 +27,29 @@ def main(
         if isinstance(engine, domain.Error):
             return engine
 
-        create_tables_result = adapter.db.create_tables(engine=engine)
+        schema = adapter.config.db_schema(config_file_path=config_file_path)
+        if isinstance(schema, domain.Error):
+            return schema
+
+        create_tables_result = adapter.db.create_tables(
+            schema=schema,
+            engine=engine,
+        )
         if isinstance(create_tables_result, domain.Error):
             return create_tables_result
 
-        username = adapter.config.current_user()
+        username = adapter.config.username(config_file_path=config_file_path)
         if isinstance(username, domain.Error):
             return username
 
-        category_service = service.CategoryService(engine=engine)
+        category_service = service.CategoryService(schema=schema, engine=engine)
 
         add_default_categories_result = category_service.add_default_categories()
         if isinstance(add_default_categories_result, domain.Error):
             return add_default_categories_result
 
         user_service: typing.Final[service.UserService] = service.UserService(
+            schema=schema,
             engine=engine,
             username=username,
             user_is_admin=user_is_admin,
@@ -48,7 +59,11 @@ def main(
         if isinstance(current_user, domain.Error):
             return current_user
 
-        todo_service = service.TodoService(engine=engine, username=username)
+        todo_service = service.TodoService(
+            schema=schema,
+            engine=engine,
+            username=username,
+        )
 
         app_icon = presentation.theme.icons.app_icon()
         if isinstance(app_icon, domain.Error):

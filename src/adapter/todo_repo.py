@@ -69,7 +69,12 @@ class ValidRow:
 
 
 # noinspection PyComparisonWithNone
-def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
+def add(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    todo: domain.Todo,
+) -> None | domain.Error:
     try:
         if todo.todo_id == "":
             return domain.Error.new(f"Not a valid uuid: {todo.todo_id}", todo=todo)
@@ -95,7 +100,7 @@ def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
             prior_completed_by_user_id = None
 
         con.execute(
-            sa.insert(db.todo).values(
+            sa.insert(db.todo(schema=schema)).values(
                 todo_id=todo.todo_id,
                 template_todo_id=todo.template_todo_id,
                 expire_days=todo.frequency.expire_display_days,
@@ -129,9 +134,18 @@ def add(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
         return domain.Error.new(str(e), todo=todo)
 
 
-def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:
+def delete(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    todo_id: str,
+) -> None | domain.Error:
     try:
-        con.execute(sa.update(db.todo).where(db.todo.c.todo_id == todo_id).values(date_deleted=datetime.datetime.now()))
+        con.execute(
+            sa.update(db.todo(schema=schema))
+            .where(db.todo(schema=schema).c.todo_id == todo_id)
+            .values(date_deleted=datetime.datetime.now())
+        )
 
         return None
     except Exception as e:
@@ -140,9 +154,14 @@ def delete(*, con: sa.Connection, todo_id: str) -> None | domain.Error:
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
-def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Error:
+def get(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    todo_id: str,
+) -> domain.Todo | None | domain.Error:
     try:
-        result = con.execute(sa.select(db.todo).where(db.todo.c.todo_id == todo_id))
+        result = con.execute(sa.select(db.todo(schema=schema)).where(db.todo(schema=schema).c.todo_id == todo_id))
 
         row = result.one_or_none()
 
@@ -154,6 +173,7 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
             return valid_row
 
         user = user_repo.get(
+            schema=schema,
             con=con,
             user_id=valid_row.user_id,
         )
@@ -162,6 +182,7 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
 
         if valid_row.last_completed_by_user_id:
             last_completed_by = user_repo.get(
+                schema=schema,
                 con=con,
                 user_id=valid_row.last_completed_by_user_id,
             )
@@ -172,6 +193,7 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
 
         if valid_row.prior_completed_by_user_id:
             prior_completed_by = user_repo.get(
+                schema=schema,
                 con=con,
                 user_id=valid_row.prior_completed_by_user_id,
             )
@@ -181,6 +203,7 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
             prior_completed_by = None
 
         category = category_repo.get(
+            schema=schema,
             con=con,
             category_id=valid_row.category_id,
         )
@@ -222,7 +245,12 @@ def get(*, con: sa.Connection, todo_id: str) -> domain.Todo | None | domain.Erro
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
-def update(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
+def update(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    todo: domain.Todo,
+) -> None | domain.Error:
     try:
         if todo.frequency.week_day is None:
             week_day = None
@@ -235,8 +263,8 @@ def update(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
             month = todo.frequency.month.to_int()
 
         con.execute(
-            sa.update(db.todo)
-            .where(db.todo.c.todo_id == todo.todo_id)
+            sa.update(db.todo(schema=schema))
+            .where(db.todo(schema=schema).c.todo_id == todo.todo_id)
             .values(
                 template_todo_id=todo.template_todo_id,
                 user_id=todo.user.user_id,
@@ -272,6 +300,7 @@ def update(*, con: sa.Connection, todo: domain.Todo) -> None | domain.Error:
 
 def where(
     *,
+    schema: str | None,
     con: sa.Connection,
     category_id: str | domain.Unspecified,
     user_id: str | domain.Unspecified,
@@ -279,29 +308,33 @@ def where(
     template_todo_id: str | domain.Unspecified,
 ) -> list[domain.Todo] | domain.Error:
     try:
-        categories = category_repo.where(con=con, active=False)
+        categories = category_repo.where(schema=schema, con=con, active=False)
         if isinstance(categories, domain.Error):
             return categories
 
-        users = user_repo.where(con=con, active=False)
+        users = user_repo.where(
+            schema=schema,
+            con=con,
+            active=False,
+        )
         if isinstance(users, domain.Error):
             return users
 
-        qry = sa.select(db.todo).where(db.todo.c.date_deleted == None)  # noqa
+        qry = sa.select(db.todo(schema=schema)).where(db.todo(schema=schema).c.date_deleted == None)  # noqa
 
         if isinstance(category_id, str):
             if category_id:
-                qry = qry.where(db.todo.c.category_id == category_id)
+                qry = qry.where(db.todo(schema=schema).c.category_id == category_id)
 
         if isinstance(user_id, str):
             if user_id:
-                qry = qry.where(db.todo.c.user_id == user_id)
+                qry = qry.where(db.todo(schema=schema).c.user_id == user_id)
 
         if isinstance(description_starts_with, str):
-            qry = qry.where(db.todo.c.description.ilike(description_starts_with + "%"))
+            qry = qry.where(db.todo(schema=schema).c.description.ilike(description_starts_with + "%"))
 
         if isinstance(template_todo_id, str):
-            qry = qry.where(db.todo.c.template_todo_id == template_todo_id)
+            qry = qry.where(db.todo(schema=schema).c.template_todo_id == template_todo_id)
 
         category_by_id: dict[str, domain.Category] = {category.category_id: category for category in categories}
 
@@ -366,49 +399,6 @@ def where(
             user_id=user_id,
             description_starts_with=description_starts_with,
         )
-
-
-# def where_category(*, con: sa.Connection, category_id: str) -> list[domain.Todo] | domain.Error:
-#     user_lkp = {user.user_id: user for user in user_repo.all_users(con=con)}
-#
-#     if category := category_repo.get(con=con, category_id=category_id):
-#         result = con.execute(
-#             sa.select(db.todo)
-#             .where(db.todo.c.date_deleted == None)  # noqa
-#             .where(db.todo.c.category_id == category_id)
-#         )
-#
-#         return [
-#             domain.Todo(
-#                 todo_id=row.todo_id,
-#                 template_todo_id=row.template_todo_id,
-#                 category=category,
-#                 user=user_lkp[row.user_id],
-#                 description=row.description,
-#                 frequency=_parse_frequency(
-#                     advance_display_days=row.advance_days,
-#                     days=row.days,
-#                     due_date=row.due_date,
-#                     expire_display_days=row.expire_days,
-#                     frequency=row.frequency,
-#                     month=row.month,
-#                     month_day=row.month_day,
-#                     start_date=row.start_date,
-#                     week_day=row.week_day,
-#                     week_number=row.week_number,
-#                 ),
-#                 note=row.note,
-#                 last_completed=row.last_completed,
-#                 last_completed_by=user_lkp.get(row.last_completed_by or ""),
-#                 prior_completed=row.prior_completed,
-#                 prior_completed_by=user_lkp.get(row.prior_completed_by or ""),
-#                 date_added=row.date_added,
-#                 date_updated=row.date_updated,
-#             )
-#             for row in result.fetchall()
-#         ]
-#
-#     return []
 
 
 def _parse_frequency(

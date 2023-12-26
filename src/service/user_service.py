@@ -13,10 +13,12 @@ class UserService(domain.UserService):
     def __init__(
         self,
         *,
+        schema: str | None,
         engine: sa.engine.Engine,
         username: str,
         user_is_admin: bool,
     ):
+        self._schema: typing.Final[str | None] = schema
         self._engine: typing.Final[sa.engine.Engine] = engine
         self._username: typing.Final[str] = username.lower().strip()
         self._user_is_admin: typing.Final[bool] = user_is_admin
@@ -25,7 +27,11 @@ class UserService(domain.UserService):
         try:
             if self._user_is_admin:
                 with self._engine.begin() as con:
-                    adapter.user_repo.add(con=con, user=user)
+                    adapter.user_repo.add(
+                        schema=self._schema,
+                        con=con,
+                        user=user,
+                    )
 
             return None
         except Exception as e:
@@ -36,7 +42,11 @@ class UserService(domain.UserService):
     def get_current_user(self) -> domain.User | domain.Error:
         try:
             with self._engine.begin() as con:
-                users = adapter.user_repo.where(con=con, active=True)
+                users = adapter.user_repo.where(
+                    schema=self._schema,
+                    con=con,
+                    active=True,
+                )
                 if isinstance(users, domain.Error):
                     return users
 
@@ -55,7 +65,11 @@ class UserService(domain.UserService):
                         date_updated=None,
                     )
 
-                    add_result = adapter.user_repo.add(con=con, user=new_user)
+                    add_result = adapter.user_repo.add(
+                        schema=self._schema,
+                        con=con,
+                        user=new_user,
+                    )
                     if isinstance(add_result, domain.Error):
                         return add_result
 
@@ -69,7 +83,11 @@ class UserService(domain.UserService):
         try:
             if self._user_is_admin:
                 with self._engine.begin() as con:
-                    delete_result = adapter.user_repo.delete(con=con, user_id=user_id)
+                    delete_result = adapter.user_repo.delete(
+                        schema=self._schema,
+                        con=con,
+                        user_id=user_id,
+                    )
                     if isinstance(delete_result, domain.Error):
                         return delete_result
 
@@ -82,7 +100,11 @@ class UserService(domain.UserService):
     def get(self, *, user_id: str) -> domain.User | None | domain.Error:
         try:
             with self._engine.begin() as con:
-                user = adapter.user_repo.get(con=con, user_id=user_id)
+                user = adapter.user_repo.get(
+                    schema=self._schema,
+                    con=con,
+                    user_id=user_id,
+                )
                 return user
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.get({user_id=!r}) failed: {e!s}")
@@ -93,7 +115,11 @@ class UserService(domain.UserService):
         try:
             if self._user_is_admin:
                 with self._engine.begin() as con:
-                    return adapter.user_repo.update(con=con, user=user)
+                    return adapter.user_repo.update(
+                        schema=self._schema,
+                        con=con,
+                        user=user,
+                    )
 
             return None
         except Exception as e:
@@ -104,7 +130,11 @@ class UserService(domain.UserService):
     def where(self, *, active: bool) -> list[domain.User] | domain.Error:
         try:
             with self._engine.begin() as con:
-                return adapter.user_repo.where(con=con, active=active)
+                return adapter.user_repo.where(
+                    schema=self._schema,
+                    con=con,
+                    active=active,
+                )
         except Exception as e:
             logger.error(f"{self.__class__}.where({active=!r}) failed: {e!s}")
 

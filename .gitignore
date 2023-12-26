@@ -148,12 +148,14 @@ environment.frozen.yml
 config.json
 *config.json
 assets/personal/
-assets/work/
+assets/office_services/
 office-services.spec
-assets/secret/
 scripts/win/create-office-services-exe.cmd
 assets/personal-config.json
 .ruff_cache
 scratch.txt
 todo.txt
-secret/secret.py
+office_services.py
+
+*.png
+!app.png
