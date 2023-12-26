@@ -258,18 +258,3 @@ class TodoService(domain.TodoService):
             logger.error(f"{self.__class__.__name__}.update({todo=!r}) failed: {e!s}")
 
             return domain.Error.new(str(e), todo=todo)
-
-
-if __name__ == "__main__":
-    eng = adapter.db.create_engine()
-    assert not isinstance(eng, domain.Error)
-    svc = TodoService(engine=eng, username="test")
-    rs = svc.where(
-        due_filter=True,
-        description_like="",
-        category_id_filter=domain.Unspecified(),
-        user_id_filter=domain.Unspecified(),
-    )
-    assert not isinstance(rs, domain.Error)
-    for r in rs:
-        print(r)

@@ -692,23 +692,3 @@ def _validate_row(row: sa.Row[typing.Any], /) -> ValidRow | domain.Error:
         logger.error(f"{__file__}._validate_row({row=!r}) failed: {e!s}")
 
         return domain.Error.new(str(e), row=row)
-
-
-if __name__ == "__main__":
-    eng = db.create_engine()
-    if isinstance(eng, domain.Error):
-        raise Exception(str(eng))
-
-    with eng.begin() as cn:
-        cs = where(
-            con=cn,
-            category_id=domain.Unspecified(),
-            user_id=domain.Unspecified(),
-            description_starts_with=domain.Unspecified(),
-            template_todo_id=domain.Unspecified(),
-        )
-        if isinstance(cs, domain.Error):
-            raise Exception(str(cs))
-
-        for c in cs:
-            print(c)

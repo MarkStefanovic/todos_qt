@@ -31,7 +31,6 @@ class DoubleClickEvent(typing.Generic[Item, Value]):
 
 
 class TableView(qtw.QTableView, typing.Generic[Item, Key]):
-    # noinspection PyArgumentList
     button_clicked = qtc.pyqtSignal(ButtonClickedEvent)
     double_click = qtc.pyqtSignal(DoubleClickEvent)
 
@@ -64,7 +63,6 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
         self.setModel(self._view_model)
 
-        # set up delegates
         for attr in self._attrs:
             if attr.data_type == "button":
                 if attr.value_selector is None:
@@ -94,8 +92,6 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 col_num = self._view_model.get_column_number_for_attr_name(attr.name)
 
                 self.setItemDelegateForColumn(col_num, btn_delegate)
-                #
-                # btn_delegate.clicked.connect(lambda ix: self._on_click(ix))
 
         self.setSortingEnabled(True)
         # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
@@ -147,8 +143,13 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self._view_model.add_item(item)
 
     def clear_highlight(self, *keys: Key) -> None:
-        keys_to_clear = {str(key) for key in keys}
-        self._view_model.clear_highlight(*keys_to_clear)
+        row_nums: list[int] = []
+        for key in keys:
+            row_num = self._view_model.get_row_num_for_key(str(key))
+            if row_num is not None:
+                row_nums.append(row_num)
+
+        self._view_model.clear_highlight(*row_nums)
 
     def clear_highlights(self) -> None:
         self._view_model.clear_highlights()

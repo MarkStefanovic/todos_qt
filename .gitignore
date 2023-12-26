@@ -147,7 +147,6 @@ todo.db
 environment.frozen.yml
 config.json
 *config.json
-*secret.json
 assets/personal/
 assets/work/
 office-services.spec
@@ -157,3 +156,4 @@ assets/personal-config.json
 .ruff_cache
 scratch.txt
 todo.txt
+secret/secret.py

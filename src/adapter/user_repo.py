@@ -6,13 +6,18 @@ from loguru import logger
 
 from src import domain
 from src.adapter import db
-from src.domain import User
 
-__all__ = ("add",)
+__all__ = (
+    "add",
+    "delete",
+    "get",
+    "update",
+    "where",
+)
 
 
 # noinspection DuplicatedCode
-def add(*, con: sa.Connection, user: User) -> None | domain.Error:
+def add(*, con: sa.Connection, user: domain.User) -> None | domain.Error:
     try:
         con.execute(
             sa.insert(db.user).values(
@@ -33,7 +38,7 @@ def add(*, con: sa.Connection, user: User) -> None | domain.Error:
         return domain.Error.new(str(e), user=user)
 
 
-def delete_user(
+def delete(
     *,
     con: sa.Connection,
     user_id: str,
@@ -82,7 +87,7 @@ def get(
 def update(
     *,
     con: sa.Connection,
-    user: User,
+    user: domain.User,
 ) -> None | domain.Error:
     try:
         con.execute(
@@ -104,7 +109,11 @@ def update(
         return domain.Error.new(str(e), user=user)
 
 
-def where(*, con: sa.Connection, active: bool) -> list[User] | domain.Error:
+def where(
+    *,
+    con: sa.Connection,
+    active: bool,
+) -> list[domain.User] | domain.Error:
     try:
         qry = sa.select(db.user)
 
@@ -190,17 +199,3 @@ def _row_to_domain(row: sa.Row[typing.Any], /) -> domain.User | domain.Error:
         logger.error(f"{__file__}._row_to_domain({row=!r}) failed: {e!s}")
 
         return domain.Error.new(str(e), row=row)
-
-
-if __name__ == "__main__":
-    eng = db.create_engine()
-    if isinstance(eng, domain.Error):
-        raise Exception(str(eng))
-
-    with eng.begin() as cn:
-        cs = where(con=cn, active=True)
-        if isinstance(cs, domain.Error):
-            raise Exception(str(cs))
-
-        for c in cs:
-            print(c)

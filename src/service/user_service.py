@@ -69,7 +69,7 @@ class UserService(domain.UserService):
         try:
             if self._user_is_admin:
                 with self._engine.begin() as con:
-                    delete_result = adapter.user_repo.delete_user(con=con, user_id=user_id)
+                    delete_result = adapter.user_repo.delete(con=con, user_id=user_id)
                     if isinstance(delete_result, domain.Error):
                         return delete_result
 
@@ -109,13 +109,3 @@ class UserService(domain.UserService):
             logger.error(f"{self.__class__}.where({active=!r}) failed: {e!s}")
 
             return domain.Error.new(str(e), active=active)
-
-
-if __name__ == "__main__":
-    eng = adapter.db.create_engine()
-    assert not isinstance(eng, domain.Error)
-    svc = UserService(engine=eng, username="test", user_is_admin=True)
-    rs = svc.where(active=True)
-    assert not isinstance(rs, domain.Error)
-    for r in rs:
-        print(r)

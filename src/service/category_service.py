@@ -94,13 +94,3 @@ class CategoryService(domain.CategoryService):
             return None
         except Exception as e:
             return domain.Error.new(str(e), category=category)
-
-
-if __name__ == "__main__":
-    eng = adapter.db.create_engine()
-    assert not isinstance(eng, domain.Error)
-    svc = CategoryService(engine=eng)
-    rs = svc.all()
-    assert not isinstance(rs, domain.Error)
-    for r in rs:
-        print(r)

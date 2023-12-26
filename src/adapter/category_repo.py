@@ -1,27 +1,25 @@
 import datetime
 import typing
 
+import sqlalchemy as sa
 from loguru import logger
 
 from src import domain
 from src.adapter import db
-from src.domain import Category
-
-import sqlalchemy as sa
 
 __all__ = (
     "add",
     "delete",
     "get",
-    "where",
     "update",
+    "where",
 )
 
 
 def add(
     *,
     con: sa.Connection,
-    category: Category,
+    category: domain.Category,
 ) -> None | domain.Error:
     try:
         con.execute(
@@ -77,7 +75,7 @@ def get(
     *,
     con: sa.Connection,
     category_id: str,
-) -> Category | None | domain.Error:
+) -> domain.Category | None | domain.Error:
     try:
         result = con.execute(sa.select(db.category).where(db.category.c.category_id == category_id))
 
@@ -104,7 +102,11 @@ def get(
         return domain.Error.new(str(e), category_id=category_id)
 
 
-def where(*, con: sa.Connection, active: bool) -> list[Category] | domain.Error:
+def where(
+    *,
+    con: sa.Connection,
+    active: bool,
+) -> list[domain.Category] | domain.Error:
     try:
         qry = sa.select(db.category)
 
@@ -129,7 +131,11 @@ def where(*, con: sa.Connection, active: bool) -> list[Category] | domain.Error:
         return domain.Error.new(str(e), active=active)
 
 
-def update(*, con: sa.Connection, category: Category) -> None | domain.Error:
+def update(
+    *,
+    con: sa.Connection,
+    category: domain.Category,
+) -> None | domain.Error:
     try:
         con.execute(
             sa.update(db.category)
@@ -211,19 +217,3 @@ def _row_to_domain(row: sa.Row[typing.Any], /) -> domain.Category | domain.Error
         logger.error(f"{__file__}._row_to_domain({row=!r}) failed: {e!s}")
 
         return domain.Error.new(str(e), row=row)
-
-
-if __name__ == "__main__":
-    eng = db.create_engine()
-    if isinstance(eng, domain.Error):
-        raise Exception(str(eng))
-
-    with eng.begin() as cn:
-        cs = where(con=cn, active=True)
-        if isinstance(cs, domain.Error):
-            raise Exception(str(cs))
-
-        for c in cs:
-            print(c)
-
-        print(f"get: {get(con=cn, category_id='29b91b51b5b64a4590e25b610b91b84f')}")

@@ -48,7 +48,11 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         return self._items.copy()
 
     def add_item(self, /, item: Item) -> None:
-        self.beginInsertRows(qtc.QModelIndex(), self.rowCount(), self.rowCount())
+        self.beginInsertRows(
+            qtc.QModelIndex(),
+            self.rowCount(),
+            self.rowCount(),
+        )
         self._items.append(item)
         self._reindex_rows()
         self.endInsertRows()
@@ -177,6 +181,9 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
             return self._items[row_num]
 
         return None
+
+    def get_row_num_for_key(self, /, key: str) -> int | None:
+        return self._row_num_by_key.get(key)
 
     def headerData(
         self,

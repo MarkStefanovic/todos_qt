@@ -1,4 +1,4 @@
-from src.domain import exceptions, permissions  # noqa: F401
+from src.domain import exceptions, fs, permissions
 from src.domain.category import *
 from src.domain.category_service import *
 from src.domain.config import *

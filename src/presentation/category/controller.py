@@ -23,7 +23,7 @@ class CategoryController(qtc.QObject):
         category_service: domain.CategoryService,
         dash_requests: dash.requests.CategoryDashRequests,
         form_requests: form.requests.CategoryFormRequests,
-        parent: qtc.QObject,
+        parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
 

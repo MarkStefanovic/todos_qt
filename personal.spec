@@ -3,10 +3,10 @@
 block_cipher = None
 
 a = Analysis(
-    ["src/main.py"],
+    ["src/personal.py"],
     pathex=[],
     binaries=[],
-    datas=[("assets/personal/secret.json", ".")],
+    datas=[],
     hiddenimports=["qtawesome"],
     hookspath=[],
     runtime_hooks=[],
@@ -38,5 +38,5 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
-    icon="assets/app.ico"
+    icon="assets/icons/app.ico"
 )

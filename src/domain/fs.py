@@ -7,7 +7,6 @@ __all__ = (
     "assets_folder",
     "config_path",
     "root_dir",
-    "secrets_path",
 )
 
 
@@ -19,9 +18,10 @@ def root_dir() -> pathlib.Path:
         return path
     else:
         project_root = pathlib.Path(__file__).parent.parent.parent
-        assert (project_root / "environment.yml").exists(), \
-            f"An error occurred while looking up the project root.  {project_root.resolve()!s} does not contain an " \
+        assert (project_root / "environment.yml").exists(), (
+            f"An error occurred while looking up the project root.  {project_root.resolve()!s} does not contain an "
             f"environment.yml file."
+        )
         return project_root
 
 
@@ -43,22 +43,5 @@ def config_path() -> pathlib.Path:
     return path
 
 
-def secrets_path() -> pathlib.Path:
-    if getattr(sys, "frozen", False):
-        bundle_folder: str = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
-
-        path = pathlib.Path(os.path.abspath(os.path.join(bundle_folder, 'secret.json')))
-
-        assert path.exists(), f"secret.json path, {path.resolve()!s}, not found."
-
-        return path
-    else:
-        path = assets_folder() / "secret.json"
-
-        assert path.exists(), f"secret.json path, {path.resolve()!s}, not found."
-
-        return path
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(config_path())
