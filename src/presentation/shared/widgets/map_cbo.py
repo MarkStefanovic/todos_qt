@@ -24,7 +24,7 @@ class MapCBO(typing.Generic[Value], qtw.QComboBox):
         self.currentIndexChanged.connect(self._on_current_index_changed)
 
     def get_value(self) -> Value | None:
-        return self.currentData()
+        return typing.cast(Value, self.currentData())
 
     def get_values(self) -> list[Value]:
         values: list[Value] = []

@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 
 from dateutil.parser import parse, ParserError
+
+# noinspection PyPep8Naming
 from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 __all__ = ("DateEditor",)

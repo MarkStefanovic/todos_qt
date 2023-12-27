@@ -37,7 +37,14 @@ class UserSelectorView(qtw.QComboBox):
         self._states.connect(self._set_state)
 
     def get_selected_item(self) -> domain.User:
-        return self.currentData()
+        if isinstance(self.currentData(), domain.User):
+            return typing.cast(domain.User, self.currentData())
+
+        logger.error(
+            f"{self.__class__.__name__}.get_selected_item() did not return a User.  "
+            f"It returned {self.currentData()!r}."
+        )
+        return domain.DEFAULT_USER
 
     def select_item(self, /, item: domain.User) -> None:
         for ix in range(self.count()):

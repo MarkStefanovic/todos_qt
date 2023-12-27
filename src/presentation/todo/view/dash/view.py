@@ -263,13 +263,17 @@ class TodoDashView(qtw.QWidget):
         if self._current_user.is_admin:
             self._requests.add.emit()
 
-    def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
+    def _on_button_clicked(
+        self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]
+    ) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         match event.attr.name:
             case "delete":
                 if self._current_user.is_admin:
-                    if popup.confirm(question=f'Are you sure you want to delete "{event.item.description}"?'):
+                    if popup.confirm(
+                        question=f'Are you sure you want to delete "{event.item.description}"?'
+                    ):
                         request = requests.DeleteTodo(todo=event.item)
 
                         self._requests.delete.emit(request)
@@ -281,7 +285,9 @@ class TodoDashView(qtw.QWidget):
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
-    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]) -> None:
+    def _on_double_click(
+        self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]
+    ) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         if self._current_user.is_admin:
@@ -324,10 +330,10 @@ def _days_color_selector(days: int | None, /) -> qtg.QColor | None:
         return None
 
     if days < 0:
-        return typing.cast(qtg.QColor, qtg.QColor(255, 0, 0))  # red
+        return qtg.QColor(255, 0, 0)  # red
 
     if days == 0:
-        return typing.cast(qtg.QColor, qtg.QColor(255, 255, 0))  # yellow
+        return qtg.QColor(255, 255, 0)  # yellow
 
     return None
 

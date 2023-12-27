@@ -33,7 +33,15 @@ class CategorySelectorView(qtw.QComboBox):
 
     @property
     def selected_item(self) -> domain.Category:
-        return self.currentData()
+        if isinstance(self.currentData(), domain.Category):
+            return typing.cast(domain.Category, self.currentData())
+
+        logger.error(
+            f"{self.__class__.__name__}.selected_item() did not return a domain.Category.  "
+            f"It returned {self.currentData()!r}."
+        )
+
+        return domain.TODO_CATEGORY
 
     def _set_state(self, /, state: CategorySelectorState) -> None:
         logger.debug(f"{self.__class__.__name__}._set_state({state=!r})")

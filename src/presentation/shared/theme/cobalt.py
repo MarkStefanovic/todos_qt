@@ -1,3 +1,5 @@
+# css ref: https://doc.qt.io/qt-6/stylesheet-examples.html
+
 # noinspection PyPep8Naming
 from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
 
@@ -34,6 +36,42 @@ def apply_theme(app: qtw.QApplication) -> None:
         
         QHeaderView, QLabel, QMainWindow, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
         
+        QScrollBar:horizontal {
+            border: none;
+            background-color: rgb(80, 80, 100);
+            height: 20px;
+        }
+        QScrollBar::handle:horizontal {
+            background: cyan;
+            min-width: 20px;
+        }
+        QScrollBar::add-line:horizontal {
+            border: none;
+        }
+        QScrollBar::sub-line:horizontal {
+            border: none;
+        }
+        
+        QScrollBar:vertical {
+            border: none;
+            background-color: rgb(80, 80, 100);
+            width: 20px;
+        }
+        QScrollBar::handle:vertical {
+            background: cyan;
+            min-width: 20px;
+        }
+        QScrollBar::add-line:vertical {
+            border: none;
+        }
+        QScrollBar::sub-line:vertical {
+            border: none;
+        }
+        
+        QStatusBar {
+            background-color: rgb(25, 25, 40);
+        }
+        
         QTabWidget:pane {
             background-color: none;
             border: none;
@@ -46,7 +84,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             border-bottom: none;
             background-color: none;
         }
-        QTabBar:tab { 
+        QTabBar::tab { 
             min-height: 30px;
             min-width: 100px;
             border: none;
@@ -58,21 +96,22 @@ def apply_theme(app: qtw.QApplication) -> None:
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
         
-        QHeaderView, QHeaderView:section { 
+        QHeaderView::section { 
             background-color: rgb(35, 35, 50);
             font-weight: bold; 
-            border: none;
-            border-radius: 0px;
+            border-left: 1px solid rgb(80, 80, 100);
+            border-right: 1px solid rgb(80, 80, 100);
+            padding: 4px;
         }
-        QTableCornerButton:section { 
-            background-color: rgb(35, 35, 50);
+        QTableCornerButton::section { 
+            background-color: rgb(15, 15, 25);
         }
-        QTableView:item {
-            border: 0px;
+        QTableView::item {
+            border-left: 1px solid rgb(25, 25, 40);
             padding: 4px;
             min-height: 20px;
         }
-        QTableView:item:hover { background-color: rgb(80, 80, 140); }
+        QTableView::item:hover { background-color: rgb(80, 80, 140); }
         
         QPushButton:hover { background-color: rgb(80, 80, 140); }
         QPushButton:pressed { background-color: rgb(80, 80, 140); }

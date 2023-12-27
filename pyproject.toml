@@ -17,13 +17,32 @@ dependencies = [
     "pip-audit",
     "ruff",
     "ruff-lsp",
+    "types-python-dateutil",
 ]
 
 [tool.ruff]
 src = ["src"]
-line-length = 120
+line-length = 100
 ignore = ["F401", "F403"]
+
 [tool.hatch]
+
+[tool.mypy]
+allow_redefinition = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+sqlite_cache = true
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
 
 [build-system]
 requires = ["hatchling"]

@@ -3,7 +3,6 @@ import warnings
 
 # noinspection PyPep8Naming
 from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
-from loguru import logger
 
 from src.presentation.shared.widgets.table_view.attr import Attr
 from src.presentation.shared.widgets.table_view.item import Item
@@ -39,7 +38,9 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
             col_num: attr for col_num, attr in enumerate(self._attrs)
         }
 
-        self._attr_by_name: typing.Final[dict[str, Attr[Item, typing.Any]]] = {attr.name: attr for attr in self._attrs}
+        self._attr_by_name: typing.Final[dict[str, Attr[Item, typing.Any]]] = {
+            attr.name: attr for attr in self._attrs
+        }
 
         self._items: list[Item] = []
         self._row_num_by_key: dict[str, int] = {}
@@ -87,7 +88,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
     def data(
         self,
         index: qtc.QModelIndex,
-        role: qtc.Qt.ItemDataRole = qtc.Qt.ItemDataRole.DisplayRole,
+        role: int = qtc.Qt.ItemDataRole.DisplayRole,
     ) -> qtc.QVariant | qtc.Qt.AlignmentFlag | qtg.QBrush | qtg.QFont | qtg.QIcon:
         if not index.isValid():
             return qtc.QVariant()
@@ -138,9 +139,9 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
             match attr.data_type:
                 case "date":
-                    return value.strftime(self._date_format)
+                    return qtc.QVariant(value.strftime(self._date_format))
                 case "datetime":
-                    return value.strftime(self._datetime_format)
+                    return qtc.QVariant(value.strftime(self._datetime_format))
                 case "text":
                     return qtc.QVariant("{0}".format(value.strip(" \n\t")))
                 case _:
@@ -163,13 +164,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
                 if color := attr.color_selector(item):
                     brush = qtg.QBrush()
-                    try:
-                        brush.setColor(color)
-                    except Exception as set_color_error:
-                        logger.error(
-                            f"attr: {attr.name}, color_selector: {attr.color_selector=!r}, set_color_error: {set_color_error!r}"
-                        )
-                        raise
+                    brush.setColor(color)
                     return brush
 
         return qtc.QVariant()
@@ -231,7 +226,10 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
     def removeRow(self, row: int, parent: qtc.QModelIndex = qtc.QModelIndex()) -> bool:  # noqa: B008
         if len(self._items) < row + 1:
-            warnings.warn(f"Attempted to delete row {row}, but there are only {len(self._items)} items.", stacklevel=1)
+            warnings.warn(
+                f"Attempted to delete row {row}, but there are only {len(self._items)} items.",
+                stacklevel=1,
+            )
             return False
 
         self.beginRemoveRows(parent, row, row)
@@ -248,6 +246,8 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         return len(self._items)
 
     def set_items(self, /, items: typing.Iterable[Item]) -> None:
+        self.layoutAboutToBeChanged.emit()
+
         self._items.clear()
         for item in items:
             self._items.append(item)
@@ -257,12 +257,15 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # noinspection PyUnresolvedReferences
         self.layoutChanged.emit()
 
-    def sort(self, col: int, order: qtc.Qt.SortOrder = qtc.Qt.SortOrder.AscendingOrder) -> None:
+    def sort(
+        self,
+        col: int,
+        order: qtc.Qt.SortOrder = qtc.Qt.SortOrder.AscendingOrder,
+    ) -> None:
         attr = self._attr_by_col_num[col]
         if attr.data_type == "button":
             return
 
-        # noinspection PyUnresolvedReferences
         self.layoutAboutToBeChanged.emit()
 
         def key_fn(item: Item, /) -> tuple[bool, typing.Any]:
@@ -284,7 +287,8 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
         self._reindex_rows()
 
-        # noinspection PyUnresolvedReferences
+        self.modelReset.emit()
+
         self.layoutChanged.emit()
 
     def update_item(self, /, updated_item: Item) -> None:

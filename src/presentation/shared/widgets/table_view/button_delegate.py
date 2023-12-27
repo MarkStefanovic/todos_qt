@@ -28,8 +28,12 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         self._text: typing.Final[str] = text
         self._icon: typing.Final[qtg.QIcon | None] = icon
-        self._button_text_selector: typing.Final[typing.Callable[[qtc.QModelIndex], str] | None] = button_text_selector
-        self._enabled_selector: typing.Final[typing.Callable[[qtc.QModelIndex], bool] | None] = enabled_selector
+        self._button_text_selector: typing.Final[
+            typing.Callable[[qtc.QModelIndex], str] | None
+        ] = button_text_selector
+        self._enabled_selector: typing.Final[
+            typing.Callable[[qtc.QModelIndex], bool] | None
+        ] = enabled_selector
 
         self._btn = qtw.QPushButton(self._text)
         self._btn.setStyleSheet("border-radius: 0px;")
@@ -67,7 +71,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
     def paint(
         self,
-        painter: qtg.QPainter,
+        painter: qtg.QPainter | None,
         option: qtw.QStyleOptionViewItem,
         index: qtc.QModelIndex,
     ) -> None:
@@ -110,12 +114,29 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
         # if option.state & qtw.QStyle.State_Sunken:
         #     print("sunken")
 
-        self._btn.style().drawControl(
-            qtw.QStyle.ControlElement.CE_PushButton,
-            btn,
-            painter,
-            self._btn,
-        )
+        if style := self._btn.style():
+            style.drawControl(
+                qtw.QStyle.ControlElement.CE_PushButton,
+                btn,
+                painter,
+                self._btn,
+            )
+
+    def sizeHint(self, option: qtw.QStyleOptionViewItem, index: qtc.QModelIndex):
+        if self._icon is None:
+            if self._button_text_selector is None:
+                btn_text = self._text
+            else:
+                # noinspection PyArgumentList
+                btn_text = self._button_text_selector(index=index)  # type: ignore
+
+            return qtc.QSize(
+                font.BOLD_FONT_METRICS.boundingRect(btn_text).width()
+                + (2 * font.BOLD_FONT_METRICS.averageCharWidth()),
+                option.rect.height(),
+            )
+
+        return super().sizeHint(option, index)
 
     def _button_is_enabled(self, *, index: qtc.QModelIndex) -> bool:
         if self._enabled_selector is None:

@@ -20,7 +20,7 @@ def _config(*, config_file_path: pathlib.Path) -> dict[str, typing.Any] | domain
             return domain.Error.new(f"config_file_path, {config_file_path.resolve()!s}, does not exist.")
 
         with config_file_path.open("r") as fh:
-            return json.load(fh)
+            return typing.cast(dict[str, typing.Any], json.load(fh))
     except:  # noqa: E722
         return domain.Error.new("An error occurred while reading config.json.")
 
@@ -34,7 +34,7 @@ def username(*, config_file_path: pathlib.Path) -> str | domain.Error:
 
         config_file_username = config.get("current-user")
         if config_file_username:
-            return config_file_username
+            return str(config_file_username)
 
         return os.environ.get("USERNAME", "user")
     except:  # noqa: E722

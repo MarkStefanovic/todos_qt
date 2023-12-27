@@ -17,9 +17,9 @@ def root_dir() -> pathlib.Path:
         return path
     else:
         project_root = pathlib.Path(__file__).parent.parent.parent
-        assert (project_root / "environment.yml").exists(), (
-            f"An error occurred while looking up the project root.  {project_root.resolve()!s} does not contain an "
-            f"environment.yml file."
+        assert (project_root / "pyproject.toml").exists(), (
+            f"An error occurred while looking up the project root.  {project_root.resolve()!s} does not contain a "
+            f"pyproject.toml file."
         )
         return project_root
 

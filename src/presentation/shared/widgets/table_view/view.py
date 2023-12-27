@@ -59,7 +59,9 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             datetime_format=self._datetime_format,
         )
 
-        self._key_col: typing.Final[int] = self._view_model.get_column_number_for_attr_name(self._key_attr_name)
+        self._key_col: typing.Final[int] = self._view_model.get_column_number_for_attr_name(
+            self._key_attr_name
+        )
 
         self.setModel(self._view_model)
 
@@ -104,30 +106,44 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 if attr.data_type == "date":
                     col_width = self._font_metrics.boundingRect("  88/88/8888  ").width()
                 else:
-                    col_width = self._font_metrics.boundingRect(attr.display_name + "33333333").width()
+                    col_width = self._font_metrics.boundingRect(
+                        attr.display_name + "33333333"
+                    ).width()
             else:
                 col_width = attr.width
 
-            self.horizontalHeader().resizeSection(col_num, col_width)
+            if header := self.horizontalHeader():
+                header.resizeSection(col_num, col_width)
 
-        self.horizontalHeader().setDefaultAlignment(
-            qtc.Qt.AlignmentFlag.AlignHCenter
-            | qtc.Qt.AlignmentFlag.AlignBottom
-            | qtg.QTextOption.WrapMode.WordWrap.value
-        )
-        self.horizontalHeader().setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
-        # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
+        if header := self.horizontalHeader():
+            header.setDefaultAlignment(
+                qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
+                # | qtg.QTextOption.WrapMode.WordWrap.value
+            )
+            header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
+            # self.horizontalHeader().setSectionResizeMode(
+            #     qtw.QHeaderView.ResizeMode.ResizeToContents
+            # )
+            header.setMaximumSectionSize(400)
+            header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
 
-        self.verticalHeader().setDefaultAlignment(qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft)
-        self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.Fixed)
-        self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)  # display at most 5 lines
-        self.verticalHeader().setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
+        if vertical_header := self.verticalHeader():
+            # header.setDefaultAlignment(
+            #     qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
+            # )
+            #     # display at most 5 lines
+            vertical_header.setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
+            # vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.Fixed)
+            # vertical_header.setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
 
         # noinspection PyUnresolvedReferences
         self.clicked.connect(self._on_click)
         # noinspection PyUnresolvedReferences
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))
         # self.selectionModel().selectionChanged.connect(self._on_selection_changed)
+
+        self._view_model.layoutChanged.connect(lambda: self.resizeRowsToContents())
+        self._view_model.layoutChanged.connect(lambda: self.resizeColumnsToContents())
 
     @property
     def items(self) -> list[Item]:
@@ -149,7 +165,8 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self._view_model.clear_highlights()
 
     def clear_selection(self) -> None:
-        self.selectionModel().clear()
+        if model := self.selectionModel():
+            model.clear()
 
     def delete_item(self, *, key: Key) -> None:
         self._view_model.delete_item(key=str(key))
@@ -162,26 +179,29 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         return self._view_model.highlight_row(*keys_to_highlight)
 
     def select_item_by_key(self, /, key: Key) -> None:
-        for row_num in range(self.model().rowCount()):
-            index = self.model().index(row_num, self._key_col)
-            model_key = self.model().data(index)
-            if model_key == key:
-                self.selectionModel().select(index, qtc.QItemSelectionModel.SelectionFlag.Rows)
+        if model := self.model():
+            for row_num in range(model.rowCount()):
+                index = model.index(row_num, self._key_col)
+                model_key = model.data(index)
+                if model_key == key:
+                    if selection_model := self.selectionModel():
+                        selection_model.select(index, qtc.QItemSelectionModel.SelectionFlag.Rows)
 
-                return None
+                    return None
 
     @property
     def selected_item(self) -> Item | None:
-        if selection_model_indices := self.selectionModel().selectedIndexes():
-            row_num = selection_model_indices[0].row()
-            key = self.model().data(self.model().index(row_num, self._key_col))
-            return self.get_item(key=key)
+        if selection_model := self.selectionModel():
+            if indices := selection_model.selectedIndexes():
+                row_num = indices[0].row()
+                if model := self.model():
+                    key = model.data(model.index(row_num, self._key_col))
+                    return self.get_item(key=key)
 
         return None
 
     def set_items(self, /, items: typing.Iterable[Item]) -> None:
         self._view_model.set_items(items)
-        self.resizeRowsToContents()
 
     def update_item(self, /, item: Item) -> None:
         self._view_model.update_item(item)
@@ -191,44 +211,50 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         attr_button_enabled_selector: typing.Callable[[Item], bool],
         index: qtc.QModelIndex,
     ) -> bool:
-        key = self.model().data(self.model().index(index.row(), self._key_col))
+        if model := self.model():
+            key = model.data(model.index(index.row(), self._key_col))
 
-        if isinstance(key, qtc.QVariant):
-            key = str(key.value())
-        else:
-            key = str(key)
+            if isinstance(key, qtc.QVariant):
+                key = str(key.value())
+            else:
+                key = str(key)
 
-        if key is None:
-            return False
+            if key is None:
+                return False
 
-        item = self.get_item(key=key)
+            item = self.get_item(key=key)
 
-        if item is None:
-            return False
+            if item is None:
+                return False
 
-        return attr_button_enabled_selector(item)
+            return attr_button_enabled_selector(item)
+
+        return False
 
     def _button_text_selector(
         self,
         attr_button_text_selector: typing.Callable[[Item], str],
         index: qtc.QModelIndex,
     ) -> str:
-        key = self.model().data(self.model().index(index.row(), self._key_col))
+        if model := self.model():
+            key = model.data(model.index(index.row(), self._key_col))
 
-        if isinstance(key, qtc.QVariant):
-            key = str(key.value())
-        else:
-            key = str(key)
+            if isinstance(key, qtc.QVariant):
+                key = str(key.value())
+            else:
+                key = str(key)
 
-        if key is None:
-            return ""
+            if key is None:
+                return ""
 
-        item = self.get_item(key=key)
+            item = self.get_item(key=key)
 
-        if item is None:
-            return ""
+            if item is None:
+                return ""
 
-        return attr_button_text_selector(item)
+            return attr_button_text_selector(item)
+
+        return ""
 
     def _on_click(self, /, index: qtc.QModelIndex) -> None:
         attr = self._view_model.get_attr_for_column_number(index.column())
