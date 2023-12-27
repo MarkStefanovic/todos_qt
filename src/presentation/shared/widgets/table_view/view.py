@@ -101,39 +101,47 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.setMouseTracking(True)
         self.setWordWrap(True)
 
+        self._min_col_widths: typing.Final[dict[int, int]] = {}
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
                 if attr.data_type == "date":
-                    col_width = self._font_metrics.boundingRect("  88/88/8888  ").width()
+                    col_width = self._font_metrics.boundingRect("   88/88/8888   ").width()
                 else:
-                    col_width = self._font_metrics.boundingRect(
-                        attr.display_name + "33333333"
+                    col_width = font.BOLD_FONT_METRICS.boundingRect(
+                        attr.display_name + "    "
                     ).width()
             else:
-                col_width = attr.width
+                if attr.display_name:
+                    col_width = max(
+                        font.BOLD_FONT_METRICS.boundingRect(attr.display_name + "    ").width(),
+                        attr.width,
+                    )
+                else:
+                    col_width = attr.width
 
             if header := self.horizontalHeader():
                 header.resizeSection(col_num, col_width)
 
-        if header := self.horizontalHeader():
-            header.setDefaultAlignment(
+            self._min_col_widths[col_num] = col_width
+
+        if horizontal_header := self.horizontalHeader():
+            horizontal_header.setDefaultAlignment(
                 qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
-                # | qtg.QTextOption.WrapMode.WordWrap.value
             )
-            header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
-            # self.horizontalHeader().setSectionResizeMode(
-            #     qtw.QHeaderView.ResizeMode.ResizeToContents
-            # )
-            header.setMaximumSectionSize(400)
-            header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
+            # | qtg.QTextOption.WrapMode.WordWrap.value
+            horizontal_header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
+            # horizontal_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
+            horizontal_header.setMaximumSectionSize(400)
+            horizontal_header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
 
         if vertical_header := self.verticalHeader():
             # header.setDefaultAlignment(
             #     qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
             # )
             #     # display at most 5 lines
+            vertical_header.setMinimumSectionSize(self._font_metrics.height())
             vertical_header.setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
-            # vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.Fixed)
+            vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
             # vertical_header.setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
 
         # noinspection PyUnresolvedReferences
@@ -142,8 +150,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))
         # self.selectionModel().selectionChanged.connect(self._on_selection_changed)
 
-        self._view_model.layoutChanged.connect(lambda: self.resizeRowsToContents())
-        self._view_model.layoutChanged.connect(lambda: self.resizeColumnsToContents())
+        self._view_model.layoutChanged.connect(self._resize)
 
     @property
     def items(self) -> list[Item]:
@@ -305,6 +312,22 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         if item:
             event = DoubleClickEvent(attr=attr, item=item)
             self.double_click.emit(event)
+
+    def _resize(self) -> None:
+        # workaround resizeRowsToContents() expanding, but not shrinking rows
+        if model := self.model():
+            default_row_height = font.DEFAULT_FONT_METRICS.height()
+
+            for row_num in range(model.rowCount()):
+                if self.rowHeight(row_num) != default_row_height:
+                    self.setRowHeight(row_num, default_row_height)
+
+        self.resizeRowsToContents()
+
+        for col, width in self._min_col_widths.items():
+            self.setColumnWidth(col, width)
+
+        # self.resizeColumnsToContents()
 
     # def _on_selection_changed(self, selected: qtc.QItemSelection, deselected: qtc.QItemSelection) -> None:
     #     print("_on_selection_changed")

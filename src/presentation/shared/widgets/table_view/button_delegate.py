@@ -122,7 +122,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
                 self._btn,
             )
 
-    def sizeHint(self, option: qtw.QStyleOptionViewItem, index: qtc.QModelIndex):
+    def sizeHint(self, option: qtw.QStyleOptionViewItem, index: qtc.QModelIndex) -> qtc.QSize:
         if self._icon is None:
             if self._button_text_selector is None:
                 btn_text = self._text

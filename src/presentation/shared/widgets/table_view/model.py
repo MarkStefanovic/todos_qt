@@ -287,7 +287,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
         self._reindex_rows()
 
-        self.modelReset.emit()
+        # self.modelReset.emit()
 
         self.layoutChanged.emit()
 
