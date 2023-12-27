@@ -45,9 +45,7 @@ class MainView(qtw.QWidget):
         self._tabs_loaded: set[int] = set()
 
     def on_load(self) -> None:
-        self._todos.refresh_categories()
-        self._todos.refresh_users()
-        self._todos.refresh_dash()
+        self._todos.on_load()
         self._tabs_loaded.add(0)
 
     def _on_enter_key_pressed(self) -> None:

@@ -25,6 +25,8 @@ class TodoWidget(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
+        self._current_user: typing.Final[domain.User] = current_user
+
         self._controller_thread = qtc.QThread(parent=self)
 
         dash_requests = TodoDashRequests(parent=self)
@@ -84,16 +86,22 @@ class TodoWidget(qtw.QWidget):
     def current_view(self) -> typing.Literal["dash", "form"]:
         return self._view.current_view()
 
-    def refresh_categories(self) -> None:
-        self._dash_category_selector.refresh()
-        self._form_category_selector.refresh()
+    def on_load(self) -> None:
+        self._refresh_categories()
+        self._refresh_users()
+        self._dash_user_selector.select_item(self._current_user)
+        self.refresh_dash()
 
     def refresh_dash(self) -> None:
         self._view.refresh_dash()
 
-    def refresh_users(self) -> None:
-        self._dash_user_selector.refresh()
-        self._form_user_selector.refresh()
-
     def save_form(self) -> None:
         self._view.save_form()
+
+    def _refresh_categories(self) -> None:
+        self._dash_category_selector.refresh()
+        self._form_category_selector.refresh()
+
+    def _refresh_users(self) -> None:
+        self._dash_user_selector.refresh()
+        self._form_user_selector.refresh()

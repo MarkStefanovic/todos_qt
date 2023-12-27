@@ -131,7 +131,7 @@ class TodoDashView(qtw.QWidget):
             table_view.text(
                 name="note",
                 display_name="Note",
-                width=200,
+                width=400,
             ),
             table_view.text(
                 name="completed",
