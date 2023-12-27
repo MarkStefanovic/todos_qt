@@ -318,7 +318,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
     def _resize_cells(self) -> None:
         if model := self.model():
-            for col in range(self.model().columnCount()):
+            for col in range(model.columnCount()):
                 self.setColumnWidth(col, self._col_widths[col])
 
             # workaround resizeRowsToContents() expanding, but not shrinking rows

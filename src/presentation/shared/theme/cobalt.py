@@ -34,7 +34,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             border: none;
         }
         
-        QHeaderView, QLabel, QMainWindow, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
+        QHeaderView, QLabel, QMainWindow, QStackedWidget, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
         
         QScrollBar:horizontal {
             border: none;

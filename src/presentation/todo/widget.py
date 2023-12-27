@@ -87,21 +87,21 @@ class TodoWidget(qtw.QWidget):
         return self._view.current_view()
 
     def on_load(self) -> None:
-        self._refresh_categories()
-        self._refresh_users()
+        self.refresh_categories()
+        self.refresh_users()
         self._dash_user_selector.select_item(self._current_user)
         self.refresh_dash()
+
+    def refresh_categories(self) -> None:
+        self._dash_category_selector.refresh()
+        self._form_category_selector.refresh()
+
+    def refresh_users(self) -> None:
+        self._dash_user_selector.refresh()
+        self._form_user_selector.refresh()
 
     def refresh_dash(self) -> None:
         self._view.refresh_dash()
 
     def save_form(self) -> None:
         self._view.save_form()
-
-    def _refresh_categories(self) -> None:
-        self._dash_category_selector.refresh()
-        self._form_category_selector.refresh()
-
-    def _refresh_users(self) -> None:
-        self._dash_user_selector.refresh()
-        self._form_user_selector.refresh()
