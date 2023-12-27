@@ -101,7 +101,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.setMouseTracking(True)
         self.setWordWrap(True)
 
-        self._min_col_widths: typing.Final[dict[int, int]] = {}
+        self._col_widths: typing.Final[dict[int, int]] = {}
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
                 if attr.data_type == "date":
@@ -122,26 +122,29 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             if header := self.horizontalHeader():
                 header.resizeSection(col_num, col_width)
 
-            self._min_col_widths[col_num] = col_width
+            # print(f"{attr.name}: {col_width}")
+
+            self._col_widths[col_num] = col_width
 
         if horizontal_header := self.horizontalHeader():
             horizontal_header.setDefaultAlignment(
                 qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
             )
             # | qtg.QTextOption.WrapMode.WordWrap.value
-            horizontal_header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
+            # horizontal_header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
             # horizontal_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
-            horizontal_header.setMaximumSectionSize(400)
-            horizontal_header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
+            # horizontal_header.setMaximumSectionSize(400)
+            # horizontal_header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
 
         if vertical_header := self.verticalHeader():
-            # header.setDefaultAlignment(
-            #     qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
-            # )
+            vertical_header.setDefaultAlignment(
+                qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
+            )
+            # vertical_header.setMaximumSectionSize(100)
             #     # display at most 5 lines
             vertical_header.setMinimumSectionSize(self._font_metrics.height())
             vertical_header.setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
-            vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
+            # vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
             # vertical_header.setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
 
         # noinspection PyUnresolvedReferences
@@ -150,7 +153,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         self.doubleClicked.connect(lambda ix: self._on_double_click(index=ix))
         # self.selectionModel().selectionChanged.connect(self._on_selection_changed)
 
-        self._view_model.layoutChanged.connect(self._resize)
+        self._view_model.layoutChanged.connect(self._resize_cells)
 
     @property
     def items(self) -> list[Item]:
@@ -313,21 +316,23 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             event = DoubleClickEvent(attr=attr, item=item)
             self.double_click.emit(event)
 
-    def _resize(self) -> None:
-        # workaround resizeRowsToContents() expanding, but not shrinking rows
+    def _resize_cells(self) -> None:
         if model := self.model():
+            for col in range(self.model().columnCount()):
+                self.setColumnWidth(col, self._col_widths[col])
+
+            # workaround resizeRowsToContents() expanding, but not shrinking rows
             default_row_height = font.DEFAULT_FONT_METRICS.height()
 
             for row_num in range(model.rowCount()):
                 if self.rowHeight(row_num) != default_row_height:
                     self.setRowHeight(row_num, default_row_height)
 
-        self.resizeRowsToContents()
+                self.resizeRowToContents(row_num)
 
-        for col, width in self._min_col_widths.items():
-            self.setColumnWidth(col, width)
-
-        # self.resizeColumnsToContents()
+                # setting maximum row height at table level is not working
+                if self.rowHeight(row_num) > 300:
+                    self.setRowHeight(row_num, 300)
 
     # def _on_selection_changed(self, selected: qtc.QItemSelection, deselected: qtc.QItemSelection) -> None:
     #     print("_on_selection_changed")

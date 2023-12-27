@@ -81,6 +81,8 @@ def main(
 
         main_view.showMaximized()
 
+        main_view.on_load()
+
         sys.exit(app.exec())
     except Exception as e:
         logger.error(f"{__file__}.main() failed: {e!s}")

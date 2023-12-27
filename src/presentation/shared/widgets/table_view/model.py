@@ -254,7 +254,6 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
         self._reindex_rows()
 
-        # noinspection PyUnresolvedReferences
         self.layoutChanged.emit()
 
     def sort(

@@ -124,10 +124,6 @@ def apply_theme(app: qtw.QApplication) -> None:
             border-radius: 4px;
             min-width: 6em;
         }
-        QComboBox:on { /* shift the text when the popup opens */
-            padding-top: 3px;
-            padding-left: 4px;
-        }
         QComboBox::drop-down {
             width: 0px;
         }

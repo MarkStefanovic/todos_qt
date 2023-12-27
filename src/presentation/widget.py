@@ -64,10 +64,13 @@ class MainWidget(qtw.QMainWindow):
 
         self.setCentralWidget(self._view)
 
-        self._view.on_load()
-
-        self._category_widget.categories_updated.connect(self._on_category_widget_categories_updated)
+        self._category_widget.categories_updated.connect(
+            self._on_category_widget_categories_updated
+        )
         self._user_widget.users_updated.connect(self._on_users_widget_users_updated)
+
+    def on_load(self) -> None:
+        self._view.on_load()
 
     def _on_category_widget_categories_updated(self) -> None:
         logger.debug(f"{self.__class__.__name__}._on_category_widget_categories_updated()")
