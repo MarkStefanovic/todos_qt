@@ -3,6 +3,7 @@ import warnings
 
 # noinspection PyPep8Naming
 from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from loguru import logger
 
 from src.presentation.shared.widgets.table_view.attr import Attr
 from src.presentation.shared.widgets.table_view.item import Item
@@ -154,12 +155,22 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         if role == qtc.Qt.ItemDataRole.ForegroundRole:
             if attr.color_selector is None:
                 if index.row() in self._highlighted_rows:
-                    return qtg.QBrush(qtg.QColor.yellow)
+                    brush = qtg.QBrush()
+                    brush.setColor(qtg.QColor(255, 255, 0))  # yellow
+                    return brush
             else:
                 item = self._items[index.row()]
 
                 if color := attr.color_selector(item):
-                    return qtg.QBrush(color)
+                    brush = qtg.QBrush()
+                    try:
+                        brush.setColor(color)
+                    except Exception as set_color_error:
+                        logger.error(
+                            f"attr: {attr.name}, color_selector: {attr.color_selector=!r}, set_color_error: {set_color_error!r}"
+                        )
+                        raise
+                    return brush
 
         return qtc.QVariant()
 

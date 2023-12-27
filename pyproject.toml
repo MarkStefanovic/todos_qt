@@ -5,7 +5,7 @@ requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = [
     "loguru",
-    "pyqt6",
+    "PyQt6",
     "hypothesis",
     "mypy",
     "pytest",

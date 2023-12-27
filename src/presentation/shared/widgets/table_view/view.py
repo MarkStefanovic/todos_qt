@@ -94,10 +94,10 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 self.setItemDelegateForColumn(col_num, btn_delegate)
 
         self.setSortingEnabled(True)
-        # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeToContents)
         self.setAlternatingRowColors(True)
         self.setColumnHidden(self._key_col, True)
         self.setMouseTracking(True)
+        self.setWordWrap(True)
 
         for col_num, attr in enumerate(self._attrs):
             if attr.width is None:
@@ -111,25 +111,17 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             self.horizontalHeader().resizeSection(col_num, col_width)
 
         self.horizontalHeader().setDefaultAlignment(
-            qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
-            # | qtc.Qt.AlignmentFlag(qtg.QTextOption.WrapMode.WordWrap)
+            qtc.Qt.AlignmentFlag.AlignHCenter
+            | qtc.Qt.AlignmentFlag.AlignBottom
+            | qtg.QTextOption.WrapMode.WordWrap.value
         )
-        self.horizontalHeader()
-        # self.verticalHeader().setDefaultAlignment(
-        #     qtc.Qt.AlignLeft | qtc.Qt.AlignTop | qtc.Qt.Alignment(qtc.Qt.TextWordWrap)
-        # )
+        self.horizontalHeader().setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
+        # self.horizontalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
 
-        min_text_height = font.BOLD_FONT_METRICS.height() * 2 + 8
-        # min_text_height = font_metrics.height() + 8
-        self.horizontalHeader().setMinimumHeight(min_text_height)
-
-        self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
-
-        # display at most 5 lines
-        self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
-
-        # self.setSelectionBehavior(qtw.QTableView.SelectRows)
-        # self.setSelectionMode(qtw.QTableView.SelectionMode.ExtendedSelection)
+        self.verticalHeader().setDefaultAlignment(qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft)
+        self.verticalHeader().setSectionResizeMode(qtw.QHeaderView.ResizeMode.Fixed)
+        self.verticalHeader().setMaximumSectionSize(self._font_metrics.height() * 5 + 8)  # display at most 5 lines
+        self.verticalHeader().setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
 
         # noinspection PyUnresolvedReferences
         self.clicked.connect(self._on_click)
@@ -189,6 +181,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
     def set_items(self, /, items: typing.Iterable[Item]) -> None:
         self._view_model.set_items(items)
+        self.resizeRowsToContents()
 
     def update_item(self, /, item: Item) -> None:
         self._view_model.update_item(item)

@@ -79,7 +79,6 @@ def main(
 
         app.setWindowIcon(app_icon)
 
-        main_view.showFullScreen()
         main_view.showMaximized()
 
         sys.exit(app.exec())

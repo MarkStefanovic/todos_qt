@@ -24,17 +24,14 @@ def apply_theme(app: qtw.QApplication) -> None:
             selection-background-color: orange;
             selection-color: green;
         }
-        QHeaderView:section { 
-            background-color: rgb(35, 35, 50);
-            font-weight: bold; 
-            border: none;
-        }
+
         QPushButton {
             font-weight: bold;
             background-color: none;
             color: cyan;
             border: none;
         }
+        
         QHeaderView, QLabel, QMainWindow, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
         
         QTabWidget:pane {
@@ -61,9 +58,11 @@ def apply_theme(app: qtw.QApplication) -> None:
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
         
-        QHeaderView, QHeaderView::section {
-            border-radius: 0px;
+        QHeaderView, QHeaderView:section { 
             background-color: rgb(35, 35, 50);
+            font-weight: bold; 
+            border: none;
+            border-radius: 0px;
         }
         QTableCornerButton:section { 
             background-color: rgb(35, 35, 50);

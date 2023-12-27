@@ -133,18 +133,11 @@ class TodoDashView(qtw.QWidget):
                 display_name="Note",
                 width=200,
             ),
-            table_view.date(
-                name="last_completed",
-                display_name="Last Completed",
-            ),
             table_view.text(
-                name="last_completed_by",
-                display_name="Last Completed By",
-                value_selector=(
-                    lambda todo: todo.last_completed_by.display_name if todo.last_completed_by is not None else ""
-                ),
+                name="completed",
+                display_name="Completed",
+                value_selector=_complete_value_selector,
                 alignment="center",
-                width=120,
             ),
             table_view.date(
                 name="date_added",
@@ -309,15 +302,32 @@ class TodoDashView(qtw.QWidget):
         self._requests.refresh.emit(request)
 
 
+def _complete_value_selector(todo: domain.Todo, /) -> str:
+    if todo.last_completed_by:
+        last_completed_by = todo.last_completed_by.display_name
+    else:
+        last_completed_by = ""
+
+    if todo.last_completed:
+        last_completed = f"{todo.last_completed:%m/%d/%Y}"
+    else:
+        last_completed = ""
+
+    if last_completed and last_completed:
+        return f"{last_completed_by}\n{last_completed}"
+
+    return f"{last_completed_by}{last_completed}"
+
+
 def _days_color_selector(days: int | None, /) -> qtg.QColor | None:
     if days is None:
         return None
 
     if days < 0:
-        return typing.cast(qtg.QColor, qtg.QColor.red)
+        return typing.cast(qtg.QColor, qtg.QColor(255, 0, 0))  # red
 
     if days == 0:
-        return typing.cast(qtg.QColor, qtg.QColor.yellow)
+        return typing.cast(qtg.QColor, qtg.QColor(255, 255, 0))  # yellow
 
     return None
 
