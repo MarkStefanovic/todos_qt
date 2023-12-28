@@ -36,6 +36,7 @@ def apply_theme(app: qtw.QApplication) -> None:
         
         QHeaderView, QLabel, QMainWindow, QStackedWidget, QStatusBar, QTableView, QTabBar, QTabWidget { border: none; }
         
+        /* Scrollbar - Horizontal */
         QScrollBar:horizontal {
             border: none;
             background-color: rgb(80, 80, 100);
@@ -52,6 +53,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             border: none;
         }
         
+        /* Scrollbar - Vertical */
         QScrollBar:vertical {
             border: none;
             background-color: rgb(80, 80, 100);
@@ -102,6 +104,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             border-left: 1px solid rgb(80, 80, 100);
             border-right: 1px solid rgb(80, 80, 100);
             padding: 4px;
+            min-height: 24px;
         }
         QTableCornerButton::section { 
             background-color: rgb(15, 15, 25);
