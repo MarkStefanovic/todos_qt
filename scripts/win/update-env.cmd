@@ -1,13 +1,7 @@
-@echo off
-SET CurrentDirectory=%~dp0
-for %%B in (%CurrentDirectory%.) do set ParentDirectory=%%~dpB
-for %%B in (%ParentDirectory%.) do set GrandparentDirectory=%%~dpB
+echo Updating todos-qt env...
 
-call conda env update -f "%GrandparentDirectory%/environment.yml" --prune
+hatch run pip-compile --upgrade
 
-call conda run -n todos-qt python -m pip_audit --fix
-
-:: pip install -v --ignore-requires-python "pyqtdarktheme>=2.1.0"
-:: pip install --force-reinstall -v --ignore-requires-python "pyqtdarktheme>=2.1.0"
+hatch run python -m pip_audit --fix
 
 echo Finished updating todos-qt env.
