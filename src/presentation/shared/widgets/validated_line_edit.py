@@ -30,9 +30,7 @@ class ValidatedLineEdit(qtw.QLineEdit):
         self.validate(initial_value)
 
     def validate(self, text: str) -> None:
-        validation_errors = [
-            result for validator in self._validators if (result := validator(text))
-        ]
+        validation_errors = [result for validator in self._validators if (result := validator(text))]
         if validation_errors:
             self.setStyleSheet("border: 1px solid red;")
 

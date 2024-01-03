@@ -59,9 +59,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             datetime_format=self._datetime_format,
         )
 
-        self._key_col: typing.Final[int] = self._view_model.get_column_number_for_attr_name(
-            self._key_attr_name
-        )
+        self._key_col: typing.Final[int] = self._view_model.get_column_number_for_attr_name(self._key_attr_name)
 
         self.setModel(self._view_model)
 
@@ -107,9 +105,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
                 if attr.data_type == "date":
                     col_width = self._font_metrics.boundingRect("   88/88/8888   ").width()
                 else:
-                    col_width = font.BOLD_FONT_METRICS.boundingRect(
-                        attr.display_name + "    "
-                    ).width()
+                    col_width = font.BOLD_FONT_METRICS.boundingRect(attr.display_name + "    ").width()
             else:
                 if attr.display_name:
                     col_width = max(
@@ -127,9 +123,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             self._col_widths[col_num] = col_width
 
         if horizontal_header := self.horizontalHeader():
-            horizontal_header.setDefaultAlignment(
-                qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom
-            )
+            horizontal_header.setDefaultAlignment(qtc.Qt.AlignmentFlag.AlignHCenter | qtc.Qt.AlignmentFlag.AlignBottom)
             # | qtg.QTextOption.WrapMode.WordWrap.value
             # horizontal_header.setMinimumHeight(font.BOLD_FONT_METRICS.height() + 8)
             # horizontal_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
@@ -137,9 +131,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             # horizontal_header.setMaximumHeight(self._font_metrics.height() * 2 + 8)
 
         if vertical_header := self.verticalHeader():
-            vertical_header.setDefaultAlignment(
-                qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
-            )
+            vertical_header.setDefaultAlignment(qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft)
             # vertical_header.setMaximumSectionSize(100)
             #     # display at most 5 lines
             vertical_header.setMinimumSectionSize(self._font_metrics.height())

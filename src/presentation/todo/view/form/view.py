@@ -12,12 +12,18 @@ from src.presentation.shared import widgets
 from src.presentation.shared.theme import font, icons
 from src.presentation.shared.widgets import DateEditor
 from src.presentation.todo.view.form import requests
+from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
 from src.presentation.todo.view.form.irregular.view import IrregularFrequencyForm
+from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState
 from src.presentation.todo.view.form.monthly.view import MonthlyFrequencyForm
+from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
 from src.presentation.todo.view.form.once.view import OnceFrequencyForm
 from src.presentation.todo.view.form.state import TodoFormState
+from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 from src.presentation.todo.view.form.weekly.view import WeeklyFrequencyForm
+from src.presentation.todo.view.form.xdays.state import XDaysFrequencyFormState
 from src.presentation.todo.view.form.xdays.view import XDaysFrequencyForm
+from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 from src.presentation.todo.view.form.yearly.view import YearlyFrequencyForm
 from src.presentation.user_selector.widget import UserSelectorWidget
 
@@ -76,7 +82,9 @@ class TodoFormView(qtw.QWidget):
         self._frequency_cbo.set_values(
             {
                 domain.FrequencyType.Daily: "Daily",
+                domain.FrequencyType.Easter: "Easter",
                 domain.FrequencyType.Irregular: "Irregular",
+                domain.FrequencyType.MemorialDay: "Memorial Day",
                 domain.FrequencyType.Monthly: "Monthly",
                 domain.FrequencyType.Once: "Once",
                 domain.FrequencyType.Weekly: "Weekly",
@@ -155,21 +163,74 @@ class TodoFormView(qtw.QWidget):
 
     def get_state(self) -> TodoFormState | domain.Error:
         try:
-            frequency_name = self._frequency_cbo.get_value()
-            if frequency_name is None:
-                return domain.Error.new("frequency is required.")
+            frequency = self._frequency_cbo.get_value()
+            if frequency is None:
+                return domain.Error.new("No frequency was selected.")
 
-            irregular_frequency_form_state = self._irregular_frequency_form.get_state()
+            irregular_frequency_form_state: IrregularFrequencyFormState | domain.Unspecified | domain.Error = (
+                domain.Unspecified()
+            )
+            monthly_frequency_form_state: MonthlyFrequencyFormState | domain.Unspecified | domain.Error = (
+                domain.Unspecified()
+            )
+            once_frequency_form_state: OnceFrequencyFormState | domain.Unspecified | domain.Error = domain.Unspecified()
+            weekly_frequency_form_state: WeeklyFrequencyFormState | domain.Unspecified | domain.Error = (
+                domain.Unspecified()
+            )
+            xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified | domain.Error = (
+                domain.Unspecified()
+            )
+            yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified | domain.Error = (
+                domain.Unspecified()
+            )
+
+            match frequency:
+                case domain.FrequencyType.Daily | domain.FrequencyType.Easter | domain.FrequencyType.MemorialDay:
+                    pass
+                case domain.FrequencyType.Irregular:
+                    irregular_frequency_form_state = self._irregular_frequency_form.get_state()
+                    if isinstance(irregular_frequency_form_state, domain.Error):
+                        return irregular_frequency_form_state
+                case domain.FrequencyType.Monthly:
+                    monthly_frequency_form_state = self._monthly_frequency_form.get_state()
+                    if isinstance(monthly_frequency_form_state, domain.Error):
+                        return monthly_frequency_form_state
+                case domain.FrequencyType.Once:
+                    once_frequency_form_state = self._one_off_frequency_form.get_state()
+                    if isinstance(once_frequency_form_state, domain.Error):
+                        return once_frequency_form_state
+                case domain.FrequencyType.Weekly:
+                    weekly_frequency_form_state = self._weekly_frequency_form.get_state()
+                    if isinstance(weekly_frequency_form_state, domain.Error):
+                        return weekly_frequency_form_state
+                case domain.FrequencyType.XDays:
+                    xdays_frequency_form_state = self._xdays_frequency_form.get_state()
+                    if isinstance(xdays_frequency_form_state, domain.Error):
+                        return xdays_frequency_form_state
+                case domain.FrequencyType.Yearly:
+                    yearly_frequency_form_state = self._yearly_frequency_form.get_state()
+                    if isinstance(yearly_frequency_form_state, domain.Error):
+                        return yearly_frequency_form_state
+                case _:
+                    raise domain.Error.new(f"Unhandled FrequencyType, {frequency!r}.")
+
             if isinstance(irregular_frequency_form_state, domain.Error):
                 return irregular_frequency_form_state
 
-            weekly_form_state = self._weekly_frequency_form.get_state()
-            if isinstance(weekly_form_state, domain.Error):
-                return weekly_form_state
+            if isinstance(monthly_frequency_form_state, domain.Error):
+                return monthly_frequency_form_state
 
-            yearly_form_state = self._yearly_frequency_form.get_state()
-            if isinstance(yearly_form_state, domain.Error):
-                return yearly_form_state
+            if isinstance(once_frequency_form_state, domain.Error):
+                return once_frequency_form_state
+
+            if isinstance(weekly_frequency_form_state, domain.Error):
+                return weekly_frequency_form_state
+
+            if isinstance(xdays_frequency_form_state, domain.Error):
+                return xdays_frequency_form_state
+
+            if isinstance(yearly_frequency_form_state, domain.Error):
+                return yearly_frequency_form_state
 
             return TodoFormState(
                 todo_id=self._todo_id,
@@ -179,7 +240,7 @@ class TodoFormView(qtw.QWidget):
                 expire_days=self._expire_days_sb.value(),
                 category=self._category_selector.selected_item(),
                 description=self._description_txt.text(),
-                frequency_name=frequency_name,
+                frequency_name=frequency,
                 note=self._note_txt.toPlainText(),
                 # note=self._note_txt.get_value(),
                 start_date=self._start_date_edit.get_value() or datetime.date(1900, 1, 1),
@@ -190,11 +251,11 @@ class TodoFormView(qtw.QWidget):
                 last_completed_by=self._last_completed_by,
                 prior_completed_by=self._prior_completed_by,
                 irregular_frequency_form_state=irregular_frequency_form_state,
-                monthly_frequency_form_state=self._monthly_frequency_form.get_state(),
-                once_frequency_form_state=self._one_off_frequency_form.get_state(),
-                weekly_frequency_form_state=weekly_form_state,
-                xdays_frequency_form_state=self._xdays_frequency_form.get_state(),
-                yearly_frequency_form_state=yearly_form_state,
+                monthly_frequency_form_state=monthly_frequency_form_state,
+                once_frequency_form_state=once_frequency_form_state,
+                weekly_frequency_form_state=weekly_frequency_form_state,
+                xdays_frequency_form_state=xdays_frequency_form_state,
+                yearly_frequency_form_state=yearly_frequency_form_state,
                 focus_description=self._description_txt.hasFocus(),
             )
         except Exception as e:
@@ -234,8 +295,19 @@ class TodoFormView(qtw.QWidget):
                 self._expire_days_sb.setValue(state.expire_days)
 
             if not isinstance(state.frequency_name, domain.Unspecified):
-                self._advance_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
-                self._expire_days_sb.setEnabled(state.frequency_name != domain.FrequencyType.Daily)
+                if state.frequency_name in (
+                    domain.FrequencyType.Daily,
+                    domain.FrequencyType.Easter,
+                    domain.FrequencyType.MemorialDay,
+                ):
+                    self._frequency_subform_layout.setCurrentIndex(0)
+
+                if state.frequency_name == domain.FrequencyType.Daily:
+                    self._advance_days_sb.setEnabled(False)
+                    self._expire_days_sb.setEnabled(False)
+                else:
+                    self._advance_days_sb.setEnabled(True)
+                    self._expire_days_sb.setEnabled(True)
 
             if not isinstance(state.category, domain.Unspecified):
                 self._category_selector.select_item(state.category)
@@ -299,13 +371,23 @@ class TodoFormView(qtw.QWidget):
                 self._expire_days_sb.setMaximum(1)
                 self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Easter:
-                raise ValueError("Easter is not meant to be created by the user.")
+                self._advance_days_sb.setValue(30)
+                self._expire_days_sb.setValue(90)
+                self._advance_days_sb.setMaximum(363)
+                self._expire_days_sb.setMaximum(363)
+                self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Irregular:
                 self._advance_days_sb.setValue(30)
                 self._expire_days_sb.setValue(90)
                 self._advance_days_sb.setMaximum(363)
                 self._expire_days_sb.setMaximum(363)
                 self._frequency_subform_layout.setCurrentIndex(1)
+            case domain.FrequencyType.MemorialDay:
+                self._advance_days_sb.setValue(30)
+                self._expire_days_sb.setValue(90)
+                self._advance_days_sb.setMaximum(363)
+                self._expire_days_sb.setMaximum(363)
+                self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Monthly:
                 self._advance_days_sb.setValue(0)
                 self._expire_days_sb.setValue(27)

@@ -152,9 +152,7 @@ class UserDash(qtw.QWidget):
     def _on_refresh_btn_clicked(self, /, _: bool) -> None:
         self._requests.refresh.emit()
 
-    def _on_table_btn_clicked(
-        self, /, event: table_view.ButtonClickedEvent[domain.User, str]
-    ) -> None:
+    def _on_table_btn_clicked(self, /, event: table_view.ButtonClickedEvent[domain.User, str]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_table_btn_clicked({event=!r})")
 
         match event.attr.name:
@@ -174,9 +172,7 @@ class UserDash(qtw.QWidget):
                     f"{event.attr.name}"
                 )
 
-    def _on_table_btn_double_clicked(
-        self, /, event: table_view.DoubleClickEvent[domain.User, str]
-    ) -> None:
+    def _on_table_btn_double_clicked(self, /, event: table_view.DoubleClickEvent[domain.User, str]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_table_btn_double_clicked({event=!r})")
 
         if self._current_user.is_admin:

@@ -1,5 +1,5 @@
 # noinspection PyPep8Naming
-from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa: F401
+from PyQt6 import QtGui as qtg, QtWidgets as qtw
 from loguru import logger
 
 from src import domain
@@ -64,9 +64,7 @@ class MainWidget(qtw.QMainWindow):
 
         self.setCentralWidget(self._view)
 
-        self._category_widget.categories_updated.connect(
-            self._on_category_widget_categories_updated
-        )
+        self._category_widget.categories_updated.connect(self._on_category_widget_categories_updated)
         self._user_widget.users_updated.connect(self._on_users_widget_users_updated)
 
     def on_load(self) -> None:

@@ -9,9 +9,7 @@ __all__ = ("x_weekday_of_month",)
 
 
 @functools.lru_cache(maxsize=10000)
-def x_weekday_of_month(
-    *, year: int, month: int, week_num: int, week_day: Weekday
-) -> datetime.date:
+def x_weekday_of_month(*, year: int, month: int, week_num: int, week_day: Weekday) -> datetime.date:
     days_in_month = calendar.monthrange(year, month)[1]
     return list(
         itertools.islice(

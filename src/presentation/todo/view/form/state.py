@@ -136,6 +136,12 @@ class TodoFormState:
                         expire_display_days=self.expire_days,
                         start_date=self.start_date,
                     )
+                case domain.FrequencyType.MemorialDay:
+                    frequency = domain.Frequency.memorial_day(
+                        advance_display_days=self.advance_days,
+                        expire_display_days=self.expire_days,
+                        start_date=self.start_date,
+                    )
                 case domain.FrequencyType.Monthly:
                     if isinstance(self.monthly_frequency_form_state, domain.Unspecified):
                         return domain.Error.new("monthly_frequency_form_state is unspecified.")
@@ -182,7 +188,7 @@ class TodoFormState:
                         start_date=self.start_date,
                     )
                 case _:
-                    return domain.Error.new(f"Unrecognized [frequency_name], {self.frequency_name!r}.")
+                    return domain.Error.new(f"Unhandled frequency_name, {self.frequency_name}")  # type: ignore
 
             return domain.Todo(
                 todo_id=self.todo_id,

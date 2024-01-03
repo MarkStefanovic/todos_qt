@@ -28,12 +28,8 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
 
         self._text: typing.Final[str] = text
         self._icon: typing.Final[qtg.QIcon | None] = icon
-        self._button_text_selector: typing.Final[
-            typing.Callable[[qtc.QModelIndex], str] | None
-        ] = button_text_selector
-        self._enabled_selector: typing.Final[
-            typing.Callable[[qtc.QModelIndex], bool] | None
-        ] = enabled_selector
+        self._button_text_selector: typing.Final[typing.Callable[[qtc.QModelIndex], str] | None] = button_text_selector
+        self._enabled_selector: typing.Final[typing.Callable[[qtc.QModelIndex], bool] | None] = enabled_selector
 
         self._btn = qtw.QPushButton(self._text)
         self._btn.setStyleSheet("border-radius: 0px;")
@@ -131,8 +127,7 @@ class ButtonDelegate(qtw.QStyledItemDelegate):
                 btn_text = self._button_text_selector(index=index)  # type: ignore
 
             return qtc.QSize(
-                font.BOLD_FONT_METRICS.boundingRect(btn_text).width()
-                + (2 * font.BOLD_FONT_METRICS.averageCharWidth()),
+                font.BOLD_FONT_METRICS.boundingRect(btn_text).width() + (2 * font.BOLD_FONT_METRICS.averageCharWidth()),
                 option.rect.height(),
             )
 

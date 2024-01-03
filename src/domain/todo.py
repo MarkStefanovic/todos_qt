@@ -41,8 +41,7 @@ class Todo:
         if (
             self.last_completed
             and due_date
-            and self.last_completed
-            >= (due_date - datetime.timedelta(days=self.frequency.advance_display_days))
+            and self.last_completed >= (due_date - datetime.timedelta(days=self.frequency.advance_display_days))
         ):
             if self.frequency.name == FrequencyType.Once:
                 return None
@@ -75,9 +74,7 @@ class Todo:
 
             return date_calc.should_display(frequency=self.frequency, last_completed=latest)
         except Exception as e:
-            logger.exception(
-                f"Failed to calculate should_display() for todo, {self.description}\n{e}"
-            )
+            logger.exception(f"Failed to calculate should_display() for todo, {self.description}\n{e}")
             raise e
 
     @staticmethod
@@ -385,9 +382,7 @@ class Todo:
         elif self.frequency.name == FrequencyType.XDays:
             assert self.frequency.days is not None
             if self.frequency.advance_display_days > self.frequency.days:
-                error_messages.append(
-                    "Advance display days must be less than the number of days between."
-                )
+                error_messages.append("Advance display days must be less than the number of days between.")
             if self.frequency.expire_display_days > self.frequency.days:
                 error_messages.append("Expire days must be less than the days between.")
         elif self.frequency.name == FrequencyType.Yearly:

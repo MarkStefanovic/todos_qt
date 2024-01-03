@@ -45,4 +45,3 @@ class CategoryFormState:
             date_updated=self.date_updated,
             date_deleted=None,
         )
-

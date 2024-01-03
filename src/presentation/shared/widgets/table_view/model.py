@@ -38,9 +38,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
             col_num: attr for col_num, attr in enumerate(self._attrs)
         }
 
-        self._attr_by_name: typing.Final[dict[str, Attr[Item, typing.Any]]] = {
-            attr.name: attr for attr in self._attrs
-        }
+        self._attr_by_name: typing.Final[dict[str, Attr[Item, typing.Any]]] = {attr.name: attr for attr in self._attrs}
 
         self._items: list[Item] = []
         self._row_num_by_key: dict[str, int] = {}

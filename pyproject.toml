@@ -22,7 +22,7 @@ dependencies = [
 
 [tool.ruff]
 src = ["src"]
-line-length = 100
+line-length = 120
 ignore = ["F401", "F403"]
 
 [tool.hatch]
