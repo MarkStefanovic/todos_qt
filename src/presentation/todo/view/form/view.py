@@ -218,8 +218,14 @@ class TodoFormView(qtw.QWidget):
             if not isinstance(state.last_completed, domain.Unspecified):
                 self._last_completed = state.last_completed
 
+            if not isinstance(state.last_completed_by, domain.Unspecified):
+                self._last_completed_by = state.last_completed_by
+
             if not isinstance(state.prior_completed, domain.Unspecified):
                 self._prior_completed = state.prior_completed
+
+            if not isinstance(state.prior_completed_by, domain.Unspecified):
+                self._prior_completed_by = state.prior_completed_by
 
             if not isinstance(state.user, domain.Unspecified):
                 self._user_selector.select_item(state.user)
@@ -267,12 +273,6 @@ class TodoFormView(qtw.QWidget):
 
             if not isinstance(state.yearly_frequency_form_state, domain.Unspecified):
                 self._yearly_frequency_form.set_state(state.yearly_frequency_form_state)
-
-            if not isinstance(state.last_completed_by, domain.Unspecified):
-                self._last_completed_by = state.last_completed_by
-
-            if not isinstance(state.prior_completed_by, domain.Unspecified):
-                self._prior_completed_by = state.prior_completed_by
 
             if not isinstance(state.focus_description, domain.Unspecified):
                 if state.focus_description and not self._description_txt.hasFocus():

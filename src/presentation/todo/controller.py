@@ -215,7 +215,7 @@ class TodoController(qtc.QObject):
                     TodoState(
                         dash_state=dash.TodoDashState(
                             updated_todo=updated_todo,
-                            status=f"{request.todo.description} updated.",
+                            status=f"Updated {request.todo.description}.",
                         ),
                         dash_active=True,
                     )
@@ -240,7 +240,7 @@ class TodoController(qtc.QObject):
                     TodoState(
                         dash_state=dash.TodoDashState(
                             added_todo=todo,
-                            status=f"{request.todo.description} added.",
+                            status=f"Added {request.todo.description}.",
                         ),
                         dash_active=True,
                     )

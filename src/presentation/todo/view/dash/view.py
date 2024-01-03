@@ -213,9 +213,6 @@ class TodoDashView(qtw.QWidget):
 
     def set_state(self, /, state: TodoDashState) -> None:
         try:
-            if state.added_todo:
-                self._table.add_item(state.added_todo)
-
             if isinstance(state.user_filter, domain.User):
                 self._user_selector.select_item(state.user_filter)
 
@@ -228,11 +225,18 @@ class TodoDashView(qtw.QWidget):
             if isinstance(state.description_filter, str):
                 self._description_filter_txt.setText(state.description_filter)
 
+            if not isinstance(state.todos, domain.Unspecified):
+                self._table.set_items(state.todos)
+
             if state.deleted_todo:
                 self._table.delete_item(key=state.deleted_todo.todo_id)
 
-            if not isinstance(state.todos, domain.Unspecified):
-                self._table.set_items(state.todos)
+            if state.added_todo:
+                if self._due_chk.isChecked():
+                    if state.added_todo.should_display():
+                        self._table.add_item(state.added_todo)
+                else:
+                    self._table.add_item(state.added_todo)
 
             if state.updated_todo:
                 if self._due_chk.isChecked():
@@ -263,17 +267,13 @@ class TodoDashView(qtw.QWidget):
         if self._current_user.is_admin:
             self._requests.add.emit()
 
-    def _on_button_clicked(
-        self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]
-    ) -> None:
+    def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         match event.attr.name:
             case "delete":
                 if self._current_user.is_admin:
-                    if popup.confirm(
-                        question=f'Are you sure you want to delete "{event.item.description}"?'
-                    ):
+                    if popup.confirm(question=f'Are you sure you want to delete "{event.item.description}"?'):
                         request = requests.DeleteTodo(todo=event.item)
 
                         self._requests.delete.emit(request)
@@ -285,9 +285,7 @@ class TodoDashView(qtw.QWidget):
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
-    def _on_double_click(
-        self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]
-    ) -> None:
+    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         if self._current_user.is_admin:

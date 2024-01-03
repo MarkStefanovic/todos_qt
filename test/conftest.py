@@ -3,7 +3,9 @@ import typing
 
 import pytest
 import sqlalchemy as sa
-from PyQt6 import QtWidgets as qtw  # noqa
+
+# noinspection PyPep8Naming
+from PyQt6 import QtWidgets as qtw
 from sqlalchemy.orm import Session
 
 from src import adapter, domain
@@ -28,9 +30,3 @@ def session(engine: sa.engine.Engine) -> typing.Generator[Session, None, None]:
     session = Session(engine)
     yield session
     session.close()
-    #
-    # sm.SQLModel.metadata.create_all
-    # fp = pathlib.Path("testdb.sqlite")
-    # fp.unlink(missing_ok=True)
-    # yield fp
-    # fp.unlink(missing_ok=True)

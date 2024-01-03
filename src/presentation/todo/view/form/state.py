@@ -46,7 +46,7 @@ class TodoFormState:
             todo_id=domain.create_uuid(),
             template_todo_id=None,
             advance_days=0,
-            expire_days=99,
+            expire_days=999,
             user=current_user or domain.DEFAULT_USER,
             category=domain.TODO_CATEGORY,
             description="",
