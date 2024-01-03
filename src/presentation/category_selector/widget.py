@@ -1,7 +1,10 @@
+import typing
+
 from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
 from src.presentation.category_selector.controller import CategorySelectorController
+from src.presentation.category_selector.state import CategorySelectorState
 from src.presentation.category_selector.view import CategorySelectorView
 
 __all__ = ("CategorySelectorWidget",)
@@ -46,3 +49,6 @@ class CategorySelectorWidget(qtw.QWidget):
 
     def select_item(self, /, item: domain.Category) -> None:
         self._controller.set_category(item)
+
+    def set_items(self, /, items: typing.Iterable[domain.Category]) -> None:
+        self._view.set_state(CategorySelectorState(category_options=tuple(items)))

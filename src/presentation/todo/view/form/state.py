@@ -14,7 +14,7 @@ from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormStat
 __all__ = ("TodoFormState",)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
 class TodoFormState:
     todo_id: str | domain.Unspecified = domain.Unspecified()
     template_todo_id: str | None | domain.Unspecified = domain.Unspecified()
@@ -32,6 +32,8 @@ class TodoFormState:
     prior_completed: datetime.date | None | domain.Unspecified = domain.Unspecified()
     last_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified()
     prior_completed_by: domain.User | None | domain.Unspecified = domain.Unspecified()
+    categories: tuple[domain.Category, ...] | domain.Unspecified = domain.Unspecified()
+    users: tuple[domain.User, ...] | domain.Unspecified = domain.Unspecified()
     irregular_frequency_form_state: IrregularFrequencyFormState | domain.Unspecified = domain.Unspecified()
     monthly_frequency_form_state: MonthlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
     once_frequency_form_state: OnceFrequencyFormState | domain.Unspecified = domain.Unspecified()
@@ -210,12 +212,12 @@ class TodoFormState:
 
     @staticmethod
     def from_domain(*, todo: domain.Todo) -> TodoFormState:
-        irregular_frequency_form_state = IrregularFrequencyFormState.initial()
-        monthly_frequency_form_state = MonthlyFrequencyFormState.initial()
-        once_frequency_form_state = OnceFrequencyFormState.initial()
-        weekly_frequency_form_state = WeeklyFrequencyFormState.initial()
-        xdays_frequency_form_state = XDaysFrequencyFormState.initial()
-        yearly_frequency_form_state = YearlyFrequencyFormState.initial()
+        irregular_frequency_form_state: IrregularFrequencyFormState | domain.Unspecified = domain.Unspecified()
+        monthly_frequency_form_state: MonthlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
+        once_frequency_form_state: OnceFrequencyFormState | domain.Unspecified = domain.Unspecified()
+        weekly_frequency_form_state: WeeklyFrequencyFormState | domain.Unspecified = domain.Unspecified()
+        xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified = domain.Unspecified()
+        yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
 
         if todo.frequency.name == domain.FrequencyType.Irregular:
             irregular_frequency_form_state = IrregularFrequencyFormState.from_domain(frequency=todo.frequency)
@@ -253,5 +255,5 @@ class TodoFormState:
             prior_completed=todo.prior_completed,
             last_completed_by=todo.last_completed_by,
             prior_completed_by=todo.prior_completed_by,
-            focus_description=True,
+            focus_description=domain.Unspecified(),
         )

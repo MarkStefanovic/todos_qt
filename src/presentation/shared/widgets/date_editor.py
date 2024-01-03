@@ -13,7 +13,7 @@ __all__ = ("DateEditor",)
 class DateEditor(qtw.QWidget):
     date_changed = qtc.pyqtSignal()
 
-    def __init__(self, *, fmt: str = "%m/%d/%y", parent: qtw.QWidget | None = None):
+    def __init__(self, *, fmt: str = "%m/%d/%Y", parent: qtw.QWidget | None = None):
         super().__init__(parent=parent)
 
         self._fmt = fmt

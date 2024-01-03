@@ -1,18 +1,20 @@
+import dataclasses
+
 from src import domain
 
 __all__ = ("TodoService",)
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
 class TodoService(domain.TodoService):
-    def __init__(self):  # type: ignore
-        self.add_result: None | domain.Error = None
-        self.delete_result: None | domain.Error = None
-        self.get_result: None | domain.Error = None
-        self.get_by_template_id_and_user_id_result: None | domain.Error = None
-        self.mark_as_completed_result: None | domain.Error = None
-        self.where_result: list[domain.Todo] | domain.Error = []
-        self.mark_incomplete_result: None | domain.Error = None
-        self.update_result: None | domain.Error = None
+    add_result: None | domain.Error = None
+    delete_result: None | domain.Error = None
+    get_result: None | domain.Error = domain.DEFAULT_TODO
+    get_by_template_id_and_user_id_result: None | domain.Error = None
+    mark_as_completed_result: None | domain.Error = None
+    where_result: tuple[domain.Todo, ...] | domain.Error = (domain.DEFAULT_TODO,)
+    mark_incomplete_result: None | domain.Error = None
+    update_result: None | domain.Error = None
 
     def add(self, *, todo: domain.Todo) -> None | domain.Error:
         return self.add_result

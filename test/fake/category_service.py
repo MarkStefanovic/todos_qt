@@ -1,16 +1,18 @@
+import dataclasses
+
 from src import domain
 from src.domain import Error
 
 __all__ = ("CategoryService",)
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
 class CategoryService(domain.CategoryService):
-    def __init__(self):  # type: ignore
-        self.add_result: None | domain.Error = None
-        self.all_result: list[domain.Category] | domain.Error = []
-        self.delete_result: None | domain.Error = None
-        self.get_result: domain.Category | None | domain.Error = None
-        self.update_result: None | domain.Error = None
+    add_result: None | domain.Error = None
+    all_result: tuple[domain.Category, ...] | domain.Error = (domain.TODO_CATEGORY,)
+    delete_result: None | domain.Error = None
+    get_result: domain.Category | None | domain.Error = (domain.TODO_CATEGORY,)
+    update_result: None | domain.Error = None
 
     def add(self, /, category: domain.Category) -> None | domain.Error:
         return self.add_result

@@ -29,7 +29,7 @@ class CategorySelectorView(qtw.QComboBox):
         self.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect(" " * 30).width())
         self.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
 
-        self._states.connect(self._set_state)
+        self._states.connect(self.set_state)
 
     @property
     def selected_item(self) -> domain.Category:
@@ -43,7 +43,7 @@ class CategorySelectorView(qtw.QComboBox):
 
         return domain.TODO_CATEGORY
 
-    def _set_state(self, /, state: CategorySelectorState) -> None:
+    def set_state(self, /, state: CategorySelectorState) -> None:
         logger.debug(f"{self.__class__.__name__}._set_state({state=!r})")
 
         if not isinstance(state.category_options, domain.Unspecified):

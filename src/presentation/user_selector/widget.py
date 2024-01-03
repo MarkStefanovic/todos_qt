@@ -1,3 +1,5 @@
+import typing
+
 from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw  # noqa
 
 from src import domain
@@ -45,3 +47,6 @@ class UserSelectorWidget(qtw.QWidget):
 
     def select_item(self, /, item: domain.User) -> None:
         return self._view.select_item(item)
+
+    def set_items(self, /, items: typing.Iterable[domain.User]) -> None:
+        self._view.set_items(items)

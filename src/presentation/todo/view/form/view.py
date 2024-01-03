@@ -52,13 +52,13 @@ class TodoFormView(qtw.QWidget):
         advance_days_lbl = qtw.QLabel("Advance Days")
         advance_days_lbl.font().setBold(True)
         self._advance_days_sb = qtw.QSpinBox()
-        self._advance_days_sb.setRange(0, 999)
+        self._advance_days_sb.setMinimum(0)
         self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
 
         expire_days_lbl = qtw.QLabel("Expire Days")
         expire_days_lbl.font().setBold(True)
         self._expire_days_sb = qtw.QSpinBox()
-        self._expire_days_sb.setRange(1, 999)
+        self._expire_days_sb.setMinimum(1)
         self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
 
         user_lbl = qtw.QLabel("User")
@@ -140,9 +140,7 @@ class TodoFormView(qtw.QWidget):
         main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
         main_layout.addLayout(form_layout)
         main_layout.addLayout(self._frequency_subform_layout)
-        main_layout.addSpacerItem(
-            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Minimum, qtw.QSizePolicy.Policy.Expanding)
-        )
+        main_layout.addStretch()
         main_layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(main_layout)
@@ -256,7 +254,7 @@ class TodoFormView(qtw.QWidget):
                 weekly_frequency_form_state=weekly_frequency_form_state,
                 xdays_frequency_form_state=xdays_frequency_form_state,
                 yearly_frequency_form_state=yearly_frequency_form_state,
-                focus_description=self._description_txt.hasFocus(),
+                focus_description=domain.Unspecified(),
             )
         except Exception as e:
             logger.error(f"{self.__class__.__name__}.get_state() failed: {e!s}")
@@ -301,6 +299,9 @@ class TodoFormView(qtw.QWidget):
                 self._expire_days_sb.setValue(state.expire_days)
 
             if not isinstance(state.frequency_name, domain.Unspecified):
+                self._advance_days_sb.setMaximum(_get_maximum_advance_days_for_frequency(state.frequency_name))
+                self._expire_days_sb.setMaximum(_get_maximum_expire_days_for_frequency(state.frequency_name))
+
                 if state.frequency_name in (
                     domain.FrequencyType.Daily,
                     domain.FrequencyType.Easter,
@@ -346,9 +347,17 @@ class TodoFormView(qtw.QWidget):
             if not isinstance(state.yearly_frequency_form_state, domain.Unspecified):
                 self._yearly_frequency_form.set_state(state.yearly_frequency_form_state)
 
+            if not isinstance(state.categories, domain.Unspecified):
+                self._category_selector.set_items(state.categories)
+
+            if not isinstance(state.users, domain.Unspecified):
+                self._user_selector.set_items(state.users)
+
             if not isinstance(state.focus_description, domain.Unspecified):
-                if state.focus_description and not self._description_txt.hasFocus():
+                if state.focus_description:
                     self._description_txt.setFocus()
+                else:
+                    self._description_txt.clearFocus()
 
             return None
         except Exception as e:
@@ -360,39 +369,29 @@ class TodoFormView(qtw.QWidget):
 
         self._advance_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
         self._expire_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
-        self._advance_days_sb.setMaximum(999)
-        self._expire_days_sb.setMaximum(999)
+        self._advance_days_sb.setMaximum(_get_maximum_advance_days_for_frequency(frequency))
+        self._expire_days_sb.setMaximum(_get_maximum_expire_days_for_frequency(frequency))
 
         match frequency:
             case domain.FrequencyType.Daily:
                 self._advance_days_sb.setValue(0)
                 self._expire_days_sb.setValue(1)
-                self._advance_days_sb.setMaximum(0)
-                self._expire_days_sb.setMaximum(1)
                 self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Easter:
                 self._advance_days_sb.setValue(30)
                 self._expire_days_sb.setValue(90)
-                self._advance_days_sb.setMaximum(363)
-                self._expire_days_sb.setMaximum(363)
                 self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Irregular:
                 self._advance_days_sb.setValue(30)
                 self._expire_days_sb.setValue(90)
-                self._advance_days_sb.setMaximum(363)
-                self._expire_days_sb.setMaximum(363)
                 self._frequency_subform_layout.setCurrentIndex(1)
             case domain.FrequencyType.MemorialDay:
                 self._advance_days_sb.setValue(30)
                 self._expire_days_sb.setValue(90)
-                self._advance_days_sb.setMaximum(363)
-                self._expire_days_sb.setMaximum(363)
                 self._frequency_subform_layout.setCurrentIndex(0)
             case domain.FrequencyType.Monthly:
                 self._advance_days_sb.setValue(0)
                 self._expire_days_sb.setValue(27)
-                self._advance_days_sb.setMaximum(27)
-                self._expire_days_sb.setMaximum(27)
                 self._frequency_subform_layout.setCurrentIndex(2)
             case domain.FrequencyType.Once:
                 self._advance_days_sb.setValue(0)
@@ -401,8 +400,6 @@ class TodoFormView(qtw.QWidget):
             case domain.FrequencyType.Weekly:
                 self._advance_days_sb.setValue(0)
                 self._expire_days_sb.setValue(5)
-                self._advance_days_sb.setMaximum(6)
-                self._expire_days_sb.setMaximum(6)
                 self._frequency_subform_layout.setCurrentIndex(4)
             case domain.FrequencyType.XDays:
                 self._advance_days_sb.setValue(0)
@@ -411,8 +408,6 @@ class TodoFormView(qtw.QWidget):
             case domain.FrequencyType.Yearly:
                 self._advance_days_sb.setValue(30)
                 self._expire_days_sb.setValue(90)
-                self._advance_days_sb.setMaximum(363)
-                self._expire_days_sb.setMaximum(363)
                 self._frequency_subform_layout.setCurrentIndex(6)
             case _:
                 self._requests.error.emit(domain.Error.new(f"Unrecognized frequency: {frequency!r}."))
@@ -437,3 +432,43 @@ class TodoFormView(qtw.QWidget):
             return None
 
         self._requests.save.emit(requests.SaveRequest(todo=todo))
+
+
+def _get_maximum_advance_days_for_frequency(frequency: domain.FrequencyType, /) -> int | None:
+    match frequency:
+        case domain.FrequencyType.Daily:
+            return 0
+        case domain.FrequencyType.Once | domain.FrequencyType.XDays:
+            return None
+        case domain.FrequencyType.Easter:
+            return 363
+        case domain.FrequencyType.MemorialDay:
+            return 363
+        case domain.FrequencyType.Irregular:
+            return 363
+        case domain.FrequencyType.Monthly:
+            return 27
+        case domain.FrequencyType.Weekly:
+            return 6
+        case domain.FrequencyType.Yearly:
+            return 363
+
+
+def _get_maximum_expire_days_for_frequency(frequency: domain.FrequencyType, /) -> int | None:
+    match frequency:
+        case domain.FrequencyType.Daily:
+            return 1
+        case domain.FrequencyType.Once | domain.FrequencyType.XDays:
+            return None
+        case domain.FrequencyType.Easter:
+            return 363
+        case domain.FrequencyType.MemorialDay:
+            return 363
+        case domain.FrequencyType.Irregular:
+            return 363
+        case domain.FrequencyType.Monthly:
+            return 27
+        case domain.FrequencyType.Weekly:
+            return 6
+        case domain.FrequencyType.Yearly:
+            return 363

@@ -1,16 +1,18 @@
+import dataclasses
+
 from src import domain
 
 __all__ = ("UserService",)
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True, slots=True)
 class UserService(domain.UserService):
-    def __init__(self):  # type: ignore
-        self.add_result: None | domain.Error = None
-        self.get_current_user_result: domain.User | domain.Error = domain.DEFAULT_USER
-        self.delete_result: None | domain.Error = None
-        self.get_result: domain.User | None | domain.Error = None
-        self.update_result: None | domain.Error = None
-        self.where_result: list[domain.User] | domain.Error = []
+    add_result: None | domain.Error = None
+    get_current_user_result: domain.User | domain.Error = domain.DEFAULT_USER
+    delete_result: None | domain.Error = None
+    get_result: domain.User | None | domain.Error = None
+    update_result: None | domain.Error = None
+    where_result: tuple[domain.User, ...] | domain.Error = ()
 
     def add(self, *, user: domain.User) -> None | domain.Error:
         return self.add_result
@@ -29,3 +31,8 @@ class UserService(domain.UserService):
 
     def where(self, *, active: bool) -> list[domain.User] | domain.Error:
         return self.where_result
+
+
+if __name__ == "__main__":
+    svc = UserService()
+    print(svc.get(user_id="12345"))
