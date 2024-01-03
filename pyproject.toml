@@ -13,7 +13,6 @@ dependencies = [
     "pyinstaller",
     "python-dateutil",
     "psycopg2-binary",
-    "pyqt5-stubs",
     "pip-audit",
     "ruff",
     "ruff-lsp",
