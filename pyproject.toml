@@ -14,6 +14,7 @@ dependencies = [
     "python-dateutil",
     "psycopg2-binary",
     "pip-audit",
+    "pip-tools",
     "ruff",
     "ruff-lsp",
     "types-python-dateutil",

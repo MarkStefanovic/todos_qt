@@ -434,12 +434,12 @@ class TodoFormView(qtw.QWidget):
         self._requests.save.emit(requests.SaveRequest(todo=todo))
 
 
-def _get_maximum_advance_days_for_frequency(frequency: domain.FrequencyType, /) -> int | None:
+def _get_maximum_advance_days_for_frequency(frequency: domain.FrequencyType, /) -> int:
     match frequency:
         case domain.FrequencyType.Daily:
             return 0
         case domain.FrequencyType.Once | domain.FrequencyType.XDays:
-            return None
+            return 9999
         case domain.FrequencyType.Easter:
             return 363
         case domain.FrequencyType.MemorialDay:
@@ -454,12 +454,12 @@ def _get_maximum_advance_days_for_frequency(frequency: domain.FrequencyType, /) 
             return 363
 
 
-def _get_maximum_expire_days_for_frequency(frequency: domain.FrequencyType, /) -> int | None:
+def _get_maximum_expire_days_for_frequency(frequency: domain.FrequencyType, /) -> int:
     match frequency:
         case domain.FrequencyType.Daily:
             return 1
         case domain.FrequencyType.Once | domain.FrequencyType.XDays:
-            return None
+            return 9999
         case domain.FrequencyType.Easter:
             return 363
         case domain.FrequencyType.MemorialDay:
