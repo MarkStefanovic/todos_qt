@@ -26,6 +26,10 @@ def apply_theme(app: qtw.QApplication) -> None:
             selection-background-color: orange;
             selection-color: green;
         }
+        
+        QMainWindow {
+            background-color: rgb(5, 5, 15);
+        }
 
         QPushButton {
             font-weight: bold;
@@ -84,19 +88,21 @@ def apply_theme(app: qtw.QApplication) -> None:
             border-left: none; 
             border-right: none; 
             border-bottom: none;
-            background-color: none;
+            background-color: rgb(15, 15, 25);;
         }
         QTabBar::tab { 
             min-height: 30px;
             min-width: 100px;
-            border: none;
+            border: 1px solid rgb(35, 35, 50);
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
         }
         QTabBar:tab:selected {
             background: rgb(80, 80, 100);
         }
-        QTabBar::tab:hover { background: rgb(100, 100, 140); }
+        QTabBar::tab:hover { 
+            background: rgb(100, 100, 140); 
+        }
         
         QHeaderView {
             padding: 0px;
