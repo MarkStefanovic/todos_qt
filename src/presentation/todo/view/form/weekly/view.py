@@ -1,21 +1,23 @@
 import typing
 
-from PyQt6 import QtWidgets as qtw  # noqa
+from PyQt6 import QtCore as qtc, QtWidgets as qtw  # noqa
 from loguru import logger
 
 from src import domain
 from src.presentation.shared import widgets
+from src.presentation.shared.theme import font
 from src.presentation.todo.view.form.weekly.state import WeeklyFrequencyFormState
 
 __all__ = ("WeeklyFrequencyForm",)
 
 
 class WeeklyFrequencyForm(qtw.QWidget):
-    def __init__(self, *, parent: qtw.QWidget | None = None):
+    def __init__(self, *, label_width: int, parent: qtw.QWidget | None):
         super().__init__(parent=parent)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.font().setBold(True)
+        weekday_lbl.setFont(font.BOLD_FONT)
+        weekday_lbl.setFixedWidth(label_width)
         self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
         self._weekday_cbo.set_values(
             {
@@ -31,10 +33,12 @@ class WeeklyFrequencyForm(qtw.QWidget):
         self._weekday_cbo.set_value(domain.Weekday.Monday)
         self._weekday_cbo.setFixedWidth(150)
 
-        form_layout = qtw.QFormLayout()
-        form_layout.addRow(weekday_lbl, self._weekday_cbo)
-
-        self.setLayout(form_layout)
+        layout = qtw.QHBoxLayout()
+        layout.addWidget(weekday_lbl, alignment=qtc.Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self._weekday_cbo, alignment=qtc.Qt.AlignmentFlag.AlignTop)
+        layout.addStretch()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
 
     def get_state(self) -> WeeklyFrequencyFormState | domain.Error:
         try:

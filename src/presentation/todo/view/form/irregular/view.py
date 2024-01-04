@@ -7,17 +7,19 @@ from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 from src import domain
 from src.presentation.shared import widgets
+from src.presentation.shared.theme import font
 from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
 
 __all__ = ("IrregularFrequencyForm",)
 
 
 class IrregularFrequencyForm(qtw.QWidget):
-    def __init__(self, *, parent: qtw.QWidget | None = None):
+    def __init__(self, *, label_width: int, parent: qtw.QWidget | None):
         super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
-        month_lbl.font().setBold(True)
+        month_lbl.setFont(font.BOLD_FONT)
+        month_lbl.setFixedWidth(label_width)
         self._month_cbo: widgets.MapCBO[domain.Month] = widgets.MapCBO()
         self._month_cbo.set_values(
             {
@@ -39,13 +41,13 @@ class IrregularFrequencyForm(qtw.QWidget):
         self._month_cbo.setFixedWidth(150)
 
         week_number_lbl = qtw.QLabel("Week #")
-        week_number_lbl.font().setBold(True)
+        week_number_lbl.setFont(font.BOLD_FONT)
         self._week_number_sb = qtw.QSpinBox()
         self._week_number_sb.setRange(1, 5)
         self._week_number_sb.setFixedWidth(150)
 
         weekday_lbl = qtw.QLabel("Weekday")
-        weekday_lbl.font().setBold(True)
+        weekday_lbl.setFont(font.BOLD_FONT)
         self._weekday_cbo: typing.Final[widgets.MapCBO[domain.Weekday]] = widgets.MapCBO()
         self._weekday_cbo.set_values(
             {
@@ -66,7 +68,7 @@ class IrregularFrequencyForm(qtw.QWidget):
         form_layout.addRow(month_lbl, self._month_cbo)
         form_layout.addRow(week_number_lbl, self._week_number_sb)
         form_layout.addRow(weekday_lbl, self._weekday_cbo)
-
+        form_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(form_layout)
 
     def get_state(self) -> IrregularFrequencyFormState | domain.Error:

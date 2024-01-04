@@ -132,12 +132,12 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
 
         if vertical_header := self.verticalHeader():
             vertical_header.setDefaultAlignment(qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft)
-            # vertical_header.setMaximumSectionSize(100)
-            #     # display at most 5 lines
-            vertical_header.setMinimumSectionSize(self._font_metrics.height())
-            vertical_header.setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
+            # vertical_header.setMinimumSectionSize(self._font_metrics.height())
+            # vertical_header.setMaximumSectionSize(self._font_metrics.height() * 5 + 8)
             # vertical_header.setSectionResizeMode(qtw.QHeaderView.ResizeMode.ResizeToContents)
             # vertical_header.setTextElideMode(qtc.Qt.TextElideMode.ElideRight)
+
+        self.setCornerButtonEnabled(False)
 
         # noinspection PyUnresolvedReferences
         self.clicked.connect(self._on_click)

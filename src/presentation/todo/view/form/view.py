@@ -41,43 +41,55 @@ class TodoFormView(qtw.QWidget):
     ):
         super().__init__(parent=parent)
 
+        label_width = font.BOLD_FONT_METRICS.boundingRect("    Advance Days    ").width()
+
         self._requests: typing.Final[requests.TodoFormRequests] = form_requests
         self._category_selector: typing.Final[CategorySelectorWidget] = category_selector
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.font().setBold(True)
+        description_lbl.setFont(font.BOLD_FONT)
+        description_lbl.setFixedWidth(label_width)
         self._description_txt = qtw.QLineEdit()
+        self._description_txt.setMaximumWidth(800)
 
         advance_days_lbl = qtw.QLabel("Advance Days")
-        advance_days_lbl.font().setBold(True)
+        advance_days_lbl.setFont(font.BOLD_FONT)
+        advance_days_lbl.setFixedWidth(label_width)
         self._advance_days_sb = qtw.QSpinBox()
         self._advance_days_sb.setMinimum(0)
-        self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
+        self._advance_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   9999   ").width())
 
         expire_days_lbl = qtw.QLabel("Expire Days")
-        expire_days_lbl.font().setBold(True)
+        expire_days_lbl.setFont(font.BOLD_FONT)
+        expire_days_lbl.setFixedWidth(label_width)
         self._expire_days_sb = qtw.QSpinBox()
         self._expire_days_sb.setMinimum(1)
-        self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   999   ").width())
+        self._expire_days_sb.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   9999   ").width())
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.font().setBold(True)
+        user_lbl.setFont(font.BOLD_FONT)
+        user_lbl.setFixedWidth(label_width)
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.font().setBold(True)
+        category_lbl.setFont(font.BOLD_FONT)
+        category_lbl.setFixedWidth(label_width)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.font().setBold(True)
+        note_lbl.setFont(font.BOLD_FONT)
+        note_lbl.setFixedWidth(label_width)
         self._note_txt = qtw.QTextEdit(parent=self)
+        self._note_txt.setMaximumWidth(800)
         # self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
-        start_date_lbl.font().setBold(True)
+        start_date_lbl.setFont(font.BOLD_FONT)
+        start_date_lbl.setFixedWidth(label_width)
         self._start_date_edit = DateEditor()
 
         frequency_lbl = qtw.QLabel("Frequency")
-        frequency_lbl.font().setBold(True)
+        frequency_lbl.setFont(font.BOLD_FONT)
+        frequency_lbl.setFixedWidth(label_width)
         self._frequency_cbo: typing.Final[widgets.MapCBO[domain.FrequencyType]] = widgets.MapCBO()
         self._frequency_cbo.set_values(
             {
@@ -96,15 +108,20 @@ class TodoFormView(qtw.QWidget):
         self._frequency_cbo.value_changed.connect(self._frequency_changed)
         self._frequency_cbo.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("   Irregular   ").width())
 
-        self._irregular_frequency_form = IrregularFrequencyForm()
-        self._monthly_frequency_form = MonthlyFrequencyForm()
-        self._one_off_frequency_form = OnceFrequencyForm()
-        self._weekly_frequency_form = WeeklyFrequencyForm()
-        self._xdays_frequency_form = XDaysFrequencyForm()
-        self._yearly_frequency_form = YearlyFrequencyForm()
+        self._irregular_frequency_form = IrregularFrequencyForm(label_width=label_width, parent=self)
+        self._monthly_frequency_form = MonthlyFrequencyForm(label_width=label_width, parent=self)
+        self._one_off_frequency_form = OnceFrequencyForm(label_width=label_width, parent=self)
+        self._weekly_frequency_form = WeeklyFrequencyForm(label_width=label_width, parent=self)
+        self._xdays_frequency_form = XDaysFrequencyForm(label_width=label_width, parent=self)
+        self._yearly_frequency_form = YearlyFrequencyForm(label_width=label_width, parent=self)
+
+        empty_subform_dummy = qtw.QWidget()
+        empty_subform_dummy.setVisible(False)
+        empty_subform_dummy.setStyleSheet("border: none;")
+        empty_subform_dummy.setFixedHeight(0)
 
         self._frequency_subform_layout = qtw.QStackedLayout()
-        self._frequency_subform_layout.addWidget(qtw.QWidget())
+        self._frequency_subform_layout.addWidget(empty_subform_dummy)
         self._frequency_subform_layout.addWidget(self._irregular_frequency_form)
         self._frequency_subform_layout.addWidget(self._monthly_frequency_form)
         self._frequency_subform_layout.addWidget(self._one_off_frequency_form)
@@ -132,16 +149,34 @@ class TodoFormView(qtw.QWidget):
         self.save_btn = qtw.QPushButton(save_btn_icon, "")
         self.save_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
         self.save_btn.setToolTip("Save")
+        self.save_btn.setIconSize(qtc.QSize(24, 24))
+        self.save_btn.setFixedSize(32, 32)
         # self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         # self.save_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("     Save     "))
         # self.save_btn.setDefault(True)
 
-        main_layout = qtw.QVBoxLayout()
-        main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
-        main_layout.addLayout(form_layout)
-        main_layout.addLayout(self._frequency_subform_layout)
-        main_layout.addStretch()
-        main_layout.addWidget(self.save_btn, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        main_layout = qtw.QGridLayout()
+        main_layout.addWidget(self.back_btn, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        # main_layout.addWidget(
+        #     self.save_btn, 0, 1, alignment=qtc.Qt.AlignmentFlag.AlignBottom | qtc.Qt.AlignmentFlag.AlignLeft
+        # )
+        main_layout.addLayout(form_layout, 1, 0)
+        main_layout.addLayout(self._frequency_subform_layout, 2, 0)
+        main_layout.addWidget(
+            self.save_btn, 2, 1, alignment=qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
+        )
+        main_layout.addItem(
+            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 3, 2
+        )
+
+        # main_layout = qtw.QVBoxLayout()
+        # main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        # main_layout.addLayout(form_layout)
+        # main_layout.addLayout(self._frequency_subform_layout)
+        # main_layout.addWidget(
+        #     self.save_btn, alignment=qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignHCenter
+        # )
+        # main_layout.addStretch()
 
         self.setLayout(main_layout)
 

@@ -6,17 +6,19 @@ from loguru import logger
 
 from src import domain
 from src.presentation.shared import widgets
+from src.presentation.shared.theme import font
 from src.presentation.todo.view.form.yearly.state import YearlyFrequencyFormState
 
 __all__ = ("YearlyFrequencyForm",)
 
 
 class YearlyFrequencyForm(qtw.QWidget):
-    def __init__(self, *, parent: qtw.QWidget | None = None):
+    def __init__(self, *, label_width: int, parent: qtw.QWidget | None):
         super().__init__(parent=parent)
 
         month_lbl = qtw.QLabel("Month")
-        month_lbl.font().setBold(True)
+        month_lbl.setFont(font.BOLD_FONT)
+        month_lbl.setFixedWidth(label_width)
         self._month_cbo: typing.Final[widgets.MapCBO[domain.Month]] = widgets.MapCBO(parent=self)
         self._month_cbo.set_values(
             {
@@ -38,7 +40,7 @@ class YearlyFrequencyForm(qtw.QWidget):
         self._month_cbo.setFixedWidth(100)
 
         month_day_lbl = qtw.QLabel("Month Day")
-        month_day_lbl.font().setBold(True)
+        month_day_lbl.setFont(font.BOLD_FONT)
         self._month_day_sb = qtw.QSpinBox()
         self._month_day_sb.setRange(1, 31)
         self._month_day_sb.setFixedWidth(100)
@@ -47,6 +49,7 @@ class YearlyFrequencyForm(qtw.QWidget):
         form_layout = qtw.QFormLayout()
         form_layout.addRow(month_lbl, self._month_cbo)
         form_layout.addRow(month_day_lbl, self._month_day_sb)
+        form_layout.setContentsMargins(0, 0, 0, 0)
 
         self.setLayout(form_layout)
 

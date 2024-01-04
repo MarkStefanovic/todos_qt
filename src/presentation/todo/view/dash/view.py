@@ -95,7 +95,7 @@ class TodoDashView(qtw.QWidget):
             table_view.text(
                 name="description",
                 display_name="Description",
-                width=300,
+                width=400,
             ),
             table_view.date(
                 name="due_date",

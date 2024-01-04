@@ -40,11 +40,11 @@ def apply_theme(app: qtw.QApplication) -> None:
         QScrollBar:horizontal {
             border: none;
             background-color: rgb(80, 80, 100);
-            height: 20px;
+            height: 14px;
         }
         QScrollBar::handle:horizontal {
             background: cyan;
-            min-width: 20px;
+            min-width: 14px;
         }
         QScrollBar::add-line:horizontal {
             border: none;
@@ -57,11 +57,11 @@ def apply_theme(app: qtw.QApplication) -> None:
         QScrollBar:vertical {
             border: none;
             background-color: rgb(80, 80, 100);
-            width: 20px;
+            width: 14px;
         }
         QScrollBar::handle:vertical {
             background: cyan;
-            min-width: 20px;
+            min-width: 14px;
         }
         QScrollBar::add-line:vertical {
             border: none;
@@ -76,7 +76,7 @@ def apply_theme(app: qtw.QApplication) -> None:
         
         QTabWidget:pane {
             background-color: none;
-            border: none;
+            border: 1px solid rgb(35, 35, 50);
         }
         QTabBar { 
             font-weight: bold;
@@ -98,21 +98,29 @@ def apply_theme(app: qtw.QApplication) -> None:
         }
         QTabBar::tab:hover { background: rgb(100, 100, 140); }
         
+        QHeaderView {
+            padding: 0px;
+            margin: 0px;
+        }
         QHeaderView::section { 
             background-color: rgb(35, 35, 50);
             font-weight: bold; 
             border-left: 1px solid rgb(80, 80, 100);
             border-right: 1px solid rgb(80, 80, 100);
-            padding: 4px;
-            min-height: 24px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-bottom: 4px;
+            padding-top: 4px;
+            min-height: 16px;
+            min-width: 16px;
         }
+        
         QTableCornerButton::section { 
             background-color: rgb(15, 15, 25);
         }
         QTableView::item {
             border-left: 1px solid rgb(25, 25, 40);
             padding: 4px;
-            min-height: 20px;
         }
         QTableView::item:hover { background-color: rgb(80, 80, 140); }
         
