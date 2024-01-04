@@ -51,19 +51,19 @@ class TodoDashView(qtw.QWidget):
             self._add_btn.clicked.connect(self._on_add_btn_clicked)
 
         due_lbl = qtw.QLabel("Due?")
-        due_lbl.font().setBold(True)
+        due_lbl.setFont(font.BOLD_FONT)
         self._due_chk = qtw.QCheckBox()
         self._due_chk.setChecked(True)
         self._due_chk.stateChanged.connect(self._refresh_btn.click)  # noqa
 
         category_lbl = qtw.QLabel("Category")
-        category_lbl.font().setBold(True)
+        category_lbl.setFont(font.BOLD_FONT)
 
         user_lbl = qtw.QLabel("User")
-        user_lbl.font().setBold(True)
+        user_lbl.setFont(font.BOLD_FONT)
 
         description_lbl = qtw.QLabel("Description")
-        description_lbl.font().setBold(True)
+        description_lbl.setFont(font.BOLD_FONT)
         self._description_filter_txt = qtw.QLineEdit("")
         self._description_filter_txt.setMaximumWidth(200)
 

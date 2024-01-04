@@ -28,7 +28,7 @@ class CategoryForm(qtw.QWidget):
         self.back_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         name_lbl = qtw.QLabel("Name")
-        name_lbl.font().setBold(True)
+        name_lbl.setFont(font.BOLD_FONT)
         # name_lbl.setFixedWidth(font.BOLD_FONT_METRICS.width("  Name  "))
         self._name_txt = qtw.QLineEdit()
         self._name_txt.setMaximumWidth(800)
@@ -38,7 +38,7 @@ class CategoryForm(qtw.QWidget):
         self.save_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
 
         note_lbl = qtw.QLabel("Note")
-        note_lbl.font().setBold(True)
+        note_lbl.setFont(font.BOLD_FONT)
         self._note_txt = qtw.QTextEdit()
         self._note_txt.setMaximumWidth(800)
         self._note_txt.setMaximumHeight(font.DEFAULT_FONT_METRICS.height() * 8 + 12)

@@ -127,6 +127,11 @@ def apply_theme(app: qtw.QApplication) -> None:
         QPushButton:hover { background-color: rgb(80, 80, 140); }
         QPushButton:pressed { background-color: rgb(80, 80, 140); }
         
+        QCheckBox {
+            border: none;
+            background-color: rgb(15, 15, 25);
+        }
+        
         QComboBox {
             border: none;
             combobox-popup: 0;
@@ -139,7 +144,7 @@ def apply_theme(app: qtw.QApplication) -> None:
             width: 0px;
         }
         
-        QCheckBox, QLineEdit, QTextEdit {
+        QLineEdit, QTextEdit {
             border: none;
             color: cyan;
             background-color: rgb(35, 35, 50);
