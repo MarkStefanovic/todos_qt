@@ -9,7 +9,7 @@ __all__ = ("TodoService",)
 class TodoService(domain.TodoService):
     add_result: None | domain.Error = None
     delete_result: None | domain.Error = None
-    get_result: None | domain.Error = domain.DEFAULT_TODO
+    get_result: domain.Todo | None | domain.Error = domain.DEFAULT_TODO
     get_by_template_id_and_user_id_result: None | domain.Error = None
     mark_as_completed_result: None | domain.Error = None
     where_result: tuple[domain.Todo, ...] | domain.Error = (domain.DEFAULT_TODO,)
@@ -49,7 +49,10 @@ class TodoService(domain.TodoService):
         category_id_filter: str | domain.Unspecified,
         user_id_filter: str | domain.Unspecified,
     ) -> list[domain.Todo] | domain.Error:
-        return self.where_result
+        if isinstance(self.where_result, domain.Error):
+            return self.where_result
+
+        return list(self.where_result)
 
     def mark_incomplete(self, *, todo_id: str) -> None | domain.Error:
         return self.mark_incomplete_result

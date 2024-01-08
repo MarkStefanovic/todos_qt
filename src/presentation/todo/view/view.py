@@ -24,7 +24,7 @@ class TodoView(qtw.QWidget):
         form_category_selector: CategorySelectorWidget,
         dash_user_selector: UserSelectorWidget,
         form_user_selector: UserSelectorWidget,
-        current_user: domain.User,
+        user_is_admin: bool,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
@@ -35,7 +35,7 @@ class TodoView(qtw.QWidget):
 
         self.dash = dash.TodoDashView(
             parent=self,
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             todo_dash_requests=dash_requests,
             category_selector=dash_category_selector,
             user_selector=dash_user_selector,

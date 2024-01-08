@@ -17,6 +17,7 @@ class MainWidget(qtw.QMainWindow):
         *,
         window_icon: qtg.QIcon,
         current_user: domain.User,
+        user_is_admin: bool,
         category_service: domain.CategoryService,
         todo_service: domain.TodoService,
         user_service: domain.UserService,
@@ -37,7 +38,7 @@ class MainWidget(qtw.QMainWindow):
 
         self._category_widget = CategoryWidget(
             category_service=category_service,
-            user_is_admin=current_user.is_admin,
+            user_is_admin=user_is_admin,
             parent=self,
         )
 
@@ -46,17 +47,18 @@ class MainWidget(qtw.QMainWindow):
             todo_service=todo_service,
             user_service=user_service,
             current_user=current_user,
+            user_is_admin=user_is_admin,
             parent=self,
         )
 
         self._user_widget = UserWidget(
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             user_service=user_service,
             parent=self,
         )
 
         self._view = MainView(
-            user_is_admin=current_user.is_admin,
+            user_is_admin=user_is_admin,
             category_widget=self._category_widget,
             todo_widget=self._todo_widget,
             user_widget=self._user_widget,

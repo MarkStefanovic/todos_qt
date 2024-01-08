@@ -11,7 +11,7 @@ class CategoryService(domain.CategoryService):
     add_result: None | domain.Error = None
     all_result: tuple[domain.Category, ...] | domain.Error = (domain.TODO_CATEGORY,)
     delete_result: None | domain.Error = None
-    get_result: domain.Category | None | domain.Error = (domain.TODO_CATEGORY,)
+    get_result: domain.Category | None | domain.Error = domain.TODO_CATEGORY
     update_result: None | domain.Error = None
 
     def add(self, /, category: domain.Category) -> None | domain.Error:
@@ -21,7 +21,10 @@ class CategoryService(domain.CategoryService):
         return None
 
     def all(self) -> list[domain.Category] | domain.Error:
-        return self.all_result
+        if isinstance(self.all_result, domain.Error):
+            return self.all_result
+
+        return list(self.all_result)
 
     def delete(self, *, category_id: str) -> None | domain.Error:
         return self.delete_result

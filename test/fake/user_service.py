@@ -30,7 +30,10 @@ class UserService(domain.UserService):
         return self.update_result
 
     def where(self, *, active: bool) -> list[domain.User] | domain.Error:
-        return self.where_result
+        if isinstance(self.where_result, domain.Error):
+            return self.where_result
+
+        return list(self.where_result)
 
 
 if __name__ == "__main__":

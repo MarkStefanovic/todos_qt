@@ -22,7 +22,6 @@ class UserController(qtc.QObject):
         *,
         dash_requests: dash.requests.UserDashRequests,
         form_requests: form.requests.UserFormRequests,
-        current_user: domain.User,
         user_service: domain.UserService,
         parent: qtc.QObject | None,
     ):
@@ -30,7 +29,6 @@ class UserController(qtc.QObject):
 
         self._dash_requests: typing.Final[dash.requests.UserDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.UserFormRequests] = form_requests
-        self._current_user: typing.Final[domain.User] = current_user
         self._user_service: typing.Final[domain.UserService] = user_service
 
         self._dash_requests.add.connect(self._on_dash_add_btn_clicked)

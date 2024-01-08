@@ -21,6 +21,7 @@ class TodoWidget(qtw.QWidget):
         todo_service: domain.TodoService,
         user_service: domain.UserService,
         current_user: domain.User,
+        user_is_admin: bool,
         parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
@@ -71,7 +72,7 @@ class TodoWidget(qtw.QWidget):
             states=self._controller.states,
             dash_requests=dash_requests,
             form_requests=form_requests,
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             dash_category_selector=self._dash_category_selector,
             form_category_selector=self._form_category_selector,
             dash_user_selector=self._dash_user_selector,

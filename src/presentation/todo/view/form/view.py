@@ -149,22 +149,24 @@ class TodoFormView(qtw.QWidget):
         self.save_btn = qtw.QPushButton(save_btn_icon, "")
         self.save_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
         self.save_btn.setToolTip("Save")
-        self.save_btn.setIconSize(qtc.QSize(24, 24))
-        self.save_btn.setFixedSize(32, 32)
+        self.save_btn.setIconSize(qtc.QSize(20, 20))
+        self.save_btn.setFixedSize(30, 30)
         # self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
         # self.save_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("     Save     "))
         # self.save_btn.setDefault(True)
 
+        btn_layout = qtw.QHBoxLayout()
+        btn_layout.addWidget(self.back_btn)
+        btn_layout.addStretch()
+        btn_layout.addWidget(self.save_btn)
+
         main_layout = qtw.QGridLayout()
-        main_layout.addWidget(self.back_btn, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        main_layout.addLayout(btn_layout, 0, 0)
         # main_layout.addWidget(
         #     self.save_btn, 0, 1, alignment=qtc.Qt.AlignmentFlag.AlignBottom | qtc.Qt.AlignmentFlag.AlignLeft
         # )
         main_layout.addLayout(form_layout, 1, 0)
         main_layout.addLayout(self._frequency_subform_layout, 2, 0)
-        main_layout.addWidget(
-            self.save_btn, 2, 1, alignment=qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignLeft
-        )
         main_layout.addItem(
             qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 3, 2
         )
@@ -402,6 +404,9 @@ class TodoFormView(qtw.QWidget):
     def _frequency_changed(self) -> None:
         frequency = self._frequency_cbo.get_value()
 
+        if frequency is None:
+            return None
+
         self._advance_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
         self._expire_days_sb.setEnabled(frequency != domain.FrequencyType.Daily)
         self._advance_days_sb.setMaximum(_get_maximum_advance_days_for_frequency(frequency))
@@ -445,7 +450,7 @@ class TodoFormView(qtw.QWidget):
                 self._expire_days_sb.setValue(90)
                 self._frequency_subform_layout.setCurrentIndex(6)
             case _:
-                self._requests.error.emit(domain.Error.new(f"Unrecognized frequency: {frequency!r}."))
+                self._requests.error.emit(domain.Error.new(f"Unrecognized frequency: {frequency!r}."))  # type: ignore
 
     def _on_back_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_back_btn_clicked()")

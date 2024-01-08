@@ -21,15 +21,15 @@ class TodoDashView(qtw.QWidget):
         todo_dash_requests: requests.TodoDashRequests,
         category_selector: CategorySelectorWidget,
         user_selector: UserSelectorWidget,
-        current_user: domain.User,
-        parent: qtw.QWidget | None = None,
+        user_is_admin: bool,
+        parent: qtw.QWidget | None,
     ):
         super().__init__(parent=parent)
 
         self._requests: typing.Final[requests.TodoDashRequests] = todo_dash_requests
         self._category_selector: typing.Final[CategorySelectorWidget] = category_selector
         self._user_selector: typing.Final[UserSelectorWidget] = user_selector
-        self._current_user: typing.Final[domain.User] = current_user
+        self._user_is_admin: typing.Final[bool] = user_is_admin
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
         self._refresh_btn = qtw.QPushButton(refresh_btn_icon, "")
@@ -41,7 +41,7 @@ class TodoDashView(qtw.QWidget):
         toolbar_layout = qtw.QHBoxLayout()
         toolbar_layout.addWidget(self._refresh_btn)
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             add_btn_icon = icons.add_btn_icon(parent=self)
             self._add_btn = qtw.QPushButton(add_btn_icon, "")
             self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
@@ -150,7 +150,7 @@ class TodoDashView(qtw.QWidget):
             ),
         )
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             attrs += (
                 table_view.button(
                     name="edit",
@@ -186,7 +186,7 @@ class TodoDashView(qtw.QWidget):
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
         self._category_selector.item_selected.connect(self._refresh_btn.click)
         self._user_selector.item_selected.connect(self._refresh_btn.click)
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             self._table.double_click.connect(self._on_double_click)
 
     def get_state(self) -> TodoDashState:
@@ -259,7 +259,7 @@ class TodoDashView(qtw.QWidget):
 
     def _on_add_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}.on_add_btn_clicked()")
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             self._requests.add.emit()
 
     def _on_button_clicked(self, /, event: table_view.ButtonClickedEvent[domain.Todo, typing.Any]) -> None:
@@ -267,13 +267,13 @@ class TodoDashView(qtw.QWidget):
 
         match event.attr.name:
             case "delete":
-                if self._current_user.is_admin:
+                if self._user_is_admin:
                     if popup.confirm(question=f'Are you sure you want to delete "{event.item.description}"?'):
                         request = requests.DeleteTodo(todo=event.item)
 
                         self._requests.delete.emit(request)
             case "edit":
-                if self._current_user.is_admin:
+                if self._user_is_admin:
                     self._requests.edit.emit(requests.EditTodo(todo=event.item))
             case "complete":
                 self._requests.toggle_completed.emit(requests.ToggleCompleted(todo=event.item))
@@ -283,7 +283,7 @@ class TodoDashView(qtw.QWidget):
     def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             edit_request = requests.EditTodo(todo=event.item)
 
             self._requests.edit.emit(edit_request)

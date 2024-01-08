@@ -75,6 +75,7 @@ def main(
             category_service=category_service,
             todo_service=todo_service,
             user_service=user_service,
+            user_is_admin=user_is_admin,
         )
 
         app.setWindowIcon(app_icon)

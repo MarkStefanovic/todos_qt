@@ -18,7 +18,7 @@ class UserWidget(qtw.QWidget):
     def __init__(
         self,
         *,
-        current_user: domain.User,
+        user_is_admin: bool,
         user_service: domain.UserService,
         parent: qtw.QWidget | None,
     ):
@@ -33,7 +33,6 @@ class UserWidget(qtw.QWidget):
         self._controller = UserController(
             dash_requests=dash_requests,
             form_requests=form_requests,
-            current_user=current_user,
             user_service=user_service,
             parent=None,
         )
@@ -44,7 +43,7 @@ class UserWidget(qtw.QWidget):
             states=self._controller.states,
             dash_requests=dash_requests,
             form_requests=form_requests,
-            current_user=current_user,
+            user_is_admin=user_is_admin,
             parent=self,
         )
 

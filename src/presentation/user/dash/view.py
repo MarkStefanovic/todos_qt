@@ -19,13 +19,13 @@ class UserDash(qtw.QWidget):
     def __init__(
         self,
         *,
-        current_user: domain.User,
+        user_is_admin: bool,
         user_requests: requests.UserDashRequests,
         parent: qtw.QWidget | None = None,
     ):
         super().__init__(parent=parent)
 
-        self._current_user: typing.Final[domain.User] = current_user
+        self._user_is_admin: typing.Final[bool] = user_is_admin
         self._requests: typing.Final[requests.UserDashRequests] = user_requests
 
         refresh_btn_icon = icons.refresh_btn_icon(parent=self)
@@ -36,7 +36,7 @@ class UserDash(qtw.QWidget):
         toolbar = qtw.QHBoxLayout()
         toolbar.addWidget(self._refresh_btn)
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             add_btn_icon = icons.add_btn_icon(parent=self)
             self._add_btn = qtw.QPushButton(add_btn_icon, "")
             self._add_btn.setFixedWidth(font.BOLD_FONT_METRICS.height() + 8)
@@ -76,21 +76,21 @@ class UserDash(qtw.QWidget):
             ),
         )
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             attrs += (
                 table_view.button(
                     name="edit",
                     button_text="",
                     icon=icons.edit_btn_icon(parent=self),
                     width=40,
-                    enabled_when=lambda _: self._current_user.is_admin,
+                    enabled_when=lambda _: self._user_is_admin,
                 ),
                 table_view.button(
                     name="delete",
                     button_text="",
                     icon=icons.delete_btn_icon(parent=self),
                     width=40,
-                    enabled_when=lambda _: self._current_user.is_admin,
+                    enabled_when=lambda _: self._user_is_admin,
                 ),
             )
 
@@ -110,7 +110,7 @@ class UserDash(qtw.QWidget):
         # noinspection PyUnresolvedReferences
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
         self._table_view.button_clicked.connect(self._on_table_btn_clicked)
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             self._table_view.double_click.connect(self._on_table_btn_double_clicked)
 
     def get_state(self) -> UserDashState:
@@ -146,7 +146,7 @@ class UserDash(qtw.QWidget):
     def _on_add_btn_clicked(self, /, _: bool) -> None:
         logger.debug(f"{self.__class__.__name__}._on_add_btn_clicked()")
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             self._requests.add.emit()
 
     def _on_refresh_btn_clicked(self, /, _: bool) -> None:
@@ -157,14 +157,14 @@ class UserDash(qtw.QWidget):
 
         match event.attr.name:
             case "delete":
-                if self._current_user.is_admin:
+                if self._user_is_admin:
                     if popup.confirm(
                         question=f"Are you sure you want to delete {event.item.display_name}?",
                         title="Confirm Delete",
                     ):
                         self._requests.delete.emit(requests.DeleteRequest(user=event.item))
             case "edit":
-                if self._current_user.is_admin:
+                if self._user_is_admin:
                     self._requests.edit.emit(requests.EditRequest(user=event.item))
             case _:
                 logger.error(
@@ -175,6 +175,6 @@ class UserDash(qtw.QWidget):
     def _on_table_btn_double_clicked(self, /, event: table_view.DoubleClickEvent[domain.User, str]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_table_btn_double_clicked({event=!r})")
 
-        if self._current_user.is_admin:
+        if self._user_is_admin:
             request = requests.EditRequest(user=event.item)
             self._requests.edit.emit(request)

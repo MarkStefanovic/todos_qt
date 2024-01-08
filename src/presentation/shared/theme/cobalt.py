@@ -137,30 +137,31 @@ def apply_theme(app: qtw.QApplication) -> None:
             border: none;
             background-color: rgb(15, 15, 25);
         }
+        QCheckBox::indicator:unchecked {
+            background-color: white;
+            width: 11px;
+            height: 11px;
+        }
         
         QComboBox {
-            border: none;
             combobox-popup: 0;
             color: cyan;
             background-color: rgb(35, 35, 50);
             border-radius: 4px;
             min-width: 6em;
         }
-        QComboBox::drop-down {
-            width: 0px;
+        
+        QSpinBox {
+            color: cyan;
+            background-color: rgb(35, 35, 50);
+            border-radius: 4px;
+            min-width: 6em;
         }
         
         QLineEdit, QTextEdit {
             border: none;
             color: cyan;
             background-color: rgb(35, 35, 50);
-        }
-        QCheckBox::indicator,
-        QGroupBox::indicator,
-        QAbstractItemView::indicator,
-        QRadioButton::indicator {
-            height: 16px;
-            width: 16px;
         }
         """
     )

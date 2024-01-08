@@ -146,6 +146,10 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         # self.selectionModel().selectionChanged.connect(self._on_selection_changed)
 
         self._view_model.layoutChanged.connect(self._resize_cells)
+        # noinspection PyUnresolvedReferences
+        self.verticalHeader().sectionClicked.connect(self._on_vertical_header_clicked)  # type: ignore
+        # noinspection PyUnresolvedReferences
+        self.verticalHeader().sectionDoubleClicked.connect(self._on_vertical_header_clicked)  # type: ignore
 
     @property
     def items(self) -> list[Item]:
@@ -307,6 +311,17 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         if item:
             event = DoubleClickEvent(attr=attr, item=item)
             self.double_click.emit(event)
+
+    def _on_vertical_header_clicked(self, /, row: int) -> None:
+        if model := self.model():
+            key = model.data(model.index(row, self._key_col))
+            if isinstance(key, qtc.QVariant):
+                key_value = key.value()
+            else:
+                key_value = key
+
+            if key_value is not None:
+                self._view_model.highlight_row(key_value)
 
     def _resize_cells(self) -> None:
         if model := self.model():
