@@ -168,7 +168,7 @@ class TodoFormView(qtw.QWidget):
         main_layout.addLayout(form_layout, 1, 0)
         main_layout.addLayout(self._frequency_subform_layout, 2, 0)
         main_layout.addItem(
-            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 3, 2
+            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 3, 1
         )
 
         # main_layout = qtw.QVBoxLayout()
