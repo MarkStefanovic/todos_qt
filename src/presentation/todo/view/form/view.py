@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 import typing
 
@@ -30,6 +28,7 @@ from src.presentation.user_selector.widget import UserSelectorWidget
 __all__ = ("TodoFormView",)
 
 
+# noinspection DuplicatedCode
 class TodoFormView(qtw.QWidget):
     def __init__(
         self,
@@ -80,7 +79,6 @@ class TodoFormView(qtw.QWidget):
         note_lbl.setFixedWidth(label_width)
         self._note_txt = qtw.QTextEdit(parent=self)
         self._note_txt.setMaximumWidth(800)
-        # self._note_txt = RichTextEditor(parent=self)
 
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(font.BOLD_FONT)
@@ -129,7 +127,24 @@ class TodoFormView(qtw.QWidget):
         self._frequency_subform_layout.addWidget(self._xdays_frequency_form)
         self._frequency_subform_layout.addWidget(self._yearly_frequency_form)
 
+        back_btn_icon = icons.back_btn_icon(parent=self)
+        self.back_btn = qtw.QPushButton(back_btn_icon, "")
+        self.back_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
+        self.back_btn.setToolTip("Back to Dashboard")
+
+        save_btn_icon = icons.save_btn_icon(parent=self)
+        self.save_btn = qtw.QPushButton(save_btn_icon, "")
+        self.save_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
+        self.save_btn.setToolTip("Save")
+        self.save_btn.setIconSize(qtc.QSize(20, 20))
+        self.save_btn.setFixedSize(30, 30)
+
+        save_btn_layout = qtw.QHBoxLayout()
+        save_btn_layout.addStretch()
+        save_btn_layout.addWidget(self.save_btn)
+
         form_layout = qtw.QFormLayout()
+        form_layout.addRow(self.back_btn, save_btn_layout)
         form_layout.addRow(description_lbl, self._description_txt)
         form_layout.addRow(start_date_lbl, self._start_date_edit)
         form_layout.addRow(advance_days_lbl, self._advance_days_sb)
@@ -139,46 +154,16 @@ class TodoFormView(qtw.QWidget):
         form_layout.addRow(note_lbl, self._note_txt)
         form_layout.addRow(frequency_lbl, self._frequency_cbo)
 
-        back_btn_icon = icons.back_btn_icon(parent=self)
-        self.back_btn = qtw.QPushButton(back_btn_icon, "")
-        self.back_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
-        self.back_btn.setToolTip("Back to Dashboard")
-        # self.back_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("   Back   "))
-
-        save_btn_icon = icons.save_btn_icon(parent=self)
-        self.save_btn = qtw.QPushButton(save_btn_icon, "")
-        self.save_btn.setMinimumWidth(font.BOLD_FONT_METRICS.height() + 8)
-        self.save_btn.setToolTip("Save")
-        self.save_btn.setIconSize(qtc.QSize(20, 20))
-        self.save_btn.setFixedSize(30, 30)
-        # self.save_btn = qtw.QPushButton(save_btn_icon, "Save")
-        # self.save_btn.setMaximumWidth(font.BOLD_FONT_METRICS.width("     Save     "))
-        # self.save_btn.setDefault(True)
-
-        btn_layout = qtw.QHBoxLayout()
-        btn_layout.addWidget(self.back_btn)
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.save_btn)
+        form_layout_wrapper = qtw.QHBoxLayout()
+        form_layout_wrapper.addLayout(form_layout)
+        form_layout_wrapper.addStretch()
 
         main_layout = qtw.QGridLayout()
-        main_layout.addLayout(btn_layout, 0, 0)
-        # main_layout.addWidget(
-        #     self.save_btn, 0, 1, alignment=qtc.Qt.AlignmentFlag.AlignBottom | qtc.Qt.AlignmentFlag.AlignLeft
-        # )
-        main_layout.addLayout(form_layout, 1, 0)
-        main_layout.addLayout(self._frequency_subform_layout, 2, 0)
+        main_layout.addLayout(form_layout_wrapper, 0, 0)
+        main_layout.addLayout(self._frequency_subform_layout, 1, 0)
         main_layout.addItem(
-            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 3, 1
+            qtw.QSpacerItem(0, 0, qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding), 2, 1
         )
-
-        # main_layout = qtw.QVBoxLayout()
-        # main_layout.addWidget(self.back_btn, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
-        # main_layout.addLayout(form_layout)
-        # main_layout.addLayout(self._frequency_subform_layout)
-        # main_layout.addWidget(
-        #     self.save_btn, alignment=qtc.Qt.AlignmentFlag.AlignTop | qtc.Qt.AlignmentFlag.AlignHCenter
-        # )
-        # main_layout.addStretch()
 
         self.setLayout(main_layout)
 
