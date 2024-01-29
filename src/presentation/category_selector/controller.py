@@ -17,6 +17,7 @@ class CategorySelectorController(qtc.QObject):
         *,
         category_service: domain.CategoryService,
         include_all_category: bool,
+        refresh_requests: qtc.pyqtBoundSignal,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
@@ -24,8 +25,10 @@ class CategorySelectorController(qtc.QObject):
         self._category_service: typing.Final[domain.CategoryService] = category_service
         self._include_all_category: typing.Final[bool] = include_all_category
 
-    def refresh(self) -> None | domain.Error:
-        logger.debug(f"{self.__class__.__name__}.refresh()")
+        refresh_requests.connect(self._on_refresh_request)
+
+    def _on_refresh_request(self) -> None | domain.Error:
+        logger.debug(f"{self.__class__.__name__}._on_refresh_request()")
 
         try:
             categories = self._category_service.all()
@@ -47,8 +50,3 @@ class CategorySelectorController(qtc.QObject):
             logger.error(f"{self.__class__.__name__}.refresh() failed: {e!s}")
 
             return domain.Error.new(str(e))
-
-    def set_category(self, /, category: domain.Category) -> None:
-        state = CategorySelectorState(selected_category=category)
-
-        self.states.emit(state)

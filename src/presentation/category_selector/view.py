@@ -43,6 +43,15 @@ class CategorySelectorView(qtw.QComboBox):
 
         return domain.TODO_CATEGORY
 
+    def set_item(self, /, item: domain.Category) -> None:
+        logger.debug(f"{self.__class__.__name__}.set_item({item=!r})")
+
+        for ix in range(self.count()):
+            category: domain.Category = self.itemData(ix)
+            if category.category_id == item.category_id:
+                self.setCurrentIndex(ix)
+                return None
+
     def set_state(self, /, state: CategorySelectorState) -> None:
         logger.debug(f"{self.__class__.__name__}._set_state({state=!r})")
 

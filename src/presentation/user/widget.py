@@ -28,15 +28,13 @@ class UserWidget(qtw.QWidget):
 
         form_requests: typing.Final[UserFormRequests] = UserFormRequests()
 
-        self._controller_thread = qtc.QThread(parent=self)
-
         self._controller = UserController(
             dash_requests=dash_requests,
             form_requests=form_requests,
             user_service=user_service,
             parent=None,
         )
-
+        self._controller_thread = qtc.QThread(parent=self)
         self._controller.moveToThread(self._controller_thread)
 
         self._view = UserView(

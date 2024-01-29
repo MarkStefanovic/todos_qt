@@ -12,6 +12,7 @@ __all__ = ("CategorySelectorWidget",)
 
 class CategorySelectorWidget(qtw.QWidget):
     item_selected = qtc.pyqtSignal(domain.Category)
+    refresh_request = qtc.pyqtSignal()
 
     def __init__(
         self,
@@ -25,8 +26,11 @@ class CategorySelectorWidget(qtw.QWidget):
         self._controller = CategorySelectorController(
             category_service=category_service,
             include_all_category=include_all_category,
+            refresh_requests=self.refresh_request,
             parent=self,
         )
+        self._controller_thread = qtc.QThread(parent=self)
+        self._controller.moveToThread(self._controller_thread)
 
         self._view = CategorySelectorView(
             parent=self,
@@ -41,14 +45,14 @@ class CategorySelectorWidget(qtw.QWidget):
 
         self._view.item_selected.connect(self.item_selected.emit)
 
-    def refresh(self) -> None | domain.Error:
-        return self._controller.refresh()
+    def refresh(self) -> None:
+        self.refresh_request.emit()
 
     def selected_item(self) -> domain.Category:
         return self._view.selected_item
 
     def select_item(self, /, item: domain.Category) -> None:
-        self._controller.set_category(item)
+        self._view.set_item(item)
 
     def set_items(self, /, items: typing.Iterable[domain.Category]) -> None:
         self._view.set_state(CategorySelectorState(category_options=tuple(items)))

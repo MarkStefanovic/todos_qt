@@ -17,6 +17,7 @@ class UserSelectorController(qtc.QObject):
         *,
         user_service: domain.UserService,
         include_all_user: bool,
+        refresh_request: qtc.pyqtBoundSignal,
         parent: qtc.QObject | None,
     ):
         super().__init__(parent=parent)
@@ -24,8 +25,10 @@ class UserSelectorController(qtc.QObject):
         self._user_service: typing.Final[domain.UserService] = user_service
         self._include_all_user: typing.Final[bool] = include_all_user
 
-    def refresh(self) -> None:
-        logger.debug(f"{self.__class__.__name__}.refresh()")
+        refresh_request.connect(self._on_refresh_request)
+
+    def _on_refresh_request(self) -> None:
+        logger.debug(f"{self.__class__.__name__}._on_refresh_request()")
 
         try:
             users = self._user_service.where(active=True)

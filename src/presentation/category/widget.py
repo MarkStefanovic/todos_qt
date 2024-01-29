@@ -30,15 +30,13 @@ class CategoryWidget(qtw.QWidget):
             parent=self
         )
 
-        self._controller_thread = qtc.QThread(parent=self)
-
         self._controller = CategoryController(
             category_service=category_service,
             dash_requests=self._dash_requests,
             form_requests=self._form_requests,
             parent=None,
         )
-
+        self._controller_thread = qtc.QThread(parent=self)
         self._controller.moveToThread(self._controller_thread)
 
         self._view = CategoryView(
@@ -59,7 +57,7 @@ class CategoryWidget(qtw.QWidget):
         return self._view.current_view()
 
     def refresh_dash(self) -> None:
-        return self._controller.refresh()
+        return self._view.refresh_dash()
 
     def save_form(self) -> None:
         return self._view.save_form()

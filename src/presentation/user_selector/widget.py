@@ -11,6 +11,7 @@ __all__ = ("UserSelectorWidget",)
 
 class UserSelectorWidget(qtw.QWidget):
     item_selected = qtc.pyqtSignal(domain.User)
+    refresh_request = qtc.pyqtSignal()
 
     def __init__(
         self,
@@ -24,8 +25,11 @@ class UserSelectorWidget(qtw.QWidget):
         self._controller = UserSelectorController(
             user_service=user_service,
             include_all_user=include_all_user,
+            refresh_request=self.refresh_request,
             parent=self,
         )
+        self._controller_thread = qtc.QThread(parent=self)
+        self._controller.moveToThread(self._controller_thread)
 
         self._view = UserSelectorView(
             item_selected_requests=self.item_selected,
@@ -43,7 +47,7 @@ class UserSelectorWidget(qtw.QWidget):
         return self._view.get_selected_item()
 
     def refresh(self) -> None:
-        self._controller.refresh()
+        self.refresh_request.emit()
 
     def select_item(self, /, item: domain.User) -> None:
         return self._view.select_item(item)
