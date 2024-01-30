@@ -18,9 +18,8 @@ class CategorySelectorController(qtc.QObject):
         category_service: domain.CategoryService,
         include_all_category: bool,
         refresh_requests: qtc.pyqtBoundSignal,
-        parent: qtc.QObject | None,
     ):
-        super().__init__(parent=parent)
+        super().__init__()
 
         self._category_service: typing.Final[domain.CategoryService] = category_service
         self._include_all_category: typing.Final[bool] = include_all_category

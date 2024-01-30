@@ -23,9 +23,8 @@ class CategoryController(qtc.QObject):
         category_service: domain.CategoryService,
         dash_requests: dash.requests.CategoryDashRequests,
         form_requests: form.requests.CategoryFormRequests,
-        parent: qtc.QObject | None,
     ):
-        super().__init__(parent=parent)
+        super().__init__()
 
         self._category_service: typing.Final[domain.CategoryService] = category_service
         self._dash_requests: typing.Final[dash.requests.CategoryDashRequests] = dash_requests

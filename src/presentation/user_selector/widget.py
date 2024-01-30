@@ -26,7 +26,6 @@ class UserSelectorWidget(qtw.QWidget):
             user_service=user_service,
             include_all_user=include_all_user,
             refresh_request=self.refresh_request,
-            parent=self,
         )
         self._controller_thread = qtc.QThread(parent=self)
         self._controller.moveToThread(self._controller_thread)

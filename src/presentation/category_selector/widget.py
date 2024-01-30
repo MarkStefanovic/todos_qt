@@ -27,7 +27,6 @@ class CategorySelectorWidget(qtw.QWidget):
             category_service=category_service,
             include_all_category=include_all_category,
             refresh_requests=self.refresh_request,
-            parent=self,
         )
         self._controller_thread = qtc.QThread(parent=self)
         self._controller.moveToThread(self._controller_thread)

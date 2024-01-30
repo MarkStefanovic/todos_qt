@@ -23,9 +23,8 @@ class UserController(qtc.QObject):
         dash_requests: dash.requests.UserDashRequests,
         form_requests: form.requests.UserFormRequests,
         user_service: domain.UserService,
-        parent: qtc.QObject | None,
     ):
-        super().__init__(parent=parent)
+        super().__init__()
 
         self._dash_requests: typing.Final[dash.requests.UserDashRequests] = dash_requests
         self._form_requests: typing.Final[form.requests.UserFormRequests] = form_requests

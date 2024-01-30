@@ -32,7 +32,6 @@ class UserWidget(qtw.QWidget):
             dash_requests=dash_requests,
             form_requests=form_requests,
             user_service=user_service,
-            parent=None,
         )
         self._controller_thread = qtc.QThread(parent=self)
         self._controller.moveToThread(self._controller_thread)

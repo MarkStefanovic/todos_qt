@@ -18,9 +18,8 @@ class UserSelectorController(qtc.QObject):
         user_service: domain.UserService,
         include_all_user: bool,
         refresh_request: qtc.pyqtBoundSignal,
-        parent: qtc.QObject | None,
     ):
-        super().__init__(parent=parent)
+        super().__init__()
 
         self._user_service: typing.Final[domain.UserService] = user_service
         self._include_all_user: typing.Final[bool] = include_all_user

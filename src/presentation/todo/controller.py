@@ -24,9 +24,8 @@ class TodoController(qtc.QObject):
         form_requests: form.requests.TodoFormRequests,
         todo_service: domain.TodoService,
         current_user: domain.User,
-        parent: qtc.QObject | None,
     ):
-        super().__init__(parent=parent)
+        super().__init__()
 
         self._todo_service: typing.Final[domain.TodoService] = todo_service
         self._current_user: typing.Final[domain.User] = current_user
