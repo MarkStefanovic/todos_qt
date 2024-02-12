@@ -2,8 +2,7 @@ import datetime
 
 from PyQt6 import QtCore as qtc, QtWidgets as qtw  # noqa
 
-from src.presentation.shared import widgets
-from src.presentation.shared.theme import font
+from src.presentation.shared import widgets, theme
 from src.presentation.todo.view.form.once.state import OnceFrequencyFormState
 
 __all__ = ("OnceFrequencyForm",)
@@ -14,10 +13,11 @@ class OnceFrequencyForm(qtw.QWidget):
         super().__init__(parent=parent)
 
         due_date_lbl = qtw.QLabel("Due Date")
-        due_date_lbl.setFont(font.BOLD_FONT)
+        due_date_lbl.setFont(theme.font.BOLD_FONT)
         due_date_lbl.setFixedWidth(label_width)
-        self._due_date_edit = widgets.DateEditor()
-        self._due_date_edit.setFixedWidth(150)
+        self._due_date_edit = widgets.DatePicker(parent=self)
+        self._due_date_edit.set_value(datetime.date.today())
+        self._due_date_edit.setFixedWidth(theme.font.DEFAULT_FONT_METRICS.boundingRect("  MM/DD/YYYY  ").width())
 
         layout = qtw.QHBoxLayout()
         layout.addWidget(due_date_lbl, alignment=qtc.Qt.AlignmentFlag.AlignTop)

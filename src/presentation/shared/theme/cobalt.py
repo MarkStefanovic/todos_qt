@@ -163,6 +163,18 @@ def apply_theme(app: qtw.QApplication) -> None:
             color: cyan;
             background-color: rgb(35, 35, 50);
         }
+        
+        QDateEdit {
+            color: cyan;
+        }
+        
+        QCalendarWidget QToolButton {
+            width: 120px;
+            background-color: rgb(35, 35, 50);
+        }
+        QCalendarWidget QWidget#qt_calendar_navigationbar { 
+            background-color: rgb(35, 35, 50);
+        }
         """
     )
 

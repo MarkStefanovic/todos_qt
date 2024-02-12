@@ -6,9 +6,8 @@ from loguru import logger
 
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
-from src.presentation.shared import widgets
+from src.presentation.shared import widgets, theme
 from src.presentation.shared.theme import font, icons
-from src.presentation.shared.widgets import DateEditor
 from src.presentation.todo.view.form import requests
 from src.presentation.todo.view.form.irregular.state import IrregularFrequencyFormState
 from src.presentation.todo.view.form.irregular.view import IrregularFrequencyForm
@@ -83,7 +82,9 @@ class TodoFormView(qtw.QWidget):
         start_date_lbl = qtw.QLabel("Start")
         start_date_lbl.setFont(font.BOLD_FONT)
         start_date_lbl.setFixedWidth(label_width)
-        self._start_date_edit = DateEditor()
+        self._start_date_edit = widgets.DatePicker(parent=self)
+        self._start_date_edit.set_value(datetime.date.today())
+        self._start_date_edit.setFixedWidth(theme.font.DEFAULT_FONT_METRICS.boundingRect("  MM/DD/YYYY  ").width())
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(font.BOLD_FONT)

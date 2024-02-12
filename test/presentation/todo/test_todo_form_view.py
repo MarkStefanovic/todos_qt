@@ -101,7 +101,7 @@ def test_once_todo_form_state_round_trips(todo: domain.Todo) -> None:
         domain.Todo.weekly,
         advance_display_days=strategies.integers(min_value=0, max_value=364),  # enforced by ui
         expire_display_days=strategies.integers(min_value=1, max_value=364),  # enforced by ui
-        start_date=strategies.dates(min_value=datetime.date(2000, 1, 1)),  # enforced by ui
+        start_date=strategies.dates(min_value=datetime.date(2000, 1, 1)),
         note=strategies.text(alphabet=string.ascii_letters + string.digits),
     )
 )

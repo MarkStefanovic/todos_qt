@@ -2,6 +2,7 @@ import datetime
 
 from PyQt6 import QtCore as qtc, QtWidgets as qtw  # noqa
 
+from src.presentation.shared import theme
 from src.presentation.shared.theme import font
 
 __all__ = ("DatePicker",)
@@ -20,8 +21,8 @@ class DatePicker(qtw.QDateEdit):
         # self._date_edit.setDateTime(qtc.QDateTime.currentDateTime())
         self.setAlignment(qtc.Qt.AlignmentFlag.AlignHCenter)
         self.setDisplayFormat("MM/dd/yyyy")
-        self.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("  88/88/8888  ").width())
-        self.setFixedHeight(font.DEFAULT_FONT_METRICS.height())
+        self.setFixedWidth(font.DEFAULT_FONT_METRICS.boundingRect("88/88/8888").width())
+        self.setFont(theme.font.DEFAULT_FONT)
 
         self.dateChanged.connect(lambda: self.date_changed.emit())  # noqa
 
