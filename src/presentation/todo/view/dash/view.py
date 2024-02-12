@@ -226,21 +226,8 @@ class TodoDashView(qtw.QWidget):
             if state.deleted_todo:
                 self._table.delete_item(key=state.deleted_todo.todo_id)
 
-            if state.added_todo:
-                if self._due_chk.isChecked():
-                    if state.added_todo.should_display():
-                        self._table.add_item(state.added_todo)
-                else:
-                    self._table.add_item(state.added_todo)
-
-            if state.updated_todo:
-                if self._due_chk.isChecked():
-                    if state.updated_todo.should_display():
-                        self._table.update_item(state.updated_todo)
-                    else:
-                        self._table.delete_item(key=state.updated_todo.todo_id)
-                else:
-                    self._table.update_item(state.updated_todo)
+            if state.added_todo or state.updated_todo:
+                self.refresh()
 
             if isinstance(state.selected_todo, domain.Todo):
                 self._table.select_item_by_key(key=state.selected_todo.todo_id)

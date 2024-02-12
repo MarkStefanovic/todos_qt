@@ -34,33 +34,33 @@ CATEGORY_3 = domain.Category(
 )
 
 
-def test_round_trip(schema: str | None, engine: sa.Engine) -> None:
+def test_round_trip(engine: sa.Engine) -> None:
     with engine.begin() as con:  # type: sa.Connection
-        assert adapter.category_repo.add(schema=schema, con=con, category=CATEGORY_1) is None
-        assert adapter.category_repo.add(schema=schema, con=con, category=CATEGORY_2) is None
-        assert adapter.category_repo.add(schema=schema, con=con, category=CATEGORY_3) is None
+        assert adapter.category_repo.add(schema=None, con=con, category=CATEGORY_1) is None
+        assert adapter.category_repo.add(schema=None, con=con, category=CATEGORY_2) is None
+        assert adapter.category_repo.add(schema=None, con=con, category=CATEGORY_3) is None
 
-        categories = adapter.category_repo.where(schema=schema, con=con, active=True)
+        categories = adapter.category_repo.where(schema=None, con=con, active=True)
         assert not isinstance(categories, domain.Error)
 
         assert len(categories) == 2  # 1 has already been deleted
 
         updated_category = dataclasses.replace(CATEGORY_1, note="Updated note 1.")
 
-        adapter.category_repo.update(schema=schema, con=con, category=updated_category)
+        adapter.category_repo.update(schema=None, con=con, category=updated_category)
 
-        category = adapter.category_repo.get(schema=schema, con=con, category_id=CATEGORY_1.category_id)
+        category = adapter.category_repo.get(schema=None, con=con, category_id=CATEGORY_1.category_id)
         assert isinstance(category, domain.Category)
 
         assert category.note == "Updated note 1."
 
-        categories = adapter.category_repo.where(schema=schema, con=con, active=True)
+        categories = adapter.category_repo.where(schema=None, con=con, active=True)
         assert isinstance(categories, list)
 
         assert len(categories) == 2
 
-        assert adapter.category_repo.delete(schema=schema, con=con, category_id=CATEGORY_3.category_id)
+        assert adapter.category_repo.delete(schema=None, con=con, category_id=CATEGORY_3.category_id) is None
 
-        categories = adapter.category_repo.where(schema=schema, con=con, active=True)
+        categories = adapter.category_repo.where(schema=None, con=con, active=True)
         assert isinstance(categories, list)
         assert len(categories) == 1

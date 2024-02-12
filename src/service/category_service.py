@@ -84,7 +84,7 @@ class CategoryService(domain.CategoryService):
                     con=con,
                     category_id=category_id,
                     user_id=domain.Unspecified(),
-                    description_starts_with=domain.Unspecified(),
+                    description_like=domain.Unspecified(),
                     template_todo_id=domain.Unspecified(),
                 )
                 if isinstance(matching_todos, domain.Error):

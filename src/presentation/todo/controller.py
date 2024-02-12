@@ -189,17 +189,20 @@ class TodoController(qtc.QObject):
 
             preexisting_todo = self._todo_service.get(todo_id=request.todo.todo_id)
             if isinstance(preexisting_todo, domain.Error):
+                logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {preexisting_todo!s}.")
                 self._set_status(preexisting_todo.error_message)
                 return None
 
             if preexisting_todo:
                 update_result = self._todo_service.update(todo=request.todo)
                 if isinstance(update_result, domain.Error):
+                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {update_result!s}.")
                     self._set_status(update_result.error_message)
                     return None
 
                 updated_todo = self._todo_service.get(todo_id=request.todo.todo_id)
                 if isinstance(updated_todo, domain.Error):
+                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {updated_todo!s}.")
                     self._set_status(updated_todo.error_message)
                     return None
 
@@ -208,6 +211,7 @@ class TodoController(qtc.QObject):
                         f"{self.__class__.__name__}._on_save_request({request=!r}): after update todo was not found "
                         f"in the database."
                     )
+                    self._set_status("An error occurred while fetching the updated Todo from the database.")
                     return None
 
                 self.states.emit(
@@ -222,10 +226,14 @@ class TodoController(qtc.QObject):
             else:
                 add_result = self._todo_service.add(todo=request.todo)
                 if isinstance(add_result, domain.Error):
+                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {add_result!s}.")
+                    self._set_status("An error occurred while adding Todo to the database.")
                     return None
 
                 todo = self._todo_service.get(todo_id=request.todo.todo_id)
                 if isinstance(todo, domain.Error):
+                    logger.error(f"{self.__class__.__name__}._on_save_request({request=!r}): {todo!s}.")
+                    self._set_status("An error occurred while fetching the new Todo from the database.")
                     return None
 
                 if todo is None:
@@ -233,6 +241,7 @@ class TodoController(qtc.QObject):
                         f"{self.__class__.__name__}._on_save_request({request=!r}): after adding todo it was not found "
                         f"in the database."
                     )
+                    self._set_status("An error occurred while fetching the new Todo from the database.")
                     return None
 
                 self.states.emit(

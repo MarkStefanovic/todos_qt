@@ -34,8 +34,8 @@ CATEGORY_3 = domain.Category(
 )
 
 
-def test_round_trip(schema: str | None, engine: sa.Engine) -> None:
-    category_service = service.CategoryService(schema=schema, engine=engine)
+def test_round_trip(engine: sa.Engine) -> None:
+    category_service = service.CategoryService(schema=None, engine=engine)
 
     assert category_service.add(category=CATEGORY_1) is None
     assert category_service.add(category=CATEGORY_2) is None

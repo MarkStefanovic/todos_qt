@@ -119,7 +119,7 @@ class TodoService(domain.TodoService):
                     con=con,
                     category_id=domain.Unspecified(),
                     user_id=user_id,
-                    description_starts_with=domain.Unspecified(),
+                    description_like=domain.Unspecified(),
                     template_todo_id=template_todo_id,
                 )
                 if isinstance(todos, domain.Error):
@@ -203,7 +203,7 @@ class TodoService(domain.TodoService):
                     con=con,
                     category_id=category_id_filter,
                     user_id=user_id_filter,
-                    description_starts_with=description_like,
+                    description_like=description_like,
                     template_todo_id=domain.Unspecified(),
                 )
                 if isinstance(todos, domain.Error):

@@ -304,7 +304,7 @@ def where(
     con: sa.Connection,
     category_id: str | domain.Unspecified,
     user_id: str | domain.Unspecified,
-    description_starts_with: str | domain.Unspecified,
+    description_like: str | domain.Unspecified,
     template_todo_id: str | domain.Unspecified,
 ) -> list[domain.Todo] | domain.Error:
     try:
@@ -330,8 +330,8 @@ def where(
             if user_id:
                 qry = qry.where(db.todo(schema=schema).c.user_id == user_id)
 
-        if isinstance(description_starts_with, str):
-            qry = qry.where(db.todo(schema=schema).c.description.ilike(description_starts_with + "%"))
+        if isinstance(description_like, str):
+            qry = qry.where(db.todo(schema=schema).c.description.ilike(f"%{description_like}%"))
 
         if isinstance(template_todo_id, str):
             qry = qry.where(db.todo(schema=schema).c.template_todo_id == template_todo_id)
@@ -391,13 +391,13 @@ def where(
 
         return todos
     except Exception as e:
-        logger.error(f"{__file__}.where({category_id=!r}, {user_id=!r}, {description_starts_with=!r}) failed: {e}")
+        logger.error(f"{__file__}.where({category_id=!r}, {user_id=!r}, {description_like=!r}) failed: {e}")
 
         return domain.Error.new(
             str(e),
             category_id=category_id,
             user_id=user_id,
-            description_starts_with=description_starts_with,
+            description_starts_with=description_like,
         )
 
 
