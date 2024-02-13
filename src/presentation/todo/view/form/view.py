@@ -85,6 +85,7 @@ class TodoFormView(qtw.QWidget):
         self._start_date_edit = widgets.DatePicker(parent=self)
         self._start_date_edit.set_value(datetime.date.today())
         self._start_date_edit.setFixedWidth(theme.font.DEFAULT_FONT_METRICS.boundingRect("  MM/DD/YYYY  ").width())
+        self._start_date_edit.setMinimumDate(datetime.date(2000, 1, 1))
 
         frequency_lbl = qtw.QLabel("Frequency")
         frequency_lbl.setFont(font.BOLD_FONT)
@@ -315,12 +316,6 @@ class TodoFormView(qtw.QWidget):
             if not isinstance(state.description, domain.Unspecified):
                 self._description_txt.setText(state.description)
 
-            if not isinstance(state.advance_days, domain.Unspecified):
-                self._advance_days_sb.setValue(state.advance_days)
-
-            if not isinstance(state.expire_days, domain.Unspecified):
-                self._expire_days_sb.setValue(state.expire_days)
-
             if not isinstance(state.frequency_name, domain.Unspecified):
                 self._advance_days_sb.setMaximum(_get_maximum_advance_days_for_frequency(state.frequency_name))
                 self._expire_days_sb.setMaximum(_get_maximum_expire_days_for_frequency(state.frequency_name))
@@ -381,6 +376,12 @@ class TodoFormView(qtw.QWidget):
                     self._description_txt.setFocus()
                 else:
                     self._description_txt.clearFocus()
+
+            if not isinstance(state.advance_days, domain.Unspecified):
+                self._advance_days_sb.setValue(state.advance_days)
+
+            if not isinstance(state.expire_days, domain.Unspecified):
+                self._expire_days_sb.setValue(state.expire_days)
 
             return None
         except Exception as e:

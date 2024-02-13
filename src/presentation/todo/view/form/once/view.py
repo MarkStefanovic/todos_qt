@@ -18,6 +18,7 @@ class OnceFrequencyForm(qtw.QWidget):
         self._due_date_edit = widgets.DatePicker(parent=self)
         self._due_date_edit.set_value(datetime.date.today())
         self._due_date_edit.setFixedWidth(theme.font.DEFAULT_FONT_METRICS.boundingRect("  MM/DD/YYYY  ").width())
+        self._due_date_edit.setMinimumDate(datetime.date(2000, 1, 1))
 
         layout = qtw.QHBoxLayout()
         layout.addWidget(due_date_lbl, alignment=qtc.Qt.AlignmentFlag.AlignTop)

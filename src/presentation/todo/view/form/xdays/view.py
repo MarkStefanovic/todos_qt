@@ -15,7 +15,7 @@ class XDaysFrequencyForm(qtw.QWidget):
         days_lbl.setFont(font.BOLD_FONT)
         days_lbl.setFixedWidth(label_width)
         self._days_sb = qtw.QSpinBox()
-        self._days_sb.setRange(1, 364)
+        self._days_sb.setRange(1, 9999)
         self._days_sb.setFixedWidth(100)
 
         layout = qtw.QHBoxLayout()
