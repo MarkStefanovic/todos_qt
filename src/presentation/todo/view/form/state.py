@@ -41,6 +41,7 @@ class TodoFormState:
     xdays_frequency_form_state: XDaysFrequencyFormState | domain.Unspecified = domain.Unspecified()
     yearly_frequency_form_state: YearlyFrequencyFormState | domain.Unspecified = domain.Unspecified()
     focus_description: bool | domain.Unspecified = domain.Unspecified()
+    notice: str = ""
 
     @staticmethod
     def initial(*, current_user: domain.User | None) -> TodoFormState:
@@ -68,6 +69,7 @@ class TodoFormState:
             xdays_frequency_form_state=XDaysFrequencyFormState.initial(),
             yearly_frequency_form_state=YearlyFrequencyFormState.initial(),
             focus_description=True,
+            notice="",
         )
 
     def to_domain(self) -> domain.Todo | domain.Error:
@@ -119,6 +121,9 @@ class TodoFormState:
 
             if isinstance(self.frequency_name, domain.Unspecified):
                 return domain.Error.new("frequency_name is unspecified.")
+
+            if isinstance(self.notice, domain.Unspecified):
+                return domain.Error.new("notice is unspecified.")
 
             match self.frequency_name:
                 case domain.FrequencyType.Daily:
@@ -256,4 +261,5 @@ class TodoFormState:
             last_completed_by=todo.last_completed_by,
             prior_completed_by=todo.prior_completed_by,
             focus_description=domain.Unspecified(),
+            notice="",
         )

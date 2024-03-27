@@ -81,11 +81,6 @@ class TodoDashView(qtw.QWidget):
         toolbar_layout.addStretch()
 
         attrs: tuple[table_view.Attr[domain.Todo, typing.Any], ...] = (
-            table_view.integer(
-                name="todo_id",
-                display_name="ID",
-                key=True,
-            ),
             table_view.button(
                 name="complete",
                 button_text="Complete",
@@ -107,7 +102,7 @@ class TodoDashView(qtw.QWidget):
                 display_name="Days",
                 width=font.BOLD_FONT_METRICS.boundingRect("  Days  ").width(),
                 value_selector=lambda todo: 0 if (d := todo.days()) is None else d,
-                color_selector=lambda todo: _days_color_selector(todo.days()),
+                text_color_selector=lambda todo: _days_color_selector(todo.days()),
             ),
             table_view.text(
                 name="user",
@@ -137,7 +132,7 @@ class TodoDashView(qtw.QWidget):
             table_view.text(
                 name="completed",
                 display_name="Completed",
-                value_selector=_complete_value_selector,
+                value_selector=_complete_value_selector,  # type: ignore
                 alignment="center",
             ),
             table_view.date(
@@ -170,7 +165,10 @@ class TodoDashView(qtw.QWidget):
 
         self._table: table_view.TableView[domain.Todo, str] = table_view.TableView(
             attrs=attrs,
+            key_attr_name="todo_id",
             parent=self,
+            normal_font=font.DEFAULT_FONT,
+            bold_font=font.BOLD_FONT,
         )
 
         self._status_bar: typing.Final[StatusBar] = StatusBar(parent=self)
@@ -187,7 +185,7 @@ class TodoDashView(qtw.QWidget):
         self._category_selector.item_selected.connect(self._refresh_btn.click)
         self._user_selector.item_selected.connect(self._refresh_btn.click)
         if self._user_is_admin:
-            self._table.double_click.connect(self._on_double_click)
+            self._table.double_clicked.connect(self._on_double_click)
 
     def get_state(self) -> TodoDashState:
         return TodoDashState(
@@ -267,7 +265,7 @@ class TodoDashView(qtw.QWidget):
             case _:
                 logger.error(f"attr name, {event.attr.name!r}, not recognized.")
 
-    def _on_double_click(self, /, event: table_view.DoubleClickEvent[domain.Todo, typing.Any]) -> None:
+    def _on_double_click(self, /, event: table_view.DoubleClickedEvent[domain.Todo, typing.Any]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_button_clicked({event=!r})")
 
         if self._user_is_admin:

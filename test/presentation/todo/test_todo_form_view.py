@@ -177,7 +177,7 @@ def test_yearly_todo_form_state_round_trips(todo: domain.Todo) -> None:
     assert todo_form._expire_days_sb.minimum() == 1
     assert todo_form._expire_days_sb.maximum() == 363
     assert todo_form._yearly_frequency_form._month_day_sb.minimum() == 1
-    assert todo_form._yearly_frequency_form._month_day_sb.maximum() == 28
+    assert todo_form._yearly_frequency_form._month_day_sb.maximum() == 31
 
     actual = todo_form.get_state()
     expected = TodoFormState().from_domain(todo=todo)

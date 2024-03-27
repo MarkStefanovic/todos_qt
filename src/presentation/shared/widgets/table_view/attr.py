@@ -6,6 +6,10 @@ import typing
 # noinspection PyPep8Naming
 from PyQt6 import QtGui as qtg
 
+from src.presentation.shared.widgets.table_view import protocols
+from src.presentation.shared.widgets.table_view.item import Item
+from src.presentation.shared.widgets.table_view.value import Value
+
 __all__ = (
     "Attr",
     "text",
@@ -13,12 +17,7 @@ __all__ = (
     "timestamp",
     "date",
     "integer",
-    "Item",
-    "Value",
 )
-
-Item = typing.TypeVar("Item")
-Value = typing.TypeVar("Value")
 
 
 class Attr(typing.Generic[Item, Value]):
@@ -26,7 +25,7 @@ class Attr(typing.Generic[Item, Value]):
         "alignment",
         "data_type",
         "display_name",
-        "key",
+        "hidden",
         "name",
         "enabled_selector",
         "value_selector",
@@ -41,22 +40,22 @@ class Attr(typing.Generic[Item, Value]):
         alignment: typing.Literal["center", "left", "right"],
         data_type: typing.Literal["button", "date", "datetime", "int", "text"],
         display_name: str,
-        enabled_when: typing.Callable[[Item], bool] | None,
-        key: bool,
+        hidden: bool,
+        enabled_when: protocols.EnabledSelector[Item] | None,
         name: str,
-        value_selector: typing.Callable[[Item], Value] | None,
-        color_selector: typing.Callable[[Item], qtg.QColor | None] | None,
+        value_selector: protocols.ValueSelector[Item, Value] | None,
+        text_color_selector: protocols.TextColorSelector[Item] | None,
         icon: qtg.QIcon | None,
         width: int | None,
     ):
         self.alignment: typing.Final[typing.Literal["center", "left", "right"]] = alignment
         self.data_type: typing.Final[typing.Literal["button", "date", "datetime", "int", "text"]] = data_type
         self.display_name: typing.Final[str] = display_name
-        self.enabled_selector: typing.Final[typing.Callable[[Item], bool] | None] = enabled_when
-        self.key: typing.Final[bool] = key
+        self.hidden: typing.Final[bool] = hidden
+        self.enabled_selector: typing.Final[protocols.EnabledSelector | None] = enabled_when
         self.name: typing.Final[str] = name
-        self.value_selector: typing.Final[typing.Callable[[Item], Value] | None] = value_selector
-        self.color_selector: typing.Final[typing.Callable[[Item], qtg.QColor | None] | None] = color_selector
+        self.value_selector: typing.Final[protocols.ValueSelector | None] = value_selector
+        self.color_selector: typing.Final[protocols.TextColorSelector | None] = text_color_selector
         self.icon: typing.Final[qtg.QIcon | None] = icon
         self.width: typing.Final[int | None] = width
 
@@ -74,9 +73,9 @@ class Attr(typing.Generic[Item, Value]):
             f"  alignment: {self.alignment!r}"
             f"  data_type: {self.data_type!r}"
             f"  display_name: {self.display_name!r}"
-            f"  enabled_selector: {self.enabled_selector!r}"
-            f"  key: {self.key!r}"
+            f"  hidden: {self.hidden!r}"
             f"  name: {self.name!r}"
+            f"  icon: {self.icon!r}"
             f"  width: {self.width!r}"
             "]"
         )
@@ -85,22 +84,22 @@ class Attr(typing.Generic[Item, Value]):
 def text(
     name: str,
     display_name: str,
-    key: bool = False,
     alignment: typing.Literal["center", "left", "right"] = "left",
     width: int | None = None,
-    value_selector: typing.Callable[[Item], str] | None = None,
-    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
+    value_selector: protocols.ValueSelector[Item, str] | None = None,
+    text_color_selector: protocols.TextColorSelector[Item] | None = None,
+    hidden: bool = False,
 ) -> Attr[Item, str]:
     return Attr(
         name=name,
         data_type="text",
         display_name=display_name,
-        key=key,
+        hidden=hidden,
         alignment=alignment,
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        color_selector=color_selector,
+        text_color_selector=text_color_selector,
         icon=None,
     )
 
@@ -109,21 +108,21 @@ def button(
     name: str,
     button_text: str,
     width: int | None = None,
-    enabled_when: typing.Callable[[Item], bool] | None = None,
-    text_selector: typing.Callable[[Item], str] | None = None,
-    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
+    enabled_when: protocols.EnabledSelector[Item] | None = None,
+    text_selector: protocols.ValueSelector[Item, str] | None = None,
+    text_color_selector: protocols.TextColorSelector[Item] | None = None,
     icon: qtg.QIcon | None = None,
 ) -> Attr[Item, str]:
     return Attr(
         name=name,
         data_type="button",
         display_name=button_text,
-        key=False,
+        hidden=False,
         alignment="center",
         width=width,
         enabled_when=enabled_when,
         value_selector=text_selector,
-        color_selector=color_selector,
+        text_color_selector=text_color_selector,
         icon=icon,
     )
 
@@ -132,19 +131,20 @@ def timestamp(
     name: str,
     display_name: str,
     width: int | None = None,
-    value_selector: typing.Callable[[Item], datetime.datetime | None] | None = None,
-    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
+    value_selector: protocols.ValueSelector[Item, datetime.datetime | None] | None = None,
+    text_color_selector: protocols.TextColorSelector[Item] | None = None,
+    hidden: bool = False,
 ) -> Attr[Item, datetime.datetime | None]:
     return Attr(
         name=name,
         data_type="datetime",
         display_name=display_name,
-        key=False,
+        hidden=hidden,
         alignment="center",
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        color_selector=color_selector,
+        text_color_selector=text_color_selector,
         icon=None,
     )
 
@@ -153,19 +153,20 @@ def date(
     name: str,
     display_name: str,
     width: int | None = None,
-    value_selector: typing.Callable[[Item], datetime.date | None] | None = None,
-    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
+    value_selector: protocols.ValueSelector[Item, datetime.date | None] | None = None,
+    text_color_selector: protocols.TextColorSelector[Item] | None = None,
+    hidden: bool = False,
 ) -> Attr[Item, datetime.date | None]:
     return Attr(
         name=name,
         data_type="date",
         display_name=display_name,
-        key=False,
+        hidden=hidden,
         alignment="center",
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        color_selector=color_selector,
+        text_color_selector=text_color_selector,
         icon=None,
     )
 
@@ -173,21 +174,21 @@ def date(
 def integer(
     name: str,
     display_name: str,
-    key: bool = False,
     alignment: typing.Literal["center", "left", "right"] = "center",
     width: int | None = None,
-    value_selector: typing.Callable[[Item], int] | None = None,
-    color_selector: typing.Callable[[Item], qtg.QColor | None] | None = None,
-) -> Attr[Item, int]:
+    value_selector: protocols.ValueSelector[Item, int | None] | None = None,
+    text_color_selector: protocols.TextColorSelector[Item] | None = None,
+    hidden: bool = False,
+) -> Attr[Item, int | None]:
     return Attr(
         name=name,
         data_type="int",
         display_name=display_name,
-        key=key,
+        hidden=hidden,
         alignment=alignment,
         width=width,
         enabled_when=None,
         value_selector=value_selector,
-        color_selector=color_selector,
+        text_color_selector=text_color_selector,
         icon=None,
     )

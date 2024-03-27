@@ -50,7 +50,7 @@ class CategoryDash(qtw.QWidget):
             table_view.text(
                 name="category_id",
                 display_name="ID",
-                key=True,
+                hidden=True,
             ),
             table_view.text(
                 display_name="Name",
@@ -92,7 +92,10 @@ class CategoryDash(qtw.QWidget):
 
         self._table_view: table_view.TableView[domain.Category, str] = table_view.TableView(
             attrs=attrs,
+            key_attr_name="category_id",
             parent=self,
+            normal_font=font.DEFAULT_FONT,
+            bold_font=font.BOLD_FONT,
         )
 
         self._status_bar = StatusBar(parent=self)
@@ -104,7 +107,7 @@ class CategoryDash(qtw.QWidget):
         self.setLayout(layout)
 
         self._table_view.button_clicked.connect(self._on_button_clicked)
-        self._table_view.double_click.connect(self._on_double_click)
+        self._table_view.double_clicked.connect(self._on_double_click)
         # noinspection PyUnresolvedReferences
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
 
@@ -169,7 +172,7 @@ class CategoryDash(qtw.QWidget):
     def _on_double_click(
         self,
         /,
-        event: table_view.DoubleClickEvent[domain.Category, str],
+        event: table_view.DoubleClickedEvent[domain.Category, str],
     ) -> None:
         if self._user_is_admin:
             self._dash_requests.edit.emit(requests.Edit(category=event.item))

@@ -20,6 +20,8 @@ def apply_theme(app: qtw.QApplication) -> None:
             padding: 4px;
             border-radius: 4px;
             border: 1px solid rgb(35, 35, 50);
+            font-family: Arial;
+            font-size: 12pt;
         }
         QWidget:disabled {
             color: rgb(15, 15, 25);
@@ -121,6 +123,10 @@ def apply_theme(app: qtw.QApplication) -> None:
             min-width: 16px;
         }
         
+        QTableView {
+            border: 1px solid rgb(25, 25, 40);
+            border-radius: 4px;
+        }
         QTableCornerButton::section { 
             background-color: rgb(15, 15, 25);
         }

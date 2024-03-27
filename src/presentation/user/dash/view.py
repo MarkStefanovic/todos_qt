@@ -11,7 +11,6 @@ from src.presentation.shared.widgets import table_view, popup
 from src.presentation.user.dash import requests
 from src.presentation.user.dash.state import UserDashState
 
-
 __all__ = ("UserDash",)
 
 
@@ -49,11 +48,6 @@ class UserDash(qtw.QWidget):
         toolbar.addStretch()
 
         attrs: tuple[table_view.Attr[domain.User, typing.Any], ...] = (
-            table_view.text(
-                name="user_id",
-                display_name="ID",
-                key=True,
-            ),
             table_view.text(
                 name="username",
                 display_name="Username",
@@ -96,7 +90,10 @@ class UserDash(qtw.QWidget):
 
         self._table_view: table_view.TableView[domain.User, str] = table_view.TableView(
             attrs=attrs,
+            key_attr_name="user_id",
             parent=self,
+            normal_font=font.DEFAULT_FONT,
+            bold_font=font.BOLD_FONT,
         )
 
         self._status_bar = widgets.StatusBar(parent=self)
@@ -111,7 +108,7 @@ class UserDash(qtw.QWidget):
         self._refresh_btn.clicked.connect(self._on_refresh_btn_clicked)
         self._table_view.button_clicked.connect(self._on_table_btn_clicked)
         if self._user_is_admin:
-            self._table_view.double_click.connect(self._on_table_btn_double_clicked)
+            self._table_view.double_clicked.connect(self._on_table_btn_double_clicked)
 
     def get_state(self) -> UserDashState:
         return UserDashState(
@@ -172,7 +169,7 @@ class UserDash(qtw.QWidget):
                     f"{event.attr.name}"
                 )
 
-    def _on_table_btn_double_clicked(self, /, event: table_view.DoubleClickEvent[domain.User, str]) -> None:
+    def _on_table_btn_double_clicked(self, /, event: table_view.DoubleClickedEvent[domain.User, str]) -> None:
         logger.debug(f"{self.__class__.__name__}._on_table_btn_double_clicked({event=!r})")
 
         if self._user_is_admin:

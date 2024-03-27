@@ -6,16 +6,18 @@ from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
 
 from src.presentation.shared.widgets.table_view.attr import Attr
 from src.presentation.shared.widgets.table_view.item import Item
+from src.presentation.shared.widgets.table_view.key import Key
 
 __all__ = ("TableViewModel",)
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
+class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item, Key]):
     def __init__(
         self,
         *,
         attrs: typing.Iterable[Attr[Item, typing.Any]],
+        key_attr_name: str,
         parent: qtw.QWidget,
         frozen_attr_name: str | None = None,
         date_format: str = "%m/%d/%Y",
@@ -24,11 +26,11 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         super().__init__(parent=parent)
 
         self._attrs: typing.Final[tuple[Attr[Item, typing.Any], ...]] = tuple(attrs)
+        self._key_attr_name: typing.Final[str] = key_attr_name
+
         self._frozen_attr_name: typing.Final[str | None] = frozen_attr_name
         self._date_format: typing.Final[str] = date_format
         self._datetime_format: typing.Final[str] = datetime_format
-
-        self._key_attr_name: typing.Final[str] = next(attr.name for attr in self._attrs if attr.key)
 
         self._column_header: typing.Final[tuple[str, ...]] = tuple(
             "" if attr.data_type == "button" else attr.display_name for attr in self._attrs
@@ -41,8 +43,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         self._attr_by_name: typing.Final[dict[str, Attr[Item, typing.Any]]] = {attr.name: attr for attr in self._attrs}
 
         self._items: list[Item] = []
-        self._row_num_by_key: dict[str, int] = {}
-        self._highlighted_rows: set[int] = set()
+        self._row_num_by_key: dict[Key, int] = {}
 
     @property
     def items(self) -> list[Item]:
@@ -58,23 +59,10 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         self._reindex_rows()
         self.endInsertRows()
 
-    def clear_highlight(self, *rows: int) -> None:
-        last_col = len(self._column_header)
-        for row_num in rows:
-            self.dataChanged.emit(
-                self.index(row_num, 0),
-                self.index(row_num, last_col),
-                [qtc.Qt.ItemDataRole.DisplayRole],
-            )
-            self._highlighted_rows.remove(row_num)
-
-    def clear_highlights(self) -> None:
-        self.clear_highlight(*self._highlighted_rows.copy())
-
     def columnCount(self, parent: qtc.QModelIndex = qtc.QModelIndex()) -> int:  # noqa: B008
         return len(self._column_header)
 
-    def delete_item(self, *, key: str) -> None:
+    def delete_item(self, *, key: Key) -> None:
         row_num = self._row_num_by_key.get(key)
 
         if row_num is None:
@@ -111,22 +99,8 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
                 case _:
                     return qtc.Qt.AlignmentFlag.AlignTop
 
-        # if role == qtc.Qt.SizeHintRole:
-        #     if attr.data_type == "text" and attr.rich_text:
-        #         return qtc.QSize(10, 10)
-
         if role == qtc.Qt.ItemDataRole.DisplayRole:
             item = self._items[index.row()]
-
-            attr = self._attr_by_name[attr.name]
-
-            # if attr.data_type == "button":
-            #     if attr.selector is None:
-            #         btn_text = attr.display_name
-            #     else:
-            #         btn_text = attr.selector(item)
-            #
-            #     return qtc.QVariant(btn_text)
 
             if attr.value_selector is None:
                 value: typing.Any = getattr(item, attr.name)
@@ -152,14 +126,9 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         # return fonts.NORMAL
 
         if role == qtc.Qt.ItemDataRole.ForegroundRole:
-            if attr.color_selector is None:
-                if index.row() in self._highlighted_rows:
-                    brush = qtg.QBrush()
-                    brush.setColor(qtg.QColor(255, 255, 0))  # yellow
-                    return brush
-            else:
-                item = self._items[index.row()]
+            item = self._items[index.row()]
 
+            if attr.color_selector is not None:
                 if color := attr.color_selector(item):
                     brush = qtg.QBrush()
                     brush.setColor(color)
@@ -182,14 +151,14 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
                 f"The attr, {attr_name!r}, was not found.  Available attrs include the following: {attr_names}"
             ) from e
 
-    def get_item(self, /, key: str) -> Item | None:
+    def get_item(self, /, key: Key) -> Item | None:
         if self._items:
             row_num = self._row_num_by_key[key]
             return self._items[row_num]
 
         return None
 
-    def get_row_num_for_key(self, /, key: str) -> int | None:
+    def get_row_num_for_key(self, /, key: Key) -> int | None:
         return self._row_num_by_key.get(key)
 
     def headerData(
@@ -210,17 +179,6 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
 
         # if role == qtc.Qt.FontRole:
         #     return fonts.BOLD
-
-    def highlight_row(self, *keys: str) -> None:
-        last_col = len(self._column_header)
-        for key in keys:
-            row_num = self._row_num_by_key[key]
-            self._highlighted_rows.add(row_num)
-            self.dataChanged.emit(
-                self.index(row_num, 0),
-                self.index(row_num, last_col),
-                [qtc.Qt.ItemDataRole.DisplayRole],
-            )
 
     def removeRow(self, row: int, parent: qtc.QModelIndex = qtc.QModelIndex()) -> bool:  # noqa: B008
         if len(self._items) < row + 1:
@@ -289,7 +247,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
         self.layoutChanged.emit()
 
     def update_item(self, /, updated_item: Item) -> None:
-        key = str(getattr(updated_item, self._key_attr_name))
+        key = getattr(updated_item, self._key_attr_name)
         row_num = self._row_num_by_key[key]
         self._items[row_num] = updated_item
         last_col = len(self._column_header)
@@ -300,4 +258,5 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item]):
     def _reindex_rows(self) -> None:
         self._row_num_by_key.clear()
         for row_num, item in enumerate(self._items):
-            self._row_num_by_key[str(getattr(item, self._key_attr_name))] = row_num
+            key = getattr(item, self._key_attr_name)
+            self._row_num_by_key[key] = row_num
