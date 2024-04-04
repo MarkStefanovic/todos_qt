@@ -71,6 +71,8 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item, Key]):
 
         self.removeRow(row_num)
 
+        del self._items[row_num]
+
     def data(
         self,
         index: qtc.QModelIndex,
