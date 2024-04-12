@@ -55,8 +55,9 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item, Key]):
             self.rowCount(),
             self.rowCount(),
         )
+        key = str(getattr(item, self._key_attr_name))
+        self._row_num_by_key[key] = len(self._items)
         self._items.append(item)
-        self._reindex_rows()
         self.endInsertRows()
 
     def columnCount(self, parent: qtc.QModelIndex = qtc.QModelIndex()) -> int:  # noqa: B008
