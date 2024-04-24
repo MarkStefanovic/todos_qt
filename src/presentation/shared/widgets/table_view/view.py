@@ -208,5 +208,5 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
             for col_num, col_width in self._col_widths.items():
                 header.resizeSection(col_num, col_width)
 
-        if vertical_header := self.verticalHeader():
-            vertical_header.setHidden(True)
+        # if vertical_header := self.verticalHeader():
+        #     vertical_header.setHidden(True)
