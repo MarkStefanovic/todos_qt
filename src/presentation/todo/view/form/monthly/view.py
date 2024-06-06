@@ -1,5 +1,5 @@
 # noinspection PyPep8Naming
-from PyQt6 import QtCore as qtc, QtGui as qtg, QtWidgets as qtw
+from PyQt6 import QtCore as qtc, QtWidgets as qtw
 
 from src.presentation.shared.theme import font
 from src.presentation.todo.view.form.monthly.state import MonthlyFrequencyFormState

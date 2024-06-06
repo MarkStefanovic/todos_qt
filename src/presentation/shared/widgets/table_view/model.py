@@ -55,7 +55,7 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item, Key]):
             self.rowCount(),
             self.rowCount(),
         )
-        key = str(getattr(item, self._key_attr_name))
+        key = getattr(item, self._key_attr_name)
         self._row_num_by_key[key] = len(self._items)
         self._items.append(item)
         self.endInsertRows()
@@ -71,8 +71,6 @@ class TableViewModel(qtc.QAbstractTableModel, typing.Generic[Item, Key]):
             return None
 
         self.removeRow(row_num)
-
-        del self._items[row_num]
 
     def data(
         self,

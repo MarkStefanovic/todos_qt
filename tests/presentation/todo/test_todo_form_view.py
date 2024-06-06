@@ -10,7 +10,7 @@ from src.presentation.todo.view.form.requests import TodoFormRequests
 from src.presentation.todo.view.form.state import TodoFormState
 from src.presentation.todo.view.form.view import TodoFormView
 from src.presentation.user_selector import UserSelectorWidget
-from test import fake
+from tests import fake
 
 
 @hypothesis.settings(deadline=None)

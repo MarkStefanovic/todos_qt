@@ -8,10 +8,10 @@ from loguru import logger
 
 from src import adapter, domain, presentation, service
 
-__all__ = ("main",)
+__all__ = ("run",)
 
 
-def main(
+def run(
     *,
     config_file_path: pathlib.Path,
     db_url: str,

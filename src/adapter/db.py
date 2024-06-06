@@ -103,6 +103,9 @@ def create_engine(*, url: str) -> sa.engine.Engine | domain.Error:
     try:
         return sa.create_engine(url=url)
     except:  # noqa: E722
+        import traceback
+
+        logger.error(traceback.format_exc())
         logger.error(f"{__file__}.create_engine(...) failed.")
 
         return domain.Error.new("An error occurred while creating engine.")

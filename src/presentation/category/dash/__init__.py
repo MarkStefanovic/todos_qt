@@ -1,3 +1,9 @@
-from src.presentation.category.dash import requests  # noqa: F401
-from src.presentation.category.dash.state import *
-from src.presentation.category.dash.view import *
+from src.presentation.category.dash import requests
+from src.presentation.category.dash.state import CategoryDashState
+from src.presentation.category.dash.view import CategoryDash
+
+__all__ = (
+    "requests",
+    "CategoryDashState",
+    "CategoryDash",
+)

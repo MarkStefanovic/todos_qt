@@ -6,7 +6,7 @@ from loguru import logger
 
 from src import domain
 from src.presentation.category_selector import CategorySelectorWidget
-from src.presentation.shared import widgets, theme
+from src.presentation.shared import widgets
 from src.presentation.shared.theme import icons
 from src.presentation.shared.widgets import StatusBar
 from src.presentation.todo.view.form import requests

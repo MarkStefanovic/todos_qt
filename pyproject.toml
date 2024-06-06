@@ -6,24 +6,45 @@ version = "0.1.0"
 dependencies = [
     "loguru",
     "PyQt6",
-    "hypothesis",
-    "mypy",
-    "pytest",
     "sqlalchemy",
-    "pyinstaller",
     "psycopg2-binary",
-    "pip-audit",
-    "pip-tools",
-    "ruff",
-    "ruff-lsp",
 ]
+
 
 [tool.ruff]
 src = ["src"]
 line-length = 120
-ignore = ["F401", "F403"]
 
-[tool.hatch]
+[tool.ruff.lint]
+ignore = []
+
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "hypothesis",
+  "mypy",
+  "ruff",
+  "ruff-lsp",
+  "pytest",
+  "pip-audit",
+  "pip-tools",
+  "pyinstaller",
+  "pytest-qt",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest -p no:faulthandler -s {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+check = "cls && mypy --install-types --non-interactive {args:src tests}"
+lint = "ruff check {args:src tests}"
 
 [tool.mypy]
 allow_redefinition = true
@@ -42,6 +63,19 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.cxfreeze]
+executables = [
+    {script = "src/personal.py", base = "gui", icon = "assets/icons/app.ico", target_name = "ToDo"},
+]
+
+[tool.cxfreeze.build_exe]
+excludes = ["tkinter", "unittest"]
+packages = [
+    "sqlalchemy.dialects.sqlite",
+]
+zip_include_packages = [
+    "loguru",
+    "PyQt6",
+    "sqlalchemy",
+    "psycopg2-binary",
+]

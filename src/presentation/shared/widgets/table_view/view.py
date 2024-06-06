@@ -28,7 +28,7 @@ class TableView(qtw.QTableView, typing.Generic[Item, Key]):
         parent: qtw.QWidget | None,
         date_format: str = "%m/%d/%Y",
         datetime_format: str = "%m/%d/%Y %I:%M %p",
-    ):
+    ) -> None:
         super().__init__(parent=parent)
 
         self._attrs: typing.Final[tuple[Attr[typing.Any, typing.Any], ...]] = tuple(attrs)

@@ -245,6 +245,35 @@ def get(
         return domain.Error.new(str(e), todo_id=todo_id)
 
 
+def cleanup(
+    *,
+    schema: str | None,
+    con: sa.Connection,
+    days_to_keep: int,
+) -> domain.Todo | None | domain.Error:
+    try:
+        if days_to_keep < 1:
+            return domain.Error.new("days_to_keep must be greater than 0.", days_to_keep=days_to_keep)
+
+        cutoff_date = datetime.date.today() - datetime.timedelta(days=days_to_keep)
+
+        todos = db.todo(schema=schema)
+
+        con.execute(
+            sa.delete(db.todo(schema=schema)).where(
+                (todos.c.last_completed < cutoff_date) & (todos.c.frequency == "once")
+            )
+        )
+
+        con.execute(sa.delete(db.todo(schema=schema)).where(todos.c.date_deleted < cutoff_date))
+
+        return None
+    except Exception as e:
+        logger.error(f"{__file__}.delete_old_one_off_todos({days_to_keep=!r}) failed: {e}")
+
+        return domain.Error.new(str(e), days_to_keep=days_to_keep)
+
+
 def update(
     *,
     schema: str | None,
@@ -283,7 +312,7 @@ def update(
                 month=month,
                 month_day=todo.frequency.month_day,
                 days=todo.frequency.days,
-                due_date=domain.due_date(frequency=todo.frequency, ref_date=datetime.date.today()),
+                due_date=domain.date_calc.due_date(frequency=todo.frequency, ref_date=datetime.date.today()),
                 last_completed=todo.last_completed,
                 prior_completed=todo.prior_completed,
                 last_completed_by=None if todo.last_completed_by is None else todo.last_completed_by.user_id,
@@ -675,7 +704,7 @@ def _validate_row(row: sa.Row[typing.Any], /) -> ValidRow | domain.Error:
 
         if errors:
             error_csv = ", ".join(errors)
-            return domain.Error.new(f"Invalid Todo row, {row!r}: {error_csv}")
+            return domain.Error.new(f"Invalid Todo row, {row!r}: {error_csv}", row=row)
 
         return ValidRow(**values)
     except Exception as e:
